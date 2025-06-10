@@ -16,17 +16,23 @@ We utilize [Open WebUI](https://github.com/open-webui/open-webui) as our chat in
 ### 2. Pipeline Modules - Open WebUI Pipelines
 [Open WebUI Pipelines](https://github.com/open-webui/pipelines) provides the capability to build modular agent logic. This framework allows us to:
 - Create customizable Python-based workflows
-- Build dynamic AI agent behaviors
+- Build dynamic AI multi-agent behaviors
 - Integrate complex business logic
 - Support computationally heavy tasks
 - Enable function calling and custom RAG implementations
+
+Pipelines is a **FastAPI application** with a fully **OpenAI-compatible API interface**. This means:
+- All API endpoints follow the OpenAI API specification
+- Any OpenAI client can be made compatible with our agent API by simply replacing the `base_url`
+- Seamless integration with existing OpenAI SDK implementations
+- Standard request/response formats for chat completions, embeddings, and other endpoints
 
 ### 3. Agent Architecture
 Agents are implemented using:
 - **LangGraph** with ReAct pattern as the primary framework
 - **AutoGen** as an alternative agent framework
 
-#### ReAct Agent Architecture (LangGraph)
+#### Simple ReAct Agent Architecture as First Step (LangGraph)
 The ReAct (Reasoning and Acting) agent follows this workflow:
 
 ```
