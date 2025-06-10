@@ -154,7 +154,7 @@ finmars-ai-assistant/
 │   └── openapi/
 │       └── portfolio/
 │           ├── openapi.json         # Local API specification
-│           └── openapi_remote.json  # Remote API specification
+│           └── openapi_remote.json  # Remote API specification (just changed `base_url` to remote)
 ├── agents/                          # Agent implementations
 ├── tools/                           # Tool definitions
 └── pipelines/                       # Open WebUI pipeline modules
