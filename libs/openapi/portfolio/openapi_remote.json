@@ -26,7 +26,7 @@
     }
   ],
   "paths": {
-    "/realm00000/space00000/api/v1/portfolios/first-transaction-date/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/first-transaction-date/": {
       "get": {
         "operationId": "Portfolios_First_Transaction_Date_List",
         "description": "",
@@ -120,7 +120,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/first-transaction-date/{id}/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/first-transaction-date/{id}/": {
       "get": {
         "operationId": "Portfolios_First_Transaction_Date_Read",
         "description": "",
@@ -169,7 +169,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/first-transaction-date/{id}/delete/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/first-transaction-date/{id}/delete/": {
       "get": {
         "operationId": "Portfolios_First_Transaction_Date_Delete_Preview",
         "description": "",
@@ -218,7 +218,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-attribute-type/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-attribute-type/": {
       "get": {
         "operationId": "Portfolios_Portfolio_Attribute_Type_List",
         "description": "",
@@ -335,7 +335,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-attribute-type/bulk-delete/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-attribute-type/bulk-delete/": {
       "post": {
         "operationId": "Portfolios_Portfolio_Attribute_Type_Bulk_Delete",
         "description": "",
@@ -378,7 +378,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-attribute-type/bulk-restore/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-attribute-type/bulk-restore/": {
       "post": {
         "operationId": "Portfolios_Portfolio_Attribute_Type_Bulk_Restore",
         "description": "",
@@ -421,7 +421,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-attribute-type/ev-group/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-attribute-type/ev-group/": {
       "post": {
         "operationId": "Portfolios_Portfolio_Attribute_Type_List_Ev_Group",
         "description": "",
@@ -464,7 +464,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-attribute-type/ev-item/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-attribute-type/ev-item/": {
       "post": {
         "operationId": "Portfolios_Portfolio_Attribute_Type_List_Ev_Item",
         "description": "",
@@ -507,7 +507,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-attribute-type/{id}/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-attribute-type/{id}/": {
       "get": {
         "operationId": "Portfolios_Portfolio_Attribute_Type_Read",
         "description": "",
@@ -615,7 +615,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-attribute-type/{id}/delete/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-attribute-type/{id}/delete/": {
       "get": {
         "operationId": "Portfolios_Portfolio_Attribute_Type_Delete_Preview",
         "description": "",
@@ -664,7 +664,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-attribute-type/{id}/objects-to-recalculate/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-attribute-type/{id}/objects-to-recalculate/": {
       "get": {
         "operationId": "Portfolios_Portfolio_Attribute_Type_Objects_To_Recalculate",
         "description": "",
@@ -713,7 +713,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-attribute-type/{id}/recalculate/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-attribute-type/{id}/recalculate/": {
       "post": {
         "operationId": "Portfolios_Portfolio_Attribute_Type_Recalculate_Attributes",
         "description": "",
@@ -765,7 +765,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-bundle/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-bundle/": {
       "get": {
         "operationId": "Portfolios_Portfolio_Bundle_List",
         "description": "",
@@ -882,7 +882,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-bundle/bulk-delete/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-bundle/bulk-delete/": {
       "post": {
         "operationId": "Portfolios_Portfolio_Bundle_Bulk_Delete",
         "description": "",
@@ -925,7 +925,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-bundle/bulk-restore/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-bundle/bulk-restore/": {
       "post": {
         "operationId": "Portfolios_Portfolio_Bundle_Bulk_Restore",
         "description": "",
@@ -968,7 +968,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-bundle/ev-group/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-bundle/ev-group/": {
       "post": {
         "operationId": "Portfolios_Portfolio_Bundle_List_Ev_Group",
         "description": "",
@@ -1011,7 +1011,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-bundle/ev-item/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-bundle/ev-item/": {
       "post": {
         "operationId": "Portfolios_Portfolio_Bundle_List_Ev_Item",
         "description": "",
@@ -1054,7 +1054,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-bundle/{id}/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-bundle/{id}/": {
       "get": {
         "operationId": "Portfolios_Portfolio_Bundle_Read",
         "description": "",
@@ -1162,7 +1162,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-bundle/{id}/delete/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-bundle/{id}/delete/": {
       "get": {
         "operationId": "Portfolios_Portfolio_Bundle_Delete_Preview",
         "description": "",
@@ -1211,7 +1211,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-bundle/{id}/portfolio-registers/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-bundle/{id}/portfolio-registers/": {
       "get": {
         "operationId": "Portfolios_Portfolio_Bundle_Get_Portfolio_Registers",
         "description": "",
@@ -1260,7 +1260,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-class/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-class/": {
       "get": {
         "operationId": "Portfolios_Portfolio_Class_List",
         "description": "",
@@ -1314,7 +1314,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-class/{id}/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-class/{id}/": {
       "get": {
         "operationId": "Portfolios_Portfolio_Class_Read",
         "description": "",
@@ -1363,7 +1363,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-classifier/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-classifier/": {
       "get": {
         "operationId": "Portfolios_Portfolio_Classifier_List",
         "description": "",
@@ -1457,7 +1457,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-classifier/{id}/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-classifier/{id}/": {
       "get": {
         "operationId": "Portfolios_Portfolio_Classifier_Read",
         "description": "",
@@ -1506,7 +1506,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-history/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-history/": {
       "get": {
         "operationId": "Portfolios_Portfolio_History_List",
         "description": "",
@@ -1623,7 +1623,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-history/bulk-delete/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-history/bulk-delete/": {
       "post": {
         "operationId": "Portfolios_Portfolio_History_Bulk_Delete",
         "description": "",
@@ -1666,7 +1666,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-history/bulk-restore/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-history/bulk-restore/": {
       "post": {
         "operationId": "Portfolios_Portfolio_History_Bulk_Restore",
         "description": "",
@@ -1709,7 +1709,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-history/calculate/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-history/calculate/": {
       "post": {
         "operationId": "Portfolios_Portfolio_History_Calculate",
         "description": "",
@@ -1759,7 +1759,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-history/ev-group/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-history/ev-group/": {
       "post": {
         "operationId": "Portfolios_Portfolio_History_List_Ev_Group",
         "description": "",
@@ -1802,7 +1802,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-history/ev-item/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-history/ev-item/": {
       "post": {
         "operationId": "Portfolios_Portfolio_History_List_Ev_Item",
         "description": "",
@@ -1845,7 +1845,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-history/{id}/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-history/{id}/": {
       "get": {
         "operationId": "Portfolios_Portfolio_History_Read",
         "description": "",
@@ -1953,7 +1953,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-history/{id}/delete/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-history/{id}/delete/": {
       "get": {
         "operationId": "Portfolios_Portfolio_History_Delete_Preview",
         "description": "",
@@ -2002,7 +2002,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-reconcile-group/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-reconcile-group/": {
       "get": {
         "operationId": "Portfolios_Portfolio_Reconcile_Group_List",
         "description": "",
@@ -2119,7 +2119,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-reconcile-group/bulk-delete/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-reconcile-group/bulk-delete/": {
       "post": {
         "operationId": "Portfolios_Portfolio_Reconcile_Group_Bulk_Delete",
         "description": "",
@@ -2162,7 +2162,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-reconcile-group/bulk-restore/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-reconcile-group/bulk-restore/": {
       "post": {
         "operationId": "Portfolios_Portfolio_Reconcile_Group_Bulk_Restore",
         "description": "",
@@ -2205,7 +2205,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-reconcile-group/ev-group/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-reconcile-group/ev-group/": {
       "post": {
         "operationId": "Portfolios_Portfolio_Reconcile_Group_List_Ev_Group",
         "description": "",
@@ -2248,7 +2248,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-reconcile-group/ev-item/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-reconcile-group/ev-item/": {
       "post": {
         "operationId": "Portfolios_Portfolio_Reconcile_Group_List_Ev_Item",
         "description": "",
@@ -2291,7 +2291,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-reconcile-group/{id}/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-reconcile-group/{id}/": {
       "get": {
         "operationId": "Portfolios_Portfolio_Reconcile_Group_Read",
         "description": "",
@@ -2399,7 +2399,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-reconcile-group/{id}/delete/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-reconcile-group/{id}/delete/": {
       "get": {
         "operationId": "Portfolios_Portfolio_Reconcile_Group_Delete_Preview",
         "description": "",
@@ -2448,7 +2448,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-reconcile-history/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-reconcile-history/": {
       "get": {
         "operationId": "Portfolios_Portfolio_Reconcile_History_List",
         "description": "",
@@ -2565,7 +2565,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-reconcile-history/bulk-calculate/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-reconcile-history/bulk-calculate/": {
       "post": {
         "operationId": "Portfolios_Portfolio_Reconcile_History_Bulk_Calculate",
         "description": "",
@@ -2615,7 +2615,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-reconcile-history/bulk-delete/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-reconcile-history/bulk-delete/": {
       "post": {
         "operationId": "Portfolios_Portfolio_Reconcile_History_Bulk_Delete",
         "description": "",
@@ -2658,7 +2658,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-reconcile-history/bulk-restore/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-reconcile-history/bulk-restore/": {
       "post": {
         "operationId": "Portfolios_Portfolio_Reconcile_History_Bulk_Restore",
         "description": "",
@@ -2701,7 +2701,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-reconcile-history/calculate/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-reconcile-history/calculate/": {
       "post": {
         "operationId": "Portfolios_Portfolio_Reconcile_History_Calculate",
         "description": "",
@@ -2751,7 +2751,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-reconcile-history/ev-group/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-reconcile-history/ev-group/": {
       "post": {
         "operationId": "Portfolios_Portfolio_Reconcile_History_List_Ev_Group",
         "description": "",
@@ -2794,7 +2794,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-reconcile-history/ev-item/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-reconcile-history/ev-item/": {
       "post": {
         "operationId": "Portfolios_Portfolio_Reconcile_History_List_Ev_Item",
         "description": "",
@@ -2837,7 +2837,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-reconcile-history/status/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-reconcile-history/status/": {
       "get": {
         "operationId": "Portfolios_Portfolio_Reconcile_History_Status",
         "description": "",
@@ -2931,7 +2931,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-reconcile-history/{id}/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-reconcile-history/{id}/": {
       "get": {
         "operationId": "Portfolios_Portfolio_Reconcile_History_Read",
         "description": "",
@@ -2980,7 +2980,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-reconcile-history/{id}/delete/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-reconcile-history/{id}/delete/": {
       "get": {
         "operationId": "Portfolios_Portfolio_Reconcile_History_Delete_Preview",
         "description": "",
@@ -3029,7 +3029,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-register-attribute-type/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-register-attribute-type/": {
       "get": {
         "operationId": "Portfolios_Portfolio_Register_Attribute_Type_List",
         "description": "",
@@ -3146,7 +3146,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-register-attribute-type/bulk-delete/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-register-attribute-type/bulk-delete/": {
       "post": {
         "operationId": "Portfolios_Portfolio_Register_Attribute_Type_Bulk_Delete",
         "description": "",
@@ -3189,7 +3189,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-register-attribute-type/bulk-restore/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-register-attribute-type/bulk-restore/": {
       "post": {
         "operationId": "Portfolios_Portfolio_Register_Attribute_Type_Bulk_Restore",
         "description": "",
@@ -3232,7 +3232,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-register-attribute-type/ev-group/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-register-attribute-type/ev-group/": {
       "post": {
         "operationId": "Portfolios_Portfolio_Register_Attribute_Type_List_Ev_Group",
         "description": "",
@@ -3275,7 +3275,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-register-attribute-type/ev-item/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-register-attribute-type/ev-item/": {
       "post": {
         "operationId": "Portfolios_Portfolio_Register_Attribute_Type_List_Ev_Item",
         "description": "",
@@ -3318,7 +3318,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-register-attribute-type/{id}/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-register-attribute-type/{id}/": {
       "get": {
         "operationId": "Portfolios_Portfolio_Register_Attribute_Type_Read",
         "description": "",
@@ -3426,7 +3426,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-register-attribute-type/{id}/delete/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-register-attribute-type/{id}/delete/": {
       "get": {
         "operationId": "Portfolios_Portfolio_Register_Attribute_Type_Delete_Preview",
         "description": "",
@@ -3475,7 +3475,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-register-attribute-type/{id}/objects-to-recalculate/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-register-attribute-type/{id}/objects-to-recalculate/": {
       "get": {
         "operationId": "Portfolios_Portfolio_Register_Attribute_Type_Objects_To_Recalculate",
         "description": "",
@@ -3524,7 +3524,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-register-attribute-type/{id}/recalculate/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-register-attribute-type/{id}/recalculate/": {
       "post": {
         "operationId": "Portfolios_Portfolio_Register_Attribute_Type_Recalculate_Attributes",
         "description": "",
@@ -3576,7 +3576,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-register-record/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-register-record/": {
       "get": {
         "operationId": "Portfolios_Portfolio_Register_Record_List",
         "description": "",
@@ -3693,7 +3693,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-register-record/bulk-delete/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-register-record/bulk-delete/": {
       "post": {
         "operationId": "Portfolios_Portfolio_Register_Record_Bulk_Delete",
         "description": "",
@@ -3736,7 +3736,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-register-record/bulk-restore/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-register-record/bulk-restore/": {
       "post": {
         "operationId": "Portfolios_Portfolio_Register_Record_Bulk_Restore",
         "description": "",
@@ -3779,7 +3779,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-register-record/ev-group/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-register-record/ev-group/": {
       "post": {
         "operationId": "Portfolios_Portfolio_Register_Record_List_Ev_Group",
         "description": "",
@@ -3822,7 +3822,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-register-record/ev-item/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-register-record/ev-item/": {
       "post": {
         "operationId": "Portfolios_Portfolio_Register_Record_List_Ev_Item",
         "description": "",
@@ -3865,7 +3865,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-register-record/{id}/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-register-record/{id}/": {
       "get": {
         "operationId": "Portfolios_Portfolio_Register_Record_Read",
         "description": "",
@@ -3973,7 +3973,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-register-record/{id}/delete/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-register-record/{id}/delete/": {
       "get": {
         "operationId": "Portfolios_Portfolio_Register_Record_Delete_Preview",
         "description": "",
@@ -4022,7 +4022,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-register/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-register/": {
       "get": {
         "operationId": "Portfolios_Portfolio_Register_List",
         "description": "",
@@ -4139,7 +4139,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-register/bulk-delete/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-register/bulk-delete/": {
       "post": {
         "operationId": "Portfolios_Portfolio_Register_Bulk_Delete",
         "description": "",
@@ -4182,7 +4182,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-register/bulk-restore/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-register/bulk-restore/": {
       "post": {
         "operationId": "Portfolios_Portfolio_Register_Bulk_Restore",
         "description": "",
@@ -4225,7 +4225,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-register/calculate-price-history/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-register/calculate-price-history/": {
       "post": {
         "operationId": "Portfolios_Portfolio_Register_Calculate_Price_History",
         "description": "",
@@ -4275,7 +4275,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-register/calculate-records/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-register/calculate-records/": {
       "post": {
         "operationId": "Portfolios_Portfolio_Register_Calculate_Records",
         "description": "",
@@ -4325,7 +4325,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-register/ev-group/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-register/ev-group/": {
       "post": {
         "operationId": "Portfolios_Portfolio_Register_List_Ev_Group",
         "description": "",
@@ -4368,7 +4368,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-register/ev-item/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-register/ev-item/": {
       "post": {
         "operationId": "Portfolios_Portfolio_Register_List_Ev_Item",
         "description": "",
@@ -4411,7 +4411,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-register/{id}/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-register/{id}/": {
       "get": {
         "operationId": "Portfolios_Portfolio_Register_Read",
         "description": "",
@@ -4519,7 +4519,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-register/{id}/delete/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-register/{id}/delete/": {
       "get": {
         "operationId": "Portfolios_Portfolio_Register_Delete_Preview",
         "description": "",
@@ -4568,7 +4568,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-type-attribute-type/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-type-attribute-type/": {
       "get": {
         "operationId": "Portfolios_Portfolio_Type_Attribute_Type_List",
         "description": "",
@@ -4685,7 +4685,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-type-attribute-type/bulk-delete/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-type-attribute-type/bulk-delete/": {
       "post": {
         "operationId": "Portfolios_Portfolio_Type_Attribute_Type_Bulk_Delete",
         "description": "",
@@ -4728,7 +4728,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-type-attribute-type/bulk-restore/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-type-attribute-type/bulk-restore/": {
       "post": {
         "operationId": "Portfolios_Portfolio_Type_Attribute_Type_Bulk_Restore",
         "description": "",
@@ -4771,7 +4771,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-type-attribute-type/ev-group/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-type-attribute-type/ev-group/": {
       "post": {
         "operationId": "Portfolios_Portfolio_Type_Attribute_Type_List_Ev_Group",
         "description": "",
@@ -4814,7 +4814,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-type-attribute-type/ev-item/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-type-attribute-type/ev-item/": {
       "post": {
         "operationId": "Portfolios_Portfolio_Type_Attribute_Type_List_Ev_Item",
         "description": "",
@@ -4857,7 +4857,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-type-attribute-type/{id}/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-type-attribute-type/{id}/": {
       "get": {
         "operationId": "Portfolios_Portfolio_Type_Attribute_Type_Read",
         "description": "",
@@ -4965,7 +4965,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-type-attribute-type/{id}/delete/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-type-attribute-type/{id}/delete/": {
       "get": {
         "operationId": "Portfolios_Portfolio_Type_Attribute_Type_Delete_Preview",
         "description": "",
@@ -5014,7 +5014,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-type-attribute-type/{id}/objects-to-recalculate/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-type-attribute-type/{id}/objects-to-recalculate/": {
       "get": {
         "operationId": "Portfolios_Portfolio_Type_Attribute_Type_Objects_To_Recalculate",
         "description": "",
@@ -5063,7 +5063,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-type-attribute-type/{id}/recalculate/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-type-attribute-type/{id}/recalculate/": {
       "post": {
         "operationId": "Portfolios_Portfolio_Type_Attribute_Type_Recalculate_Attributes",
         "description": "",
@@ -5115,7 +5115,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-type/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-type/": {
       "get": {
         "operationId": "Portfolios_Portfolio_Type_List",
         "description": "",
@@ -5232,7 +5232,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-type/attributes/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-type/attributes/": {
       "get": {
         "operationId": "Portfolios_Portfolio_Type_List_Attributes",
         "description": "",
@@ -5326,7 +5326,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-type/bulk-delete/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-type/bulk-delete/": {
       "post": {
         "operationId": "Portfolios_Portfolio_Type_Bulk_Delete",
         "description": "",
@@ -5369,7 +5369,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-type/bulk-restore/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-type/bulk-restore/": {
       "post": {
         "operationId": "Portfolios_Portfolio_Type_Bulk_Restore",
         "description": "",
@@ -5412,7 +5412,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-type/ev-group/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-type/ev-group/": {
       "post": {
         "operationId": "Portfolios_Portfolio_Type_List_Ev_Group",
         "description": "",
@@ -5455,7 +5455,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-type/ev-item/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-type/ev-item/": {
       "post": {
         "operationId": "Portfolios_Portfolio_Type_List_Ev_Item",
         "description": "",
@@ -5498,7 +5498,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-type/light/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-type/light/": {
       "get": {
         "operationId": "Portfolios_Portfolio_Type_List_Light",
         "description": "",
@@ -5592,7 +5592,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-type/{id}/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-type/{id}/": {
       "get": {
         "operationId": "Portfolios_Portfolio_Type_Read",
         "description": "",
@@ -5700,7 +5700,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio-type/{id}/delete/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio-type/{id}/delete/": {
       "get": {
         "operationId": "Portfolios_Portfolio_Type_Delete_Preview",
         "description": "",
@@ -5749,7 +5749,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio/": {
       "get": {
         "operationId": "Portfolios_Portfolio_List",
         "description": "",
@@ -5866,7 +5866,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio/attributes/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio/attributes/": {
       "get": {
         "operationId": "Portfolios_Portfolio_List_Attributes",
         "description": "",
@@ -5960,7 +5960,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio/bulk-delete/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio/bulk-delete/": {
       "post": {
         "operationId": "Portfolios_Portfolio_Bulk_Delete",
         "description": "",
@@ -6003,7 +6003,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio/bulk-restore/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio/bulk-restore/": {
       "post": {
         "operationId": "Portfolios_Portfolio_Bulk_Restore",
         "description": "",
@@ -6046,7 +6046,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio/ev-group/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio/ev-group/": {
       "post": {
         "operationId": "Portfolios_Portfolio_List_Ev_Group",
         "description": "",
@@ -6089,7 +6089,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio/ev-item/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio/ev-item/": {
       "post": {
         "operationId": "Portfolios_Portfolio_List_Ev_Item",
         "description": "",
@@ -6132,7 +6132,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio/get-inception-date/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio/get-inception-date/": {
       "get": {
         "operationId": "Portfolios_Portfolio_Get_Inception_Date",
         "description": "",
@@ -6226,7 +6226,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio/light/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio/light/": {
       "get": {
         "operationId": "Portfolios_Portfolio_List_Light",
         "description": "",
@@ -6320,7 +6320,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio/{id}/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio/{id}/": {
       "get": {
         "operationId": "Portfolios_Portfolio_Read",
         "description": "",
@@ -6428,7 +6428,7 @@
         }
       ]
     },
-    "/realm00000/space00000/api/v1/portfolios/portfolio/{id}/delete/": {
+    "/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio/{id}/delete/": {
       "get": {
         "operationId": "Portfolios_Portfolio_Delete_Preview",
         "description": "",
