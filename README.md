@@ -81,7 +81,36 @@ Each tool follows a three-step pattern:
 2. **API Request**: Calls to [Finmars Portfolio API](https://api-docs.finmars.com/portfolio.html)
 3. **Post-process**: Format results into LLM-optimized strings
 
-#### 4.2 Future Extensions
+#### 4.2 Pydantic Models Architecture
+The project uses two distinct types of Pydantic models:
+
+##### API Payload Models (`libs/schema/`)
+- **Purpose**: Define the exact structure for API requests/responses
+- **Location**: `libs/schema/` directory
+- **Characteristics**:
+  - Auto-generated from OpenAPI specification
+  - Strict validation constraints (string lengths, numeric ranges, formats)
+  - Optional fields for flexible API operations
+  - View models for read operations
+  - Light models for minimal representations
+- **Examples**: `PortfolioView`, `TransactionRequest`, `ClientLight`
+
+##### Tool-Calling Input Schemas
+- **Purpose**: Define input structures for LLM tool calls
+- **Characteristics**:
+  - Simplified schemas focused on LLM-friendly inputs
+  - May have different field names and structures than API models
+  - Related but not inherited from API models
+  - Optimized for natural language understanding
+  - Flexible validation for conversational inputs
+- **Relationship**: These schemas act as adapters between LLM-generated parameters and API payload models
+
+This separation allows for:
+- LLM-optimized tool interfaces without API constraints
+- Independent evolution of tool calling schemas
+- Clear boundary between AI interaction layer and API layer
+
+#### 4.3 Future Extensions
 - MCP Server implementation for comprehensive tool sharing capabilities
 
 ### 5. Observability - Langfuse
@@ -151,12 +180,26 @@ cp .env.example .env
 finmars-ai-assistant/
 ├── README.md
 ├── libs/
-│   └── openapi/
-│       └── portfolio/
-│           ├── openapi.json         # Local API specification
-│           └── openapi_remote.json  # Remote API specification (just changed `base_url` to remote)
+│   ├── openapi/
+│   │   └── portfolio/
+│   │       ├── openapi.json         # Local API specification
+│   │       └── openapi_remote.json  # Remote API specification (just changed `base_url` to remote)
+│   └── schema/                      # Pydantic models for API payloads
+│       ├── account.py               # Account-related models
+│       ├── base.py                  # Base enums and types
+│       ├── client.py                # Client models
+│       ├── counterparty.py          # Counterparty models
+│       ├── currency.py              # Currency models
+│       ├── instrument.py            # Financial instrument models
+│       ├── portfolio.py             # Portfolio models
+│       ├── pricing.py               # Pricing models
+│       ├── reconcile.py             # Reconciliation models
+│       ├── responses.py             # Paginated response models
+│       ├── responsible.py           # User responsibility models
+│       ├── transaction.py           # Transaction models
+│       └── via_data_model_codegen/  # Auto-generated models
 ├── agents/                          # Agent implementations
-├── tools/                           # Tool definitions
+├── tools/                           # Tool definitions with input schemas
 └── pipelines/                       # Open WebUI pipeline modules
 ```
 
