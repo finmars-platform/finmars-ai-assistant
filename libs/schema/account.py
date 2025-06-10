@@ -3,7 +3,7 @@ from pydantic import BaseModel, Field
 
 
 class AccountTypeView(BaseModel):
-    id: int = Field(..., title="ID", description="readonly")
+    id: Optional[int] = Field(None, title="ID", description="readonly")
     user_code: Optional[str] = Field(None, title="User code", max_length=255)
     name: str = Field(..., title="Name", description="Human Readable Name of the object", max_length=255, min_length=1)
     short_name: Optional[str] = Field(None, title="Short name", description="Short Name of the object. Used in dropdown menus")
@@ -12,7 +12,7 @@ class AccountTypeView(BaseModel):
 
 
 class AccountView(BaseModel):
-    id: int = Field(..., title="ID", description="readonly")
+    id: Optional[int] = Field(None, title="ID", description="readonly")
     type: str = Field(..., title="Type")
     type_object: Optional[AccountTypeView] = None
     user_code: Optional[str] = Field(None, title="User code", max_length=255)
