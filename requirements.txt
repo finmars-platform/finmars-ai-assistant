@@ -1,1 +1,2 @@
 datamodel-code-generator==0.30.2
+black==25.1.0
