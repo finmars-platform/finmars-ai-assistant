@@ -6480,7 +6480,7 @@
   },
   "servers": [
     {
-      "url": "http://0.0.0.0:8000"
+      "url": "https://eu-central.finmars.com"
     }
   ],
   "components": {
