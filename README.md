@@ -203,6 +203,77 @@ finmars-ai-assistant/
 └── pipelines/                       # Open WebUI pipeline modules
 ```
 
+## Finmars API Client Library
+
+### Overview
+The `libs/client/` directory contains a fully async Python client library for interacting with the Finmars Portfolio API. The client is organized into logical sub-clients based on business domains.
+
+### Features
+- **Async/await support** for all API operations
+- **Type-safe** with Pydantic model validation
+- **Organized by business logic** into specialized sub-clients
+- **Comprehensive test coverage**
+- **Built-in authentication** with API key support
+- **Configurable timeouts** and error handling
+
+### Usage Example
+
+```python
+import asyncio
+from libs.client import FinmarsPortfolioClient
+
+async def main():
+    # Initialize the client
+    client = FinmarsPortfolioClient(
+        base_url="",
+        realm="",
+        space="",
+        api_key="your-api-key"
+    )
+    
+    # List portfolios
+    portfolios = await client.portfolios.list_portfolios(page=1, page_size=10)
+    print(f"Found {portfolios.count} portfolios")
+    
+    # Get specific portfolio
+    portfolio = await client.portfolios.get_portfolio(portfolio_id=1)
+    print(f"Portfolio: {portfolio.name}")
+    
+    # List portfolio types
+    portfolio_types = await client.portfolio_types.list_portfolio_types()
+    
+    # Get portfolio history
+    history = await client.portfolio_history.list_portfolio_history()
+    
+    # Access reconciliation data
+    reconcile_groups = await client.portfolio_reconcile.list_portfolio_reconcile_groups()
+
+if __name__ == "__main__":
+    asyncio.run(main())
+```
+
+### Client Structure
+
+The main `FinmarsPortfolioClient` aggregates the following sub-clients:
+
+1. **portfolios** - Portfolio operations (list, get, attributes, inception dates)
+2. **portfolio_types** - Portfolio type management and attributes
+3. **portfolio_registers** - Portfolio register and record operations
+4. **portfolio_history** - Historical portfolio data access
+5. **portfolio_reconcile** - Reconciliation groups and history
+
+### Testing
+
+Run the test suite:
+
+```bash
+# Install test dependencies
+pip install pytest pytest-asyncio httpx
+
+# Run tests
+pytest libs/client/tests/
+```
+
 ## Contributing
 Please read our contributing guidelines before submitting pull requests.
 
