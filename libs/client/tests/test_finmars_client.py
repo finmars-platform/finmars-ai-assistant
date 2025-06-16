@@ -1,3 +1,4 @@
+import os
 import pytest
 
 from ..finmars_client import FinmarsPortfolioClient
@@ -14,18 +15,20 @@ class TestFinmarsPortfolioClient:
     @pytest.fixture
     def client(self):
         return FinmarsPortfolioClient(
-            base_url="https://api.finmars.com",
-            realm="realm0v4ry",
-            space="space0ihxm",
+            base_url=os.getenv("FINMARS_BASE_URL"),
+            realm="test_realm",
+            space="test_space",
             api_key="test-api-key",
             timeout=30.0,
         )
 
     def test_init(self, client):
         """Test client initialization."""
-        assert client.base_url == "https://api.finmars.com"
-        assert client.realm == "realm0v4ry"
-        assert client.space == "space0ihxm"
+        assert client.base_url == os.getenv(
+            "FINMARS_BASE_URL"
+        )
+        assert client.realm == "test_realm"
+        assert client.space == "test_space"
         assert client.api_key == "test-api-key"
         assert client.timeout == 30.0
 
@@ -40,20 +43,24 @@ class TestFinmarsPortfolioClient:
     def test_sub_clients_configuration(self, client):
         """Test that sub-clients have correct configuration."""
         # Check portfolios client
-        assert client.portfolios.base_url == "https://api.finmars.com"
-        assert client.portfolios.realm == "realm0v4ry"
-        assert client.portfolios.space == "space0ihxm"
+        assert client.portfolios.base_url == os.getenv(
+            "FINMARS_BASE_URL"
+        )
+        assert client.portfolios.realm == "test_realm"
+        assert client.portfolios.space == "test_space"
         assert client.portfolios.api_key == "test-api-key"
 
         # Check portfolio_types client
-        assert client.portfolio_types.base_url == "https://api.finmars.com"
-        assert client.portfolio_types.realm == "realm0v4ry"
-        assert client.portfolio_types.space == "space0ihxm"
+        assert client.portfolio_types.base_url == os.getenv(
+            "FINMARS_BASE_URL",
+        )
+        assert client.portfolio_types.realm == "test_realm"
+        assert client.portfolio_types.space == "test_space"
         assert client.portfolio_types.api_key == "test-api-key"
 
     def test_repr(self, client):
         """Test string representation."""
-        expected = "FinmarsPortfolioClient(base_url='https://api.finmars.com', realm='realm0v4ry', space='space0ihxm')"
+        expected = f"FinmarsPortfolioClient(base_url='{os.getenv('FINMARS_BASE_URL', 'https://api.finmars.com')}', realm='test_realm', space='test_space')"
         assert repr(client) == expected
 
     def test_custom_configuration(self):

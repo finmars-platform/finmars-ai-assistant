@@ -19,8 +19,8 @@ class FinmarsPortfolioClient:
     def __init__(
         self,
         base_url: str,
-        realm: str = "realm0v4ry",
-        space: str = "space0ihxm",
+        realm: Optional[str] = None,
+        space: Optional[str] = None,
         api_key: Optional[str] = None,
         timeout: float = 30.0,
     ):
@@ -29,8 +29,8 @@ class FinmarsPortfolioClient:
 
         Args:
             base_url: The base URL of the Finmars API
-            realm: The realm code (default: realm0v4ry)
-            space: The space code (default: space0ihxm)
+            realm: The realm code
+            space: The space code
             api_key: Optional API key for authentication
             timeout: Request timeout in seconds (default: 30.0)
         """

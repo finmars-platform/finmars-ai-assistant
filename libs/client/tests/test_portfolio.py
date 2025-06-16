@@ -1,15 +1,18 @@
+import os
 import pytest
 from unittest.mock import AsyncMock, patch
 from datetime import date
 
 from ..portfolio import PortfolioClient
-from ...schema import (
-    Portfolio,
-    PortfolioLight,
+from ...schema.responses import (
     PortfolioListResponse,
     PortfolioLightListResponse,
-    FirstTransactionDateRequest,
     FirstTransactionDateListResponse,
+)
+from ...schema.via_data_model_codegen.finmars_schema import (
+    Portfolio,
+    PortfolioLight,
+    FirstTransactionDateRequest,
     GenericAttribute,
 )
 
@@ -20,9 +23,9 @@ class TestPortfolioClient:
     @pytest.fixture
     def client(self):
         return PortfolioClient(
-            base_url="https://api.finmars.com",
-            realm="realm0v4ry",
-            space="space0ihxm",
+            base_url=os.getenv("FINMARS_BASE_URL"),
+            realm="test_realm",
+            space="test_space",
             api_key="test-api-key",
         )
 

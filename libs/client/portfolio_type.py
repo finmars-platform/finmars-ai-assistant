@@ -1,15 +1,18 @@
 from typing import Optional, List, Dict, Any
 
-from ..schema import (
-    PortfolioType,
-    PortfolioTypeLight,
+from ..schema.responses import (
     PortfolioTypeListResponse,
     PortfolioTypeLightListResponse,
+    GenericAttributeTypeListResponse,
+)
+from ..schema.via_data_model_codegen.finmars_schema import (
+    PortfolioType,
+    PortfolioTypeLight,
     GenericAttribute,
     GenericAttributeType,
-    GenericAttributeTypeListResponse,
     RecalculateAttributes,
 )
+
 from .base import BaseHTTPClient
 
 

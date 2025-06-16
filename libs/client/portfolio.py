@@ -1,13 +1,15 @@
 from typing import Optional, List, Dict, Any
 from datetime import date
 
-from ..schema import (
-    Portfolio,
-    PortfolioLight,
+from ..schema.responses import (
     PortfolioListResponse,
     PortfolioLightListResponse,
-    FirstTransactionDateRequest,
     FirstTransactionDateListResponse,
+)
+from ..schema.via_data_model_codegen.finmars_schema import (
+    Portfolio,
+    PortfolioLight,
+    FirstTransactionDateRequest,
     GenericAttribute,
 )
 from .base import BaseHTTPClient

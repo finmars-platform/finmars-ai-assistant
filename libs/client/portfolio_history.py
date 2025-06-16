@@ -1,10 +1,8 @@
 from typing import Optional
 
-from ..schema import (
-    PortfolioHistory,
-    PortfolioHistoryListResponse,
-)
 from .base import BaseHTTPClient
+from ..schema.responses import PortfolioHistoryListResponse
+from ..schema.via_data_model_codegen.finmars_schema import PortfolioHistory
 
 
 class PortfolioHistoryClient(BaseHTTPClient):

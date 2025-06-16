@@ -1,14 +1,17 @@
 from typing import Optional, List
 
-from ..schema import (
+from ..schema.responses import (
+    PortfolioRegisterRecordListResponse,
+    GenericAttributeTypeListResponse,
+    PortfolioRegisterListResponse,
+)
+from ..schema.via_data_model_codegen.finmars_schema import (
     PortfolioRegister,
     PortfolioRegisterRecord,
-    PortfolioRegisterListResponse,
-    PortfolioRegisterRecordListResponse,
     GenericAttributeType,
-    GenericAttributeTypeListResponse,
     RecalculateAttributes,
 )
+
 from .base import BaseHTTPClient
 
 

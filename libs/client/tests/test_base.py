@@ -1,3 +1,4 @@
+import os
 import pytest
 import httpx
 from unittest.mock import AsyncMock, patch
@@ -17,17 +18,19 @@ class TestBaseHTTPClient:
     @pytest.fixture
     def client(self):
         return BaseHTTPClient(
-            base_url="https://api.finmars.com",
-            realm="realm0v4ry",
-            space="space0ihxm",
+            base_url=os.getenv("FINMARS_BASE_URL"),
+            realm="test_realm",
+            space="test_space",
             api_key="test-api-key",
         )
 
     def test_init(self, client):
         """Test client initialization."""
-        assert client.base_url == "https://api.finmars.com"
-        assert client.realm == "realm0v4ry"
-        assert client.space == "space0ihxm"
+        assert client.base_url == os.getenv(
+            "FINMARS_BASE_URL"
+        )
+        assert client.realm == "test_realm"
+        assert client.space == "test_space"
         assert client.api_key == "test-api-key"
         assert client.timeout == 30.0
 
@@ -41,9 +44,7 @@ class TestBaseHTTPClient:
     def test_build_url(self, client):
         """Test URL building."""
         url = client._build_url("portfolios/portfolio/")
-        expected = (
-            "https://api.finmars.com/realm0v4ry/space0ihxm/api/v1/portfolios/portfolio/"
-        )
+        expected = f"{os.getenv('FINMARS_BASE_URL', 'https://api.finmars.com')}/test_realm/test_space/api/v1/portfolios/portfolio/"
         assert url == expected
 
     @pytest.mark.asyncio

@@ -1,11 +1,13 @@
 from typing import Optional, Dict, Any
 from datetime import date
 
-from ..schema import (
-    PortfolioReconcileGroup,
-    PortfolioReconcileHistory,
+from ..schema.responses import (
     PortfolioReconcileGroupListResponse,
     PortfolioReconcileHistoryListResponse,
+)
+from ..schema.via_data_model_codegen.finmars_schema import (
+    PortfolioReconcileGroup,
+    PortfolioReconcileHistory,
     PortfolioReconcileStatus,
 )
 from .base import BaseHTTPClient

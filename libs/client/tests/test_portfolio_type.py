@@ -1,15 +1,17 @@
+import os
 import pytest
 from unittest.mock import AsyncMock, patch
 
 from ..portfolio_type import PortfolioTypeClient
-from ...schema import (
-    PortfolioType,
-    PortfolioTypeLight,
+from ...schema.responses import (
     PortfolioTypeListResponse,
     PortfolioTypeLightListResponse,
+    GenericAttributeTypeListResponse,
+)
+from ...schema.via_data_model_codegen.finmars_schema import (
+    PortfolioTypeLight,
     GenericAttribute,
     GenericAttributeType,
-    GenericAttributeTypeListResponse,
     RecalculateAttributes,
 )
 
@@ -20,9 +22,9 @@ class TestPortfolioTypeClient:
     @pytest.fixture
     def client(self):
         return PortfolioTypeClient(
-            base_url="https://api.finmars.com",
-            realm="realm0v4ry",
-            space="space0ihxm",
+            base_url=os.getenv("FINMARS_BASE_URL"),
+            realm="test_realm",
+            space="test_space",
             api_key="test-api-key",
         )
 
