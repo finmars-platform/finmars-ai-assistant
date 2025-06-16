@@ -9,9 +9,9 @@ Usage:
 
 Environment Variables:
     FINMARS_EXPERT_TOKEN: API authentication token (required)
-    FINMARS_BASE_URL: API base URL (optional, defaults to https://api.finmars.com)
-    FINMARS_REALM: Realm code (optional, defaults to realm0v4ry)
-    FINMARS_SPACE: Space code (optional, defaults to space0ihxm)
+    FINMARS_BASE_URL: API base URL
+    FINMARS_REALM: Realm code
+    FINMARS_SPACE: Space code
 
 Commands:
     list-portfolios         List all portfolios
@@ -25,7 +25,10 @@ Examples:
     python cli/main.py get-portfolio --id 123
     python cli/main.py list-portfolio-types
 """
+import traceback
+
 from dotenv import load_dotenv
+
 load_dotenv()
 
 import os
@@ -43,9 +46,9 @@ class FinmarsCLI:
 
     def __init__(self):
         """Initialize the CLI with environment configuration."""
-        self.base_url = os.environ.get("FINMARS_BASE_URL", "https://api.finmars.com")
-        self.realm = os.environ.get("FINMARS_REALM", "realm0v4ry")
-        self.space = os.environ.get("FINMARS_SPACE", "space0ihxm")
+        self.base_url = os.environ.get("FINMARS_BASE_URL")
+        self.realm = os.environ.get("FINMARS_REALM")
+        self.space = os.environ.get("FINMARS_SPACE")
         self.api_key = os.environ.get("FINMARS_EXPERT_TOKEN")
 
         if not self.api_key:
@@ -78,6 +81,8 @@ class FinmarsCLI:
                 print("-" * 40)
 
         except Exception as e:
+            exc = traceback.format_exc()
+            print(exc)
             print(f"Error: {e}")
             sys.exit(1)
 
@@ -98,6 +103,8 @@ class FinmarsCLI:
                 print(f"Portfolio Type: {portfolio.portfolio_type}")
 
         except Exception as e:
+            exc = traceback.format_exc()
+            print(exc)
             print(f"Error: {e}")
             sys.exit(1)
 
@@ -121,6 +128,8 @@ class FinmarsCLI:
                 print("-" * 40)
 
         except Exception as e:
+            exc = traceback.format_exc()
+            print(exc)
             print(f"Error: {e}")
             sys.exit(1)
 
@@ -145,6 +154,8 @@ class FinmarsCLI:
                 print("-" * 40)
 
         except Exception as e:
+            exc = traceback.format_exc()
+            print(exc)
             print(f"Error: {e}")
             sys.exit(1)
 
@@ -165,6 +176,8 @@ class FinmarsCLI:
                     print(f"{key}: {value}")
 
         except Exception as e:
+            exc = traceback.format_exc()
+            print(exc)
             print(f"Error: {e}")
             sys.exit(1)
 

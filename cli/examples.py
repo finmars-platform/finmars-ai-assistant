@@ -4,7 +4,10 @@ Example commands for the Finmars Portfolio API CLI.
 
 This module provides example usage patterns for common operations.
 """
+import traceback
+
 from dotenv import load_dotenv
+
 load_dotenv()
 
 import asyncio
@@ -14,15 +17,19 @@ from datetime import datetime
 
 from libs.client import FinmarsPortfolioClient
 
+FINMARS_BASE_URL = os.getenv("FINMARS_BASE_URL")
+REALM = os.getenv("FINMARS_REALM")
+SPACE = os.getenv("FINMARS_SPACE")
+
 
 async def example_list_portfolios():
     """Example: List portfolios with pagination."""
     print("=== Example: List Portfolios ===")
 
     client = FinmarsPortfolioClient(
-        base_url="https://api.finmars.com",
-        realm="realm0v4ry",
-        space="space0ihxm",
+        base_url=FINMARS_BASE_URL,
+        realm=REALM,
+        space=SPACE,
         # API key will be loaded from FINMARS_EXPERT_TOKEN environment variable
     )
 
@@ -39,6 +46,8 @@ async def example_list_portfolios():
             )
 
     except Exception as e:
+        exc = traceback.format_exc()
+        print(exc)
         print(f"Error: {e}")
 
 
@@ -46,9 +55,7 @@ async def example_get_portfolio_details():
     """Example: Get detailed portfolio information."""
     print("\n=== Example: Get Portfolio Details ===")
 
-    client = FinmarsPortfolioClient(
-        base_url="https://api.finmars.com", realm="realm0v4ry", space="space0ihxm"
-    )
+    client = FinmarsPortfolioClient(base_url=FINMARS_BASE_URL, realm=REALM, space=SPACE)
 
     try:
         # Replace with actual portfolio ID
@@ -73,6 +80,8 @@ async def example_get_portfolio_details():
                 )
 
     except Exception as e:
+        exc = traceback.format_exc()
+        print(exc)
         print(f"Error: {e}")
 
 
@@ -80,9 +89,7 @@ async def example_portfolio_types():
     """Example: Work with portfolio types."""
     print("\n=== Example: Portfolio Types ===")
 
-    client = FinmarsPortfolioClient(
-        base_url="https://api.finmars.com", realm="realm0v4ry", space="space0ihxm"
-    )
+    client = FinmarsPortfolioClient(base_url=FINMARS_BASE_URL, realm=REALM, space=SPACE)
 
     try:
         # List portfolio types
@@ -103,6 +110,8 @@ async def example_portfolio_types():
             break  # Just show one example
 
     except Exception as e:
+        exc = traceback.format_exc()
+        print(exc)
         print(f"Error: {e}")
 
 
@@ -110,9 +119,7 @@ async def example_portfolio_history():
     """Example: Access portfolio history."""
     print("\n=== Example: Portfolio History ===")
 
-    client = FinmarsPortfolioClient(
-        base_url="https://api.finmars.com", realm="realm0v4ry", space="space0ihxm"
-    )
+    client = FinmarsPortfolioClient(base_url=FINMARS_BASE_URL, realm=REALM, space=SPACE)
 
     try:
         # List portfolio history
@@ -130,6 +137,8 @@ async def example_portfolio_history():
                     print(f"  {field}: {value}")
 
     except Exception as e:
+        exc = traceback.format_exc()
+        print(exc)
         print(f"Error: {e}")
 
 
@@ -137,9 +146,7 @@ async def example_reconciliation():
     """Example: Portfolio reconciliation operations."""
     print("\n=== Example: Portfolio Reconciliation ===")
 
-    client = FinmarsPortfolioClient(
-        base_url="https://api.finmars.com", realm="realm0v4ry", space="space0ihxm"
-    )
+    client = FinmarsPortfolioClient(base_url=FINMARS_BASE_URL, realm=REALM, space=SPACE)
 
     try:
         # Get reconciliation status
@@ -159,6 +166,8 @@ async def example_reconciliation():
             print(f"  - Group ID: {group.id}")
 
     except Exception as e:
+        exc = traceback.format_exc()
+        print(exc)
         print(f"Error: {e}")
 
 
@@ -166,9 +175,7 @@ async def example_first_transaction_dates():
     """Example: Get first transaction dates."""
     print("\n=== Example: First Transaction Dates ===")
 
-    client = FinmarsPortfolioClient(
-        base_url="https://api.finmars.com", realm="realm0v4ry", space="space0ihxm"
-    )
+    client = FinmarsPortfolioClient(base_url=FINMARS_BASE_URL, realm=REALM, space=SPACE)
 
     try:
         # List first transaction dates
@@ -184,6 +191,8 @@ async def example_first_transaction_dates():
                 print(f"    Date Field: {date_info.date_field}")
 
     except Exception as e:
+        exc = traceback.format_exc()
+        print(exc)
         print(f"Error: {e}")
 
 

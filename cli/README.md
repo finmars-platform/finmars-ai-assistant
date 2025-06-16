@@ -15,9 +15,9 @@ Set the following environment variables:
 export FINMARS_EXPERT_TOKEN='your-api-token-here'
 
 # Optional - API configuration (defaults shown)
-export FINMARS_BASE_URL='https://api.finmars.com'
-export FINMARS_REALM='realm0v4ry'
-export FINMARS_SPACE='space0ihxm'
+export FINMARS_BASE_URL=''
+export FINMARS_REALM=''
+export FINMARS_SPACE=''
 ```
 
 ## Usage
