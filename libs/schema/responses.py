@@ -1,17 +1,24 @@
 from typing import Optional, List, Generic, TypeVar
 from pydantic import BaseModel, Field
 
-from .base import PaginatedResponse
-from .portfolio import (
-    Portfolio, PortfolioLight, PortfolioType, PortfolioTypeLight,
-    PortfolioRegister, PortfolioRegisterRecord, PortfolioHistory,
-    PortfolioBundle, FirstTransactionDateRequest
+from libs.schema.base import PaginatedResponse
+from libs.schema.via_data_model_codegen.finmars_schema import (
+    Portfolio,
+    PortfolioLight,
+    PortfolioType,
+    PortfolioTypeLight,
+    PortfolioRegister,
+    PortfolioRegisterRecord,
+    PortfolioHistory,
+    PortfolioBundle,
+    FirstTransactionDateRequest,
+    PortfolioReconcileGroup,
+    PortfolioReconcileHistory,
+    GenericAttributeType,
+    Clients,
 )
-from .reconcile import PortfolioReconcileGroup, PortfolioReconcileHistory
-from .common import GenericAttributeType
-from .client import Clients
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 class PaginatedResponseGeneric(PaginatedResponse, Generic[T]):
