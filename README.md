@@ -180,6 +180,15 @@ cp .env.example .env
 finmars-ai-assistant/
 ├── README.md
 ├── libs/
+│   ├── client/                      # Finmars API Client Library
+│   │   ├── base.py                  # Base HTTP client with async support
+│   │   ├── portfolio.py             # Portfolio-related operations client
+│   │   ├── portfolio_type.py        # Portfolio type operations client
+│   │   ├── portfolio_register.py    # Portfolio register operations client
+│   │   ├── portfolio_history.py     # Portfolio history operations client
+│   │   ├── portfolio_reconcile.py   # Portfolio reconciliation client
+│   │   ├── finmars_client.py        # Main client aggregating all sub-clients
+│   │   └── tests/                   # Test suite for client library
 │   ├── openapi/
 │   │   └── portfolio/
 │   │       ├── openapi.json         # Local API specification
