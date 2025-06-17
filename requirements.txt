@@ -5,3 +5,7 @@ pytest-asyncio==1.0.0
 pytest==8.4.0
 httpx==0.28.1
 pydantic[email]
+langgraph==0.4.8
+langfuse==3.0.2
+langchain-openai==0.3.23
+langchain==0.3.25
