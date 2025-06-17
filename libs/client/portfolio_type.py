@@ -36,7 +36,10 @@ class PortfolioTypeClient(BaseHTTPClient):
         Returns:
             PortfolioTypeListResponse with paginated results
         """
-        params = {}
+        params = {
+            "realm_code": self.realm,
+            "space_code": self.space,
+        }
         if ordering:
             params["ordering"] = ordering
         if page:
@@ -60,8 +63,13 @@ class PortfolioTypeClient(BaseHTTPClient):
         Returns:
             PortfolioType object
         """
+        params = {
+            "realm_code": self.realm,
+            "space_code": self.space,
+        }
         return await self.get(
             endpoint=f"portfolios/portfolio-type/{portfolio_type_id}/",
+            params=params,
             response_model=PortfolioType,
         )
 
@@ -82,7 +90,10 @@ class PortfolioTypeClient(BaseHTTPClient):
         Returns:
             PortfolioTypeLightListResponse with paginated results
         """
-        params = {}
+        params = {
+            "realm_code": self.realm,
+            "space_code": self.space,
+        }
         if ordering:
             params["ordering"] = ordering
         if page:
@@ -103,8 +114,13 @@ class PortfolioTypeClient(BaseHTTPClient):
         Returns:
             List of GenericAttribute objects
         """
+        params = {
+            "realm_code": self.realm,
+            "space_code": self.space,
+        }
         response = await self.get(
             endpoint="portfolios/portfolio-type/attributes/",
+            params=params,
         )
         return [GenericAttribute.model_validate(item) for item in response]
 
@@ -125,7 +141,10 @@ class PortfolioTypeClient(BaseHTTPClient):
         Returns:
             GenericAttributeTypeListResponse with paginated results
         """
-        params = {}
+        params = {
+            "realm_code": self.realm,
+            "space_code": self.space,
+        }
         if ordering:
             params["ordering"] = ordering
         if page:
@@ -151,8 +170,13 @@ class PortfolioTypeClient(BaseHTTPClient):
         Returns:
             GenericAttributeType object
         """
+        params = {
+            "realm_code": self.realm,
+            "space_code": self.space,
+        }
         return await self.get(
             endpoint=f"portfolios/portfolio-attribute-type/{attribute_type_id}/",
+            params=params,
             response_model=GenericAttributeType,
         )
 
@@ -168,8 +192,13 @@ class PortfolioTypeClient(BaseHTTPClient):
         Returns:
             RecalculateAttributes object
         """
+        params = {
+            "realm_code": self.realm,
+            "space_code": self.space,
+        }
         return await self.get(
             endpoint=f"portfolios/portfolio-attribute-type/{attribute_type_id}/objects-to-recalculate/",
+            params=params,
             response_model=RecalculateAttributes,
         )
 
@@ -190,7 +219,10 @@ class PortfolioTypeClient(BaseHTTPClient):
         Returns:
             GenericAttributeTypeListResponse with paginated results
         """
-        params = {}
+        params = {
+            "realm_code": self.realm,
+            "space_code": self.space,
+        }
         if ordering:
             params["ordering"] = ordering
         if page:
@@ -216,8 +248,13 @@ class PortfolioTypeClient(BaseHTTPClient):
         Returns:
             GenericAttributeType object
         """
+        params = {
+            "realm_code": self.realm,
+            "space_code": self.space,
+        }
         return await self.get(
             endpoint=f"portfolios/portfolio-type-attribute-type/{attribute_type_id}/",
+            params=params,
             response_model=GenericAttributeType,
         )
 
@@ -233,7 +270,12 @@ class PortfolioTypeClient(BaseHTTPClient):
         Returns:
             RecalculateAttributes object
         """
+        params = {
+            "realm_code": self.realm,
+            "space_code": self.space,
+        }
         return await self.get(
             endpoint=f"portfolios/portfolio-type-attribute-type/{attribute_type_id}/objects-to-recalculate/",
+            params=params,
             response_model=RecalculateAttributes,
         )

@@ -35,7 +35,10 @@ class PortfolioRegisterClient(BaseHTTPClient):
         Returns:
             PortfolioRegisterListResponse with paginated results
         """
-        params = {}
+        params = {
+            "realm_code": self.realm,
+            "space_code": self.space,
+        }
         if ordering:
             params["ordering"] = ordering
         if page:
@@ -59,8 +62,13 @@ class PortfolioRegisterClient(BaseHTTPClient):
         Returns:
             PortfolioRegister object
         """
+        params = {
+            "realm_code": self.realm,
+            "space_code": self.space,
+        }
         return await self.get(
             endpoint=f"portfolios/portfolio-register/{register_id}/",
+            params=params,
             response_model=PortfolioRegister,
         )
 
@@ -81,7 +89,10 @@ class PortfolioRegisterClient(BaseHTTPClient):
         Returns:
             PortfolioRegisterRecordListResponse with paginated results
         """
-        params = {}
+        params = {
+            "realm_code": self.realm,
+            "space_code": self.space,
+        }
         if ordering:
             params["ordering"] = ordering
         if page:
@@ -107,8 +118,13 @@ class PortfolioRegisterClient(BaseHTTPClient):
         Returns:
             PortfolioRegisterRecord object
         """
+        params = {
+            "realm_code": self.realm,
+            "space_code": self.space,
+        }
         return await self.get(
             endpoint=f"portfolios/portfolio-register-record/{record_id}/",
+            params=params,
             response_model=PortfolioRegisterRecord,
         )
 
@@ -129,7 +145,10 @@ class PortfolioRegisterClient(BaseHTTPClient):
         Returns:
             GenericAttributeTypeListResponse with paginated results
         """
-        params = {}
+        params = {
+            "realm_code": self.realm,
+            "space_code": self.space,
+        }
         if ordering:
             params["ordering"] = ordering
         if page:
@@ -155,8 +174,13 @@ class PortfolioRegisterClient(BaseHTTPClient):
         Returns:
             GenericAttributeType object
         """
+        params = {
+            "realm_code": self.realm,
+            "space_code": self.space,
+        }
         return await self.get(
             endpoint=f"portfolios/portfolio-register-attribute-type/{attribute_type_id}/",
+            params=params,
             response_model=GenericAttributeType,
         )
 
@@ -172,7 +196,12 @@ class PortfolioRegisterClient(BaseHTTPClient):
         Returns:
             RecalculateAttributes object
         """
+        params = {
+            "realm_code": self.realm,
+            "space_code": self.space,
+        }
         return await self.get(
             endpoint=f"portfolios/portfolio-register-attribute-type/{attribute_type_id}/objects-to-recalculate/",
+            params=params,
             response_model=RecalculateAttributes,
         )

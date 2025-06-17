@@ -25,7 +25,10 @@ class PortfolioHistoryClient(BaseHTTPClient):
         Returns:
             PortfolioHistoryListResponse with paginated results
         """
-        params = {}
+        params = {
+            "realm_code": self.realm,
+            "space_code": self.space,
+        }
         if ordering:
             params["ordering"] = ordering
         if page:
@@ -49,7 +52,12 @@ class PortfolioHistoryClient(BaseHTTPClient):
         Returns:
             PortfolioHistory object
         """
+        params = {
+            "realm_code": self.realm,
+            "space_code": self.space,
+        }
         return await self.get(
             endpoint=f"portfolios/portfolio-history/{history_id}/",
+            params=params,
             response_model=PortfolioHistory,
         )

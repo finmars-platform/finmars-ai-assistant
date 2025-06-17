@@ -35,7 +35,10 @@ class PortfolioClient(BaseHTTPClient):
         Returns:
             PortfolioListResponse with paginated results
         """
-        params = {}
+        params = {
+            "realm_code": self.realm,
+            "space_code": self.space,
+        }
         if ordering:
             params["ordering"] = ordering
         if page:
@@ -59,8 +62,14 @@ class PortfolioClient(BaseHTTPClient):
         Returns:
             Portfolio object
         """
+        params = {
+            "realm_code": self.realm,
+            "space_code": self.space,
+        }
         return await self.get(
-            endpoint=f"portfolios/portfolio/{portfolio_id}/", response_model=Portfolio
+            endpoint=f"portfolios/portfolio/{portfolio_id}/",
+            params=params,
+            response_model=Portfolio
         )
 
     async def list_portfolios_light(
@@ -80,7 +89,10 @@ class PortfolioClient(BaseHTTPClient):
         Returns:
             PortfolioLightListResponse with paginated results
         """
-        params = {}
+        params = {
+            "realm_code": self.realm,
+            "space_code": self.space,
+        }
         if ordering:
             params["ordering"] = ordering
         if page:
@@ -135,7 +147,14 @@ class PortfolioClient(BaseHTTPClient):
         Returns:
             Dictionary with inception date information
         """
-        return await self.get(endpoint="portfolios/portfolio/get-inception-date/")
+        params = {
+            "realm_code": self.realm,
+            "space_code": self.space,
+        }
+        return await self.get(
+            endpoint="portfolios/portfolio/get-inception-date/",
+            params=params
+        )
 
     async def list_first_transaction_dates(
         self,
@@ -154,7 +173,10 @@ class PortfolioClient(BaseHTTPClient):
         Returns:
             FirstTransactionDateListResponse with paginated results
         """
-        params = {}
+        params = {
+            "realm_code": self.realm,
+            "space_code": self.space,
+        }
         if ordering:
             params["ordering"] = ordering
         if page:
@@ -180,7 +202,12 @@ class PortfolioClient(BaseHTTPClient):
         Returns:
             FirstTransactionDateRequest object
         """
+        params = {
+            "realm_code": self.realm,
+            "space_code": self.space,
+        }
         return await self.get(
             endpoint=f"portfolios/first-transaction-date/{portfolio_id}/",
+            params=params,
             response_model=FirstTransactionDateRequest,
         )

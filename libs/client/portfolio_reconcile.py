@@ -33,7 +33,10 @@ class PortfolioReconcileClient(BaseHTTPClient):
         Returns:
             PortfolioReconcileGroupListResponse with paginated results
         """
-        params = {}
+        params = {
+            "realm_code": self.realm,
+            "space_code": self.space,
+        }
         if ordering:
             params["ordering"] = ordering
         if page:
@@ -59,8 +62,13 @@ class PortfolioReconcileClient(BaseHTTPClient):
         Returns:
             PortfolioReconcileGroup object
         """
+        params = {
+            "realm_code": self.realm,
+            "space_code": self.space,
+        }
         return await self.get(
             endpoint=f"portfolios/portfolio-reconcile-group/{group_id}/",
+            params=params,
             response_model=PortfolioReconcileGroup,
         )
 
@@ -81,7 +89,10 @@ class PortfolioReconcileClient(BaseHTTPClient):
         Returns:
             PortfolioReconcileHistoryListResponse with paginated results
         """
-        params = {}
+        params = {
+            "realm_code": self.realm,
+            "space_code": self.space,
+        }
         if ordering:
             params["ordering"] = ordering
         if page:
@@ -107,8 +118,13 @@ class PortfolioReconcileClient(BaseHTTPClient):
         Returns:
             PortfolioReconcileHistory object
         """
+        params = {
+            "realm_code": self.realm,
+            "space_code": self.space,
+        }
         return await self.get(
             endpoint=f"portfolios/portfolio-reconcile-history/{history_id}/",
+            params=params,
             response_model=PortfolioReconcileHistory,
         )
 
@@ -119,4 +135,11 @@ class PortfolioReconcileClient(BaseHTTPClient):
         Returns:
             Dictionary with reconcile status information
         """
-        return await self.get(endpoint="portfolios/portfolio-reconcile-history/status/")
+        params = {
+            "realm_code": self.realm,
+            "space_code": self.space,
+        }
+        return await self.get(
+            endpoint="portfolios/portfolio-reconcile-history/status/",
+            params=params
+        )
