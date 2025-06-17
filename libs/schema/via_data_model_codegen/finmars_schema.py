@@ -258,8 +258,8 @@ class Status(Enum):
 class PortfolioHistory(BaseModel):
     id: Optional[int] = Field(None, title='ID')
     user_code: Optional[constr(max_length=255)] = Field(None, title='User code')
-    portfolio: str = Field(..., title='Portfolio')
-    currency: Optional[str] = Field(None, title='Currency')
+    portfolio: int = Field(..., title='Portfolio')
+    currency: Optional[int] = Field(None, title='Currency')
     pricing_policy: int = Field(..., title='Pricing policy')
     date: Optional[date_aliased] = Field(None, title='Date')
     date_from: Optional[date_aliased] = Field(None, title='Date from')
