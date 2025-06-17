@@ -224,7 +224,7 @@ async def run_all_examples():
     await example_portfolio_types()
     await example_portfolio_history()
     # await example_reconciliation()
-    await example_first_transaction_dates()
+    # await example_first_transaction_dates()
 
     print("\n" + "=" * 50)
     print("Examples completed!")
