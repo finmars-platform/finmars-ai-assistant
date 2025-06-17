@@ -88,12 +88,17 @@ The project uses two distinct types of Pydantic models:
 - **Purpose**: Define the exact structure for API requests/responses
 - **Location**: `libs/schema/` directory
 - **Characteristics**:
-  - Auto-generated from OpenAPI specification
+  - Auto-generated from OpenAPI specification using `datamodel-codegen`
   - Strict validation constraints (string lengths, numeric ranges, formats)
   - Optional fields for flexible API operations
   - View models for read operations
   - Light models for minimal representations
-- **Examples**: `PortfolioView`, `TransactionRequest`, `ClientLight`
+- **Examples**: `Portfolio`, `PortfolioType`, `PortfolioHistory`, `GenericAttribute`
+
+The main schema files include:
+- `base.py` - Base enums and types (SourceTypeEnum, StatusEnum, etc.)
+- `responses.py` - Paginated response models for API endpoints
+- `via_data_model_codegen/finmars_schema.py` - Auto-generated models from OpenAPI spec
 
 ##### Tool-Calling Input Schemas
 - **Purpose**: Define input structures for LLM tool calls
@@ -121,29 +126,30 @@ This separation allows for:
 - **Datasets**: Test sets and benchmarks for continuous improvement
 - **LLM Playground**: Testing and iteration environment
 
-## MVP Implementation Plan
+## Current Implementation Status
 
-### Phase 1: Tool Development
-- Create simple tools with limited functionality
-- Implement basic API calls to [Finmars Portfolio API](https://api-docs.finmars.com/portfolio.html)
-- Focus on core portfolio management operations
+### ✅ Phase 1: Core Infrastructure (Completed)
+- **Finmars API Client Library** - Fully async Python client with type safety
+- **Schema Generation** - Auto-generated Pydantic models from OpenAPI specification
+- **CLI Interface** - Command-line tools for API interaction and testing
+- **Comprehensive Testing** - Test suite for all client components
 
-### Phase 2: Agent Implementation
+### 🚧 Phase 2: Agent Implementation (In Progress)
 - Implement `create_react_agent` using LangGraph
 - Set up basic reasoning and tool-calling capabilities
 - Test agent workflows
 
-### Phase 3: Pipeline Integration
+### ⏳ Phase 3: Pipeline Integration (Planned)
 - Wrap agent logic into Open WebUI Pipelines module
 - Configure pipeline endpoints and parameters
 - Test integration points
 
-### Phase 4: UI Deployment
+### ⏳ Phase 4: UI Deployment (Planned)
 - Deploy Open WebUI instance
 - Connect pipeline module to the interface
 - Enable chat-based interactions with the agent
 
-### Phase 5: Observability Setup
+### ⏳ Phase 5: Observability Setup (Planned)
 - Integrate Langfuse for trace tracking
 - Set up prompt management workflows
 - Configure evaluation pipelines
@@ -181,35 +187,39 @@ finmars-ai-assistant/
 ├── README.md
 ├── libs/
 │   ├── client/                      # Finmars API Client Library
+│   │   ├── __init__.py              # Client exports
 │   │   ├── base.py                  # Base HTTP client with async support
-│   │   ├── portfolio.py             # Portfolio-related operations client
+│   │   ├── finmars_client.py        # Main client aggregating all sub-clients
+│   │   ├── portfolio.py             # Portfolio operations client
 │   │   ├── portfolio_type.py        # Portfolio type operations client
 │   │   ├── portfolio_register.py    # Portfolio register operations client
 │   │   ├── portfolio_history.py     # Portfolio history operations client
 │   │   ├── portfolio_reconcile.py   # Portfolio reconciliation client
-│   │   ├── finmars_client.py        # Main client aggregating all sub-clients
 │   │   └── tests/                   # Test suite for client library
+│   │       ├── test_base.py         # Base client tests
+│   │       ├── test_finmars_client.py # Main client tests
+│   │       ├── test_portfolio.py    # Portfolio client tests
+│   │       └── test_portfolio_type.py # Portfolio type tests
 │   ├── openapi/
 │   │   └── portfolio/
 │   │       ├── openapi.json         # Local API specification
-│   │       └── openapi_remote.json  # Remote API specification (just changed `base_url` to remote)
+│   │       └── openapi_remote.json  # Remote API specification
 │   └── schema/                      # Pydantic models for API payloads
-│       ├── account.py               # Account-related models
-│       ├── base.py                  # Base enums and types
-│       ├── client.py                # Client models
-│       ├── counterparty.py          # Counterparty models
-│       ├── currency.py              # Currency models
-│       ├── instrument.py            # Financial instrument models
-│       ├── portfolio.py             # Portfolio models
-│       ├── pricing.py               # Pricing models
-│       ├── reconcile.py             # Reconciliation models
+│       ├── __init__.py              # Schema exports
+│       ├── base.py                  # Base enums and common types
 │       ├── responses.py             # Paginated response models
-│       ├── responsible.py           # User responsibility models
-│       ├── transaction.py           # Transaction models
+│       ├── README.md                # Schema generation documentation
 │       └── via_data_model_codegen/  # Auto-generated models
-├── agents/                          # Agent implementations
-├── tools/                           # Tool definitions with input schemas
-└── pipelines/                       # Open WebUI pipeline modules
+│           ├── __init__.py          # Generated schema exports
+│           └── finmars_schema.py    # Complete API models
+├── cli/                             # Command-line interface
+│   ├── __init__.py                  # CLI exports
+│   ├── main.py                      # Main CLI application
+│   ├── examples.py                  # Usage examples and demos
+│   └── README.md                    # CLI documentation
+├── agents/                          # Agent implementations (planned)
+├── tools/                           # Tool definitions with input schemas (planned)
+└── pipelines/                       # Open WebUI pipeline modules (planned)
 ```
 
 ## Finmars API Client Library
@@ -221,9 +231,10 @@ The `libs/client/` directory contains a fully async Python client library for in
 - **Async/await support** for all API operations
 - **Type-safe** with Pydantic model validation
 - **Organized by business logic** into specialized sub-clients
-- **Comprehensive test coverage**
+- **Comprehensive test coverage** with mocked HTTP requests
 - **Built-in authentication** with API key support
 - **Configurable timeouts** and error handling
+- **Environment variable integration** for configuration
 
 ### Usage Example
 
@@ -232,15 +243,15 @@ import asyncio
 from libs.client import FinmarsPortfolioClient
 
 async def main():
-    # Initialize the client
+    # Initialize the client (loads from environment variables)
     client = FinmarsPortfolioClient(
-        base_url="",
-        realm="",
-        space="",
-        api_key="your-api-key"
+        base_url="https://api.finmars.com",
+        realm="your-realm",
+        space="your-space",
+        # api_key automatically loaded from FINMARS_EXPERT_TOKEN
     )
     
-    # List portfolios
+    # List portfolios with pagination
     portfolios = await client.portfolios.list_portfolios(page=1, page_size=10)
     print(f"Found {portfolios.count} portfolios")
     
@@ -265,23 +276,116 @@ if __name__ == "__main__":
 
 The main `FinmarsPortfolioClient` aggregates the following sub-clients:
 
-1. **portfolios** - Portfolio operations (list, get, attributes, inception dates)
-2. **portfolio_types** - Portfolio type management and attributes
-3. **portfolio_registers** - Portfolio register and record operations
-4. **portfolio_history** - Historical portfolio data access
-5. **portfolio_reconcile** - Reconciliation groups and history
+1. **portfolios** (`PortfolioClient`) - Portfolio operations
+   - `list_portfolios()` - List all portfolios with pagination
+   - `get_portfolio()` - Get specific portfolio by ID
+   - `list_portfolios_light()` - List portfolios in minimal format
+   - `list_portfolio_attributes()` - Get portfolio attributes
+   - `get_inception_date()` - Get portfolio inception dates
+   - `list_first_transaction_dates()` - Get first transaction dates
+
+2. **portfolio_types** (`PortfolioTypeClient`) - Portfolio type management
+   - `list_portfolio_types()` - List all portfolio types
+   - `get_portfolio_type()` - Get specific portfolio type by ID
+   - `list_portfolio_types_light()` - List types in minimal format
+   - `list_portfolio_attribute_types()` - Get portfolio attribute types
+   - `get_portfolio_type_attributes()` - Get type-specific attributes
+
+3. **portfolio_registers** (`PortfolioRegisterClient`) - Portfolio register operations
+   - `list_portfolio_registers()` - List all portfolio registers
+   - `get_portfolio_register()` - Get specific register by ID
+   - `list_portfolio_register_records()` - List register records
+   - `get_portfolio_register_record()` - Get specific record
+
+4. **portfolio_history** (`PortfolioHistoryClient`) - Historical portfolio data
+   - `list_portfolio_history()` - List portfolio history records
+   - `get_portfolio_history()` - Get specific history record
+
+5. **portfolio_reconcile** (`PortfolioReconcileClient`) - Reconciliation operations
+   - `list_portfolio_reconcile_groups()` - List reconcile groups
+   - `get_portfolio_reconcile_group()` - Get specific group
+   - `list_portfolio_reconcile_history()` - List reconcile history
+   - `list_portfolio_reconcile_status()` - Get reconciliation status
+
+### Schema Models
+
+The schema system uses auto-generated Pydantic models from the OpenAPI specification:
+
+#### Key Models
+- **Portfolio** - Full portfolio model with all fields
+- **PortfolioLight** - Minimal portfolio representation
+- **PortfolioType** - Portfolio type with configuration
+- **PortfolioHistory** - Historical portfolio data
+- **GenericAttribute** - Flexible attribute system
+- **PortfolioReconcileGroup** - Reconciliation group configuration
+
+#### Response Models
+- **PaginatedResponse** - Base pagination model
+- **PortfolioListResponse** - Paginated portfolio lists
+- **PortfolioTypeListResponse** - Paginated portfolio type lists
+- **GenericAttributeTypeListResponse** - Paginated attribute type lists
 
 ### Testing
 
-Run the test suite:
+The client library includes comprehensive test coverage:
 
 ```bash
 # Install test dependencies
 pip install pytest pytest-asyncio httpx
 
-# Run tests
+# Run all tests
 pytest libs/client/tests/
+
+# Run specific test file
+pytest libs/client/tests/test_portfolio.py
+
+# Run with coverage
+pytest libs/client/tests/ --cov=libs/client
 ```
+
+## Command Line Interface
+
+The CLI provides convenient access to the Finmars Portfolio API:
+
+### Basic Usage
+```bash
+# List portfolios
+python cli/main.py list-portfolios --page 1 --page-size 10
+
+# Get specific portfolio
+python cli/main.py get-portfolio --id 123
+
+# List portfolio types
+python cli/main.py list-portfolio-types
+
+# Run examples
+python cli/examples.py
+```
+
+### Environment Setup
+```bash
+export FINMARS_EXPERT_TOKEN='your-api-token'
+export FINMARS_BASE_URL='https://api.finmars.com'
+export FINMARS_REALM='your-realm'
+export FINMARS_SPACE='your-space'
+```
+
+See [CLI README](cli/README.md) for complete documentation.
+
+## Schema Generation
+
+The project uses `datamodel-codegen` to automatically generate Pydantic models from the OpenAPI specification:
+
+```bash
+datamodel-codegen \
+  --input ./libs/openapi/portfolio/openapi.json \
+  --input-file-type openapi \
+  --output ./libs/schema/via_data_model_codegen/finmars_schema.py \
+  --target-python-version 3.12 \
+  --output-model-type pydantic_v2.BaseModel
+```
+
+This ensures type safety and automatic updates when the API specification changes.
 
 ## Contributing
 Please read our contributing guidelines before submitting pull requests.
