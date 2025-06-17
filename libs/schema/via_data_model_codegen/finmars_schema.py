@@ -678,9 +678,9 @@ class PortfolioRegister(BaseModel):
     portfolio_object: Optional[PortfolioView] = None
     linked_instrument: Optional[int] = Field(None, title='Linked instrument')
     linked_instrument_object: Optional[InstrumentView] = None
-    valuation_currency: Optional[str] = Field(None, title='Valuation currency')
+    valuation_currency: Optional[int] = Field(None, title='Valuation currency')
     valuation_currency_object: Optional[CurrencyView] = None
-    valuation_pricing_policy: str = Field(..., title='Valuation pricing policy')
+    valuation_pricing_policy: int = Field(..., title='Valuation pricing policy')
     valuation_pricing_policy_object: Optional[PricingPolicy] = None
     default_price: Optional[float] = Field(None, title='Default price')
     is_active: Optional[bool] = Field(True, title='Is active')
@@ -808,9 +808,9 @@ class PortfolioPortfolioRegister(BaseModel):
     is_enabled: Optional[bool] = Field(None, title='Is enabled')
     linked_instrument: Optional[int] = Field(None, title='Linked instrument')
     linked_instrument_object: Optional[InstrumentView] = None
-    valuation_currency: Optional[str] = Field(None, title='Valuation currency')
+    valuation_currency: Optional[int] = Field(None, title='Valuation currency')
     valuation_currency_object: Optional[CurrencyView] = None
-    valuation_pricing_policy: str = Field(..., title='Valuation pricing policy')
+    valuation_pricing_policy: int = Field(..., title='Valuation pricing policy')
     valuation_pricing_policy_object: Optional[PricingPolicy] = None
     default_price: Optional[float] = Field(None, title='Default price')
     is_active: Optional[bool] = Field(True, title='Is active')
