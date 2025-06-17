@@ -71,13 +71,16 @@ async def example_get_portfolio_details():
         print(f"  Public Name: {portfolio.public_name}")
 
         # Get portfolio attributes
-        attributes = await client.portfolios.get_portfolio_attributes()
-        if attributes:
-            print("\n  Attributes:")
-            for attr in attributes[:3]:  # Show first 3 attributes
-                print(
-                    f"    - {attr.attribute_type}: {attr.value_string or attr.value_float or attr.value_date}"
-                )
+        attributes_response = await client.portfolios.list_portfolio_attributes(page_size=3)
+        if attributes_response.results:
+            print(f"\n  Attributes ({attributes_response.count} total):")
+            for portfolio in attributes_response.results[:3]:  # Show first 3 portfolios with attributes
+                if hasattr(portfolio, 'attributes') and portfolio.attributes:
+                    print(f"    Portfolio {portfolio.name}:")
+                    for attr in portfolio.attributes[:2]:  # Show first 2 attributes per portfolio
+                        print(
+                            f"      - {attr.attribute_type}: {attr.value_string or attr.value_float or attr.value_date}"
+                        )
 
     except Exception as e:
         exc = traceback.format_exc()

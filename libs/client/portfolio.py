@@ -94,17 +94,39 @@ class PortfolioClient(BaseHTTPClient):
             response_model=PortfolioLightListResponse,
         )
 
-    async def get_portfolio_attributes(self) -> List[GenericAttribute]:
+    async def list_portfolio_attributes(
+        self,
+        ordering: Optional[str] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+    ) -> PortfolioListResponse:
         """
-        Get portfolio attributes.
+        List portfolio attributes.
+
+        Args:
+            ordering: Which field to use when ordering the results
+            page: Page number within the paginated result set
+            page_size: Number of results to return per page
 
         Returns:
-            List of GenericAttribute objects
+            PortfolioListResponse with paginated results
         """
-        response = await self.get(
+        params = {
+            "realm_code": self.realm,
+            "space_code": self.space,
+        }
+        if ordering:
+            params["ordering"] = ordering
+        if page:
+            params["page"] = page
+        if page_size:
+            params["page_size"] = page_size
+
+        return await self.get(
             endpoint="portfolios/portfolio/attributes/",
+            params=params,
+            response_model=PortfolioListResponse,
         )
-        return [GenericAttribute.model_validate(item) for item in response]
 
     async def get_inception_date(self) -> Dict[str, Any]:
         """
