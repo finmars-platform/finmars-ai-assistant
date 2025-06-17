@@ -128,18 +128,33 @@ class PortfolioReconcileClient(BaseHTTPClient):
             response_model=PortfolioReconcileHistory,
         )
 
-    async def get_portfolio_reconcile_status(self) -> Dict[str, Any]:
+    async def list_portfolio_reconcile_status(
+        self,
+        ordering: Optional[str] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+    ) -> PortfolioReconcileStatus:
         """
-        Get portfolio reconcile status.
+        List portfolio reconcile status.
+
+        Args:
+            ordering: Which field to use when ordering the results
+            page: Page number within the paginated result set
+            page_size: Number of results to return per page
 
         Returns:
-            Dictionary with reconcile status information
+            PortfolioReconcileStatus with paginated results
         """
-        params = {
-            "realm_code": self.realm,
-            "space_code": self.space,
-        }
+        params = {}
+        if ordering:
+            params["ordering"] = ordering
+        if page:
+            params["page"] = page
+        if page_size:
+            params["page_size"] = page_size
+
         return await self.get(
             endpoint="portfolios/portfolio-reconcile-history/status/",
-            params=params
+            params=params,
+            response_model=PortfolioReconcileStatus,
         )

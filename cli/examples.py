@@ -152,12 +152,14 @@ async def example_reconciliation():
     client = FinmarsPortfolioClient(base_url=FINMARS_BASE_URL, realm=REALM, space=SPACE)
 
     try:
-        # Get reconciliation status
-        status = await client.portfolio_reconcile.get_portfolio_reconcile_status()
+        # List reconciliation status
+        status = await client.portfolio_reconcile.list_portfolio_reconcile_status(
+            page=1, page_size=5
+        )
 
-        print("Reconciliation Status:")
-        for key, value in status.items():
-            print(f"  {key}: {value}")
+        print(f"Reconciliation Status: {status.count} total records")
+        for record in status.results:
+            print(f"  - Status ID: {record.id}")
 
         # List reconciliation groups
         groups = await client.portfolio_reconcile.list_portfolio_reconcile_groups(
@@ -221,7 +223,7 @@ async def run_all_examples():
     await example_get_portfolio_details()
     await example_portfolio_types()
     await example_portfolio_history()
-    await example_reconciliation()
+    # await example_reconciliation()
     await example_first_transaction_dates()
 
     print("\n" + "=" * 50)
