@@ -135,6 +135,10 @@ This separation allows for:
 - **Comprehensive Testing** - Test suite for all client components
 
 ### 🚧 Phase 2: Agent Implementation (In Progress)
+```bash
+# to run current state of Agent
+python agents/react_agent/runner.py
+```
 - Implement `create_react_agent` using LangGraph
 - Set up basic reasoning and tool-calling capabilities
 - Test agent workflows
