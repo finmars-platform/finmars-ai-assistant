@@ -637,7 +637,8 @@ class GenericClassifierView(BaseModel):
 
 class GenericAttribute(BaseModel):
     id: Optional[int] = Field(None, title='ID')
-    attribute_type: str = Field(..., title='Attribute type')
+    # attribute_type: str = Field(..., title='Attribute type')
+    attribute_type: int = Field(..., title='Attribute type')
     value_string: Optional[constr(max_length=255)] = Field(None, title='Value (String)')
     value_float: Optional[float] = Field(None, title='Value (Float)')
     value_date: Optional[date_aliased] = Field(None, title='Value (Date)')
