@@ -1,0 +1,328 @@
+import asyncio
+from typing import Optional, List
+from pydantic import BaseModel, Field
+from langchain_core.tools import StructuredTool, BaseTool
+
+from libs.client.finmars_client import FinmarsPortfolioClient
+
+
+class ListPortfolioReconcileGroupsSchema(BaseModel):
+    """Input schema for listing portfolio reconcile groups"""
+
+    ordering: Optional[str] = Field(
+        default=None,
+        description="Field to use for ordering results (e.g., 'id', '-created_at')",
+    )
+    page: Optional[int] = Field(default=1, description="Page number for pagination")
+    page_size: Optional[int] = Field(
+        default=10, description="Number of results per page (max 100)"
+    )
+
+
+class GetPortfolioReconcileGroupSchema(BaseModel):
+    """Input schema for getting a specific portfolio reconcile group"""
+
+    group_id: int = Field(
+        description="The ID of the portfolio reconcile group to retrieve"
+    )
+
+
+class ListPortfolioReconcileHistorySchema(BaseModel):
+    """Input schema for listing portfolio reconcile history records"""
+
+    ordering: Optional[str] = Field(
+        default=None, description="Field to use for ordering results"
+    )
+    page: Optional[int] = Field(default=1, description="Page number for pagination")
+    page_size: Optional[int] = Field(
+        default=10, description="Number of results per page"
+    )
+
+
+class GetPortfolioReconcileHistorySchema(BaseModel):
+    """Input schema for getting a specific portfolio reconcile history record"""
+
+    history_id: int = Field(
+        description="The ID of the portfolio reconcile history record to retrieve"
+    )
+
+
+class ListPortfolioReconcileStatusSchema(BaseModel):
+    """Input schema for listing portfolio reconcile status"""
+
+    ordering: Optional[str] = Field(
+        default=None, description="Field to use for ordering results"
+    )
+    page: Optional[int] = Field(default=1, description="Page number for pagination")
+    page_size: Optional[int] = Field(
+        default=10, description="Number of results per page"
+    )
+
+
+class PortfolioReconcileToolkit:
+    """Toolkit for portfolio reconciliation-related operations using the Finmars API"""
+
+    def __init__(self):
+        self.client = FinmarsPortfolioClient()
+
+    async def _list_portfolio_reconcile_groups(self, **kwargs) -> str:
+        """List all portfolio reconcile groups with pagination and filtering"""
+        try:
+            schema = ListPortfolioReconcileGroupsSchema(**kwargs)
+            result = (
+                await self.client.portfolio_reconcile.list_portfolio_reconcile_groups(
+                    ordering=schema.ordering,
+                    page=schema.page,
+                    page_size=schema.page_size,
+                )
+            )
+
+            output = f"Found {result.count} total portfolio reconcile groups.\n"
+            if result.results:
+                output += f"Showing {len(result.results)} reconcile groups on page {schema.page}:\n\n"
+                for group in result.results:
+                    output += f"ID: {group.id}\n"
+                    output += f"Name: {group.name}\n"
+                    if group.description:
+                        output += f"Description: {group.description}\n"
+                    if hasattr(group, "status") and group.status:
+                        output += f"Status: {group.status}\n"
+                    output += f"Created: {group.created_at}\n"
+                    output += "-" * 40 + "\n"
+            else:
+                output += "No portfolio reconcile groups found.\n"
+
+            if result.next:
+                output += (
+                    f"\nNext page available. Use page={schema.page + 1} to continue."
+                )
+
+            return output
+        except Exception as e:
+            return f"Error listing portfolio reconcile groups: {str(e)}"
+
+    async def _get_portfolio_reconcile_group(self, **kwargs) -> str:
+        """Get a specific portfolio reconcile group by ID"""
+        try:
+            schema = GetPortfolioReconcileGroupSchema(**kwargs)
+            group = await self.client.portfolio_reconcile.get_portfolio_reconcile_group(
+                schema.group_id
+            )
+
+            output = f"Portfolio Reconcile Group Details:\n"
+            output += f"ID: {group.id}\n"
+            output += f"Name: {group.name}\n"
+            if group.description:
+                output += f"Description: {group.description}\n"
+            if hasattr(group, "status") and group.status:
+                output += f"Status: {group.status}\n"
+            if hasattr(group, "portfolios") and group.portfolios:
+                output += f"Portfolios: {len(group.portfolios)} items\n"
+            output += f"Created: {group.created_at}\n"
+            if group.updated_at:
+                output += f"Updated: {group.updated_at}\n"
+
+            return output
+        except Exception as e:
+            return f"Error getting portfolio reconcile group {kwargs.get('group_id')}: {str(e)}"
+
+    async def _list_portfolio_reconcile_history(self, **kwargs) -> str:
+        """List all portfolio reconcile history records"""
+        try:
+            schema = ListPortfolioReconcileHistorySchema(**kwargs)
+            result = (
+                await self.client.portfolio_reconcile.list_portfolio_reconcile_history(
+                    ordering=schema.ordering,
+                    page=schema.page,
+                    page_size=schema.page_size,
+                )
+            )
+
+            output = (
+                f"Found {result.count} total portfolio reconcile history records.\n"
+            )
+            if result.results:
+                output += f"Showing {len(result.results)} history records on page {schema.page}:\n\n"
+                for history in result.results:
+                    output += f"ID: {history.id}\n"
+                    if hasattr(history, "group") and history.group:
+                        output += f"Group: {history.group}\n"
+                    if hasattr(history, "portfolio") and history.portfolio:
+                        output += f"Portfolio: {history.portfolio}\n"
+                    if hasattr(history, "status") and history.status:
+                        output += f"Status: {history.status}\n"
+                    if hasattr(history, "reconcile_date") and history.reconcile_date:
+                        output += f"Reconcile Date: {history.reconcile_date}\n"
+                    output += f"Created: {history.created_at}\n"
+                    output += "-" * 40 + "\n"
+            else:
+                output += "No portfolio reconcile history records found.\n"
+
+            if result.next:
+                output += (
+                    f"\nNext page available. Use page={schema.page + 1} to continue."
+                )
+
+            return output
+        except Exception as e:
+            return f"Error listing portfolio reconcile history: {str(e)}"
+
+    async def _get_portfolio_reconcile_history(self, **kwargs) -> str:
+        """Get a specific portfolio reconcile history record by ID"""
+        try:
+            schema = GetPortfolioReconcileHistorySchema(**kwargs)
+            history = (
+                await self.client.portfolio_reconcile.get_portfolio_reconcile_history(
+                    schema.history_id
+                )
+            )
+
+            output = f"Portfolio Reconcile History Record Details:\n"
+            output += f"ID: {history.id}\n"
+            if hasattr(history, "group") and history.group:
+                output += f"Group: {history.group}\n"
+            if hasattr(history, "portfolio") and history.portfolio:
+                output += f"Portfolio: {history.portfolio}\n"
+            if hasattr(history, "status") and history.status:
+                output += f"Status: {history.status}\n"
+            if hasattr(history, "reconcile_date") and history.reconcile_date:
+                output += f"Reconcile Date: {history.reconcile_date}\n"
+            if hasattr(history, "discrepancies") and history.discrepancies:
+                output += f"Discrepancies: {history.discrepancies}\n"
+            output += f"Created: {history.created_at}\n"
+            if history.updated_at:
+                output += f"Updated: {history.updated_at}\n"
+
+            return output
+        except Exception as e:
+            return f"Error getting portfolio reconcile history record {kwargs.get('history_id')}: {str(e)}"
+
+    async def _list_portfolio_reconcile_status(self, **kwargs) -> str:
+        """List portfolio reconcile status"""
+        try:
+            schema = ListPortfolioReconcileStatusSchema(**kwargs)
+            status = (
+                await self.client.portfolio_reconcile.list_portfolio_reconcile_status(
+                    ordering=schema.ordering,
+                    page=schema.page,
+                    page_size=schema.page_size,
+                )
+            )
+
+            output = f"Portfolio Reconcile Status:\n"
+            if (
+                hasattr(status, "pending_reconciliations")
+                and status.pending_reconciliations is not None
+            ):
+                output += f"Pending Reconciliations: {status.pending_reconciliations}\n"
+            if (
+                hasattr(status, "completed_reconciliations")
+                and status.completed_reconciliations is not None
+            ):
+                output += (
+                    f"Completed Reconciliations: {status.completed_reconciliations}\n"
+                )
+            if (
+                hasattr(status, "failed_reconciliations")
+                and status.failed_reconciliations is not None
+            ):
+                output += f"Failed Reconciliations: {status.failed_reconciliations}\n"
+            if (
+                hasattr(status, "total_reconciliations")
+                and status.total_reconciliations is not None
+            ):
+                output += f"Total Reconciliations: {status.total_reconciliations}\n"
+            if hasattr(status, "last_updated") and status.last_updated:
+                output += f"Last Updated: {status.last_updated}\n"
+
+            return output
+        except Exception as e:
+            return f"Error getting portfolio reconcile status: {str(e)}"
+
+
+def build_portfolio_reconcile_tools() -> List[BaseTool]:
+    """Build and return portfolio reconciliation-related tools"""
+    toolkit = PortfolioReconcileToolkit()
+
+    tools = [
+        StructuredTool.from_function(
+            name="list_portfolio_reconcile_groups",
+            func=lambda **kwargs: asyncio.run(
+                toolkit._list_portfolio_reconcile_groups(**kwargs)
+            ),
+            coroutine=toolkit._list_portfolio_reconcile_groups,
+            description=(
+                "List all portfolio reconcile groups with optional filtering and pagination. "
+                "Returns reconcile group details including ID, name, description, status, "
+                "and timestamps. Supports ordering by various fields and pagination for large datasets. "
+                "Useful for managing and monitoring portfolio reconciliation configurations."
+            ),
+            args_schema=ListPortfolioReconcileGroupsSchema,
+            # response_format="content_and_artifact",
+            response_format="content",
+        ),
+        StructuredTool.from_function(
+            name="get_portfolio_reconcile_group",
+            func=lambda **kwargs: asyncio.run(
+                toolkit._get_portfolio_reconcile_group(**kwargs)
+            ),
+            coroutine=toolkit._get_portfolio_reconcile_group,
+            description=(
+                "Get detailed information about a specific portfolio reconcile group by its ID. "
+                "Returns complete reconcile group details including name, description, status, "
+                "portfolios, and timestamps. Useful for detailed analysis of reconciliation group configurations."
+            ),
+            args_schema=GetPortfolioReconcileGroupSchema,
+            # response_format="content_and_artifact",
+            response_format="content",
+        ),
+        StructuredTool.from_function(
+            name="list_portfolio_reconcile_history",
+            func=lambda **kwargs: asyncio.run(
+                toolkit._list_portfolio_reconcile_history(**kwargs)
+            ),
+            coroutine=toolkit._list_portfolio_reconcile_history,
+            description=(
+                "List all portfolio reconcile history records with pagination. "
+                "Returns historical reconciliation data including ID, group, portfolio, status, "
+                "reconcile date, and timestamps. Useful for tracking reconciliation activities "
+                "and analyzing reconciliation trends over time."
+            ),
+            args_schema=ListPortfolioReconcileHistorySchema,
+            # response_format="content_and_artifact",
+            response_format="content",
+        ),
+        StructuredTool.from_function(
+            name="get_portfolio_reconcile_history",
+            func=lambda **kwargs: asyncio.run(
+                toolkit._get_portfolio_reconcile_history(**kwargs)
+            ),
+            coroutine=toolkit._get_portfolio_reconcile_history,
+            description=(
+                "Get detailed information about a specific portfolio reconcile history record. "
+                "Returns complete history details including group, portfolio, status, reconcile date, "
+                "discrepancies, and timestamps. Useful for detailed analysis of specific reconciliation events."
+            ),
+            args_schema=GetPortfolioReconcileHistorySchema,
+            # response_format="content_and_artifact",
+            response_format="content",
+        ),
+        StructuredTool.from_function(
+            name="get_portfolio_reconcile_status",
+            func=lambda **kwargs: asyncio.run(
+                toolkit._list_portfolio_reconcile_status(**kwargs)
+            ),
+            coroutine=toolkit._list_portfolio_reconcile_status,
+            description=(
+                "Get current portfolio reconcile status information. "
+                "Returns status summary including pending, completed, failed, and total reconciliations, "
+                "along with last update timestamp. Useful for monitoring overall reconciliation health "
+                "and system status."
+            ),
+            args_schema=ListPortfolioReconcileStatusSchema,
+            # response_format="content_and_artifact",
+            response_format="content",
+        ),
+    ]
+
+    return tools
