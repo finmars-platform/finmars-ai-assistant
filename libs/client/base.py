@@ -11,13 +11,16 @@ class BaseHTTPClient:
 
     def __init__(
         self,
-        base_url: str,
+        base_url: Optional[str] = None,
         realm: Optional[str] = None,
         space: Optional[str] = None,
         api_key: Optional[str] = None,
         timeout: float = 30.0,
     ):
-        self.base_url = base_url.rstrip("/")
+        self.base_url = base_url or os.environ.get("FINMARS_BASE_URL")
+        if isinstance(self.base_url, str):
+            self.base_url = self.base_url.rstrip("/")
+
         self.realm = realm or os.environ.get("FINMARS_REALM")
         self.space = space or os.environ.get("FINMARS_SPACE")
         # Load API key from environment variable if not provided
