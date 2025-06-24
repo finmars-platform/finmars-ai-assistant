@@ -7,7 +7,7 @@ from agents.react_agent.agent_react_builder import create_finmars_agent_react
 from libs.utils.prompt_map_builder import build_map_prompts_cfg
 
 
-async def run_agent_stream(message_input: str):
+async def arun_agent_stream(message_input: str):
     langfuse_handler = CallbackHandler()
 
     map_prompts_cfg = await build_map_prompts_cfg(tags=simple_react_tag)
@@ -51,7 +51,7 @@ async def run_agent_stream(message_input: str):
 
 async def run_agent(message_input: str) -> str:
     answer = ""
-    async for chunk in run_agent_stream(message_input):
+    async for chunk in arun_agent_stream(message_input):
         answer += chunk
     return answer
 
