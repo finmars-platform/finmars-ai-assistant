@@ -126,6 +126,47 @@ This separation allows for:
 - **Datasets**: Test sets and benchmarks for continuous improvement
 - **LLM Playground**: Testing and iteration environment
 
+#### Langfuse Integration Details
+
+The project integrates Langfuse at multiple levels:
+
+1. **Prompt Management (`libs/utils/langfuse_manager.py`)**:
+   - Automatic prompt versioning with labels
+   - Prompt creation if not found in Langfuse
+   - Message format mapping between LangChain and Langfuse
+   - Centralized prompt retrieval for consistency
+
+2. **Agent Tracing**:
+   - All agent executions are automatically traced
+   - Metadata support (user_id, session_id, tags)
+   - Tool call tracking and performance monitoring
+   - Error tracking and debugging capabilities
+
+3. **Docker Compose Deployment**:
+   - Full Langfuse stack included in `docker-compose.yaml`
+   - PostgreSQL for data persistence
+   - ClickHouse for analytics
+   - MinIO for object storage
+   - Redis for caching
+
+4. **Usage in Code**:
+   ```python
+   from langfuse.callback import CallbackHandler
+   
+   # Create callback handler with metadata
+   langfuse_handler = CallbackHandler(
+       user_id=\"user-123\",
+       session_id=\"session-456\",
+       tags=[\"portfolio-query\", \"production\"]
+   )
+   
+   # Use with agent
+   response = await agent.ainvoke(
+       {\"messages\": [HumanMessage(content=\"Your query\")]},
+       config={\"callbacks\": [langfuse_handler]}
+   )
+   ```
+
 ## Current Implementation Status
 
 ### ✅ Phase 1: Core Infrastructure (Completed)
@@ -134,36 +175,82 @@ This separation allows for:
 - **CLI Interface** - Command-line tools for API interaction and testing
 - **Comprehensive Testing** - Test suite for all client components
 
-### 🚧 Phase 2: Agent Implementation (In Progress)
+### ✅ Phase 2: Agent Implementation (Completed)
+- **ReAct Agent** implemented using LangGraph with full reasoning and tool-calling capabilities
+- **Langfuse Integration** for prompt management and observability
+- **5 Comprehensive Toolkits** for portfolio operations
+- **Async Runner** with metadata support for tracing
+
 ```bash
-# to run current state of Agent
+# Simple Fast Run the ReAct agent
 python agents/react_agent/runner.py
 ```
-- Implement `create_react_agent` using LangGraph
-- Set up basic reasoning and tool-calling capabilities
-- Test agent workflows
 
-### ⏳ Phase 3: Pipeline Integration (Planned)
+### ✅ Phase 3: Observability Setup (Completed)
+- **Langfuse** fully integrated with Docker Compose deployment
+- **Prompt Management** system with versioning and automatic prompt creation
+- **Trace Tracking** enabled for all agent executions
+- **Callback Handlers** integrated into the ReAct agent
+
+### 🚧 Phase 4: Pipeline Integration (In Progress)
 - Wrap agent logic into Open WebUI Pipelines module
 - Configure pipeline endpoints and parameters
 - Test integration points
 
-### ⏳ Phase 4: UI Deployment (Planned)
+### ⏳ Phase 5: UI Deployment (Planned)
 - Deploy Open WebUI instance
 - Connect pipeline module to the interface
 - Enable chat-based interactions with the agent
 
-### ⏳ Phase 5: Observability Setup (Planned)
-- Integrate Langfuse for trace tracking
-- Set up prompt management workflows
-- Configure evaluation pipelines
+## Tools Implementation
+
+The project includes 5 comprehensive toolkits that provide the ReAct agent with full access to Finmars Portfolio API capabilities:
+
+### 1. Portfolio Toolkit (`tools/portfolio_toolkit.py`)
+- **list_portfolios**: Search and filter portfolios with pagination
+- **get_portfolio**: Retrieve detailed portfolio information
+- **list_portfolios_light**: Get minimal portfolio representations
+- **list_portfolio_attributes**: Access portfolio custom attributes
+- **get_inception_date**: Retrieve portfolio inception dates
+- **list_first_transaction_dates**: Get first transaction dates by portfolio type
+
+### 2. Portfolio Type Toolkit (`tools/portfolio_type_toolkit.py`)
+- **list_portfolio_types**: Browse available portfolio types
+- **get_portfolio_type**: Get detailed portfolio type configuration
+- **list_portfolio_types_light**: Minimal portfolio type listings
+- **list_portfolio_attribute_types**: Discover available attribute types
+- **get_portfolio_type_attributes**: Get type-specific attribute definitions
+
+### 3. Portfolio Register Toolkit (`tools/portfolio_register_toolkit.py`)
+- **list_portfolio_registers**: Browse portfolio registers
+- **get_portfolio_register**: Access specific register details
+- **list_portfolio_register_records**: Query register records with filtering
+- **get_portfolio_register_record**: Retrieve individual record details
+
+### 4. Portfolio History Toolkit (`tools/portfolio_history_toolkit.py`)
+- **list_portfolio_history**: Access historical portfolio data
+- **get_portfolio_history**: Retrieve specific history records
+
+### 5. Portfolio Reconcile Toolkit (`tools/portfolio_reconcile_toolkit.py`)
+- **list_portfolio_reconcile_groups**: Browse reconciliation groups
+- **get_portfolio_reconcile_group**: Access group configurations
+- **list_portfolio_reconcile_history**: Query reconciliation history
+- **list_portfolio_reconcile_status**: Check current reconciliation status
+
+### Tool Architecture
+Each toolkit follows a consistent implementation pattern:
+- **LLM-Optimized Input Schemas**: Separate from API models for better agent interaction
+- **Async Operations**: All tools use async/await for efficient execution
+- **Structured Output**: JSON-formatted responses for agent consumption
+- **Error Handling**: Graceful error management with informative messages
 
 ## Getting Started
 
 ### Prerequisites
 - Python 3.12+
-- Docker using docker-compose
+- Docker and Docker Compose
 - API access to Finmars Portfolio service
+- OpenAI API key (or compatible LLM provider)
 
 ### Installation
 ```bash
@@ -180,15 +267,84 @@ cp .env.example .env
 ```
 
 ### Configuration
-1. Configure Finmars API credentials
-2. Set up LLM provider (OpenAI, Anthropic, etc.)
-3. Configure Langfuse connection
-4. Deploy Open WebUI and Pipelines
+
+#### Required Environment Variables
+```bash
+# Finmars API Configuration
+export FINMARS_EXPERT_TOKEN='your-api-token'
+export FINMARS_BASE_URL='https://api.finmars.com'
+export FINMARS_REALM='your-realm'
+export FINMARS_SPACE='your-space'
+
+# LLM Provider (OpenAI or compatible)
+export OPENAI_API_KEY='your-openai-key'
+export OPENAI_BASE_URL='https://api.openai.com/v1'  # Optional, for custom endpoints
+
+# Langfuse Observability (optional but recommended)
+export LANGFUSE_PUBLIC_KEY='your-public-key'
+export LANGFUSE_SECRET_KEY='your-secret-key'
+export LANGFUSE_HOST='http://localhost:3000'  # Or your Langfuse URL
+
+# Open WebUI Pipelines (for future integration)
+export PIPELINES_API_KEY='your-pipelines-key'
+```
+
+### Docker Compose Setup
+
+The project includes a comprehensive Docker Compose configuration for local development:
+
+```bash
+# Start all services (Open WebUI, Langfuse, databases)
+docker-compose up -d
+
+# Check service status
+docker-compose ps
+
+# View logs
+docker-compose logs -f
+
+# Stop all services
+docker-compose down
+```
+
+#### Available Services:
+- **Open WebUI**: http://localhost:8881 - Chat interface for interacting with agents
+- **Langfuse**: http://localhost:3000 - Observability and prompt management
+- **PostgreSQL**: Port 5432 - Database for Langfuse
+- **ClickHouse**: Port 8123 - Analytics database for Langfuse
+- **MinIO**: Port 9001 - Object storage for Langfuse
+- **Redis**: Port 6379 - Caching layer
+
+### Quick Start
+
+1. **Set up environment**:
+   ```bash
+   cp .env.example .env
+   # Edit .env with your credentials
+   ```
+
+2. **Start Docker services** (optional, for UI and observability):
+   ```bash
+   docker-compose up -d
+   ```
+
+3. **Run the ReAct agent**:
+   ```bash
+   python agents/react_agent/runner.py
+   ```
+
+4. **Use the CLI for direct API access**:
+   ```bash
+   python cli/main.py list-portfolios --page 1 --page-size 10
+   ```
 
 ## Project Structure
 ```
 finmars-ai-assistant/
 ├── README.md
+├── docker-compose.yaml              # Local development environment setup
+├── .env.example                     # Environment variables template
+├── requirements.txt                 # Python dependencies
 ├── libs/
 │   ├── client/                      # Finmars API Client Library
 │   │   ├── __init__.py              # Client exports
@@ -208,21 +364,40 @@ finmars-ai-assistant/
 │   │   └── portfolio/
 │   │       ├── openapi.json         # Local API specification
 │   │       └── openapi_remote.json  # Remote API specification
-│   └── schema/                      # Pydantic models for API payloads
-│       ├── __init__.py              # Schema exports
-│       ├── base.py                  # Base enums and common types
-│       ├── responses.py             # Paginated response models
-│       ├── README.md                # Schema generation documentation
-│       └── via_data_model_codegen/  # Auto-generated models
-│           ├── __init__.py          # Generated schema exports
-│           └── finmars_schema.py    # Complete API models
+│   ├── schema/                      # Pydantic models for API payloads
+│   │   ├── __init__.py              # Schema exports
+│   │   ├── base.py                  # Base enums and common types
+│   │   ├── responses.py             # Paginated response models
+│   │   ├── README.md                # Schema generation documentation
+│   │   └── via_data_model_codegen/  # Auto-generated models
+│   │       ├── __init__.py          # Generated schema exports
+│   │       └── finmars_schema.py    # Complete API models
+│   ├── basic/                       # Basic utilities
+│   │   └── base_enum.py             # Base enum with string representation
+│   ├── logger/                      # Logging configuration
+│   │   └── logger.py                # Custom logger setup
+│   └── utils/                       # Utility modules
+│       ├── key_manager.py           # API key management
+│       ├── langfuse_manager.py      # Langfuse prompt management
+│       └── prompt_map_builder.py    # Prompt configuration builder
 ├── cli/                             # Command-line interface
 │   ├── __init__.py                  # CLI exports
 │   ├── main.py                      # Main CLI application
 │   ├── examples.py                  # Usage examples and demos
 │   └── README.md                    # CLI documentation
-├── agents/                          # Agent implementations (planned)
-├── tools/                           # Tool definitions with input schemas (planned)
+├── agents/                          # Agent implementations
+│   └── react_agent/                 # ReAct agent using LangGraph
+│       ├── __init__.py              # Agent exports
+│       ├── agent_react_builder.py   # ReAct agent builder with Langfuse
+│       ├── runner.py                # Async agent runner with tracing
+│       └── system_prompt.py         # System prompt configuration
+├── tools/                           # Tool implementations with LangChain
+│   ├── __init__.py                  # Tool exports and registry
+│   ├── portfolio_toolkit.py         # Portfolio management tools
+│   ├── portfolio_type_toolkit.py    # Portfolio type tools
+│   ├── portfolio_register_toolkit.py # Portfolio register tools
+│   ├── portfolio_history_toolkit.py # Portfolio history tools
+│   └── portfolio_reconcile_toolkit.py # Portfolio reconciliation tools
 └── pipelines/                       # Open WebUI pipeline modules (planned)
 ```
 
@@ -347,9 +522,60 @@ pytest libs/client/tests/test_portfolio.py
 pytest libs/client/tests/ --cov=libs/client
 ```
 
+## Agent Usage Examples
+
+### Running the ReAct Agent
+
+The ReAct agent provides an interactive way to query and analyze portfolio data:
+
+```python
+# Basic usage
+python agents/react_agent/runner.py
+
+# Example queries you can ask:
+# - "List all active portfolios"
+# - "Show me portfolios of type 'HEDGE_FUND'"
+# - "Get the inception date for portfolio ID 123"
+# - "What portfolio types are available?"
+# - "Show reconciliation status for all portfolios"
+```
+
+### Programmatic Agent Usage
+
+```python
+import asyncio
+from agents.react_agent import create_finmars_agent_react
+from langchain_core.messages import HumanMessage
+
+async def query_agent():
+    # Create the agent
+    agent = await create_finmars_agent_react()
+    
+    # Ask a question
+    response = await agent.ainvoke({
+        "messages": [HumanMessage(content="List all portfolios with their types")]
+    })
+    
+    # Print the response
+    print(response["messages"][-1].content)
+
+if __name__ == "__main__":
+    asyncio.run(query_agent())
+```
+
+### Agent Capabilities
+
+The agent can help with:
+- **Portfolio Discovery**: Search and filter portfolios by various criteria
+- **Portfolio Analysis**: Get detailed information about specific portfolios
+- **Type Management**: Explore portfolio types and their configurations
+- **Historical Data**: Access portfolio history and transaction dates
+- **Reconciliation**: Check reconciliation status and groups
+- **Attribute Management**: Query portfolio and type-specific attributes
+
 ## Command Line Interface
 
-The CLI provides convenient access to the Finmars Portfolio API:
+The CLI provides direct access to the Finmars Portfolio API:
 
 ### Basic Usage
 ```bash
@@ -364,14 +590,6 @@ python cli/main.py list-portfolio-types
 
 # Run examples
 python cli/examples.py
-```
-
-### Environment Setup
-```bash
-export FINMARS_EXPERT_TOKEN='your-api-token'
-export FINMARS_BASE_URL='https://api.finmars.com'
-export FINMARS_REALM='your-realm'
-export FINMARS_SPACE='your-space'
 ```
 
 See [CLI README](cli/README.md) for complete documentation.

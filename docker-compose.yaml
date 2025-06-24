@@ -4,6 +4,23 @@
 # All other components are bound to localhost (127.0.0.1) to only accept connections from the local machine.
 # External connections from other machines will not be able to reach these services directly.
 services:
+  open-webui:
+    image: backplane/open-webui:0.6.15
+    container_name: open-webui-finmars
+    ports:
+      - "8881:8080"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      - TZ=${TZ:-Europe/Luxembourg}
+      - PIPELINES_API_KEY=${PIPELINES_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    volumes:
+      - open-webui:/app/backend/data
+    restart: always
+    networks:
+      - arch-network
+
   langfuse-worker:
     image: langfuse/langfuse-worker:3
     restart: always
@@ -157,6 +174,8 @@ services:
       - langfuse_postgres_data:/var/lib/postgresql/data
 
 volumes:
+  open-webui:
+    driver: local
   langfuse_postgres_data:
     driver: local
   langfuse_clickhouse_data:
@@ -165,3 +184,8 @@ volumes:
     driver: local
   langfuse_minio_data:
     driver: local
+
+
+networks:
+  arch-network:
+    driver: bridge
