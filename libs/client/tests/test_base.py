@@ -26,9 +26,7 @@ class TestBaseHTTPClient:
 
     def test_init(self, client):
         """Test client initialization."""
-        assert client.base_url == os.getenv(
-            "FINMARS_BASE_URL"
-        )
+        assert client.base_url == os.getenv("FINMARS_BASE_URL")
         assert client.realm == "test_realm"
         assert client.space == "test_space"
         assert client.api_key == "test-api-key"

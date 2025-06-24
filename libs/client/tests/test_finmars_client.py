@@ -24,9 +24,7 @@ class TestFinmarsPortfolioClient:
 
     def test_init(self, client):
         """Test client initialization."""
-        assert client.base_url == os.getenv(
-            "FINMARS_BASE_URL"
-        )
+        assert client.base_url == os.getenv("FINMARS_BASE_URL")
         assert client.realm == "test_realm"
         assert client.space == "test_space"
         assert client.api_key == "test-api-key"
@@ -43,9 +41,7 @@ class TestFinmarsPortfolioClient:
     def test_sub_clients_configuration(self, client):
         """Test that sub-clients have correct configuration."""
         # Check portfolios client
-        assert client.portfolios.base_url == os.getenv(
-            "FINMARS_BASE_URL"
-        )
+        assert client.portfolios.base_url == os.getenv("FINMARS_BASE_URL")
         assert client.portfolios.realm == "test_realm"
         assert client.portfolios.space == "test_space"
         assert client.portfolios.api_key == "test-api-key"

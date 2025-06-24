@@ -7,8 +7,7 @@ from agents.react_agent.agent_react_builder import create_finmars_agent_react
 from libs.utils.prompt_map_builder import build_map_prompts_cfg
 
 
-async def run_agent(message_input: str) -> str:
-
+async def run_agent_stream(message_input: str):
     langfuse_handler = CallbackHandler()
 
     map_prompts_cfg = await build_map_prompts_cfg(tags=simple_react_tag)
@@ -27,15 +26,33 @@ async def run_agent(message_input: str) -> str:
     agent = create_finmars_agent_react(config)
 
     # Set trace attributes dynamically via metadata
-    response = await agent.ainvoke(
+    answer = ""
+    async for event_graph in agent.astream_events(
         {
             "messages": [
                 HumanMessage(content=message_input),
             ]
         },
+        version="v2",
         config=config,
-    )
-    answer: str = response["messages"][-1].content
+    ):
+        if "skip" in event_graph.get("tags", []):
+            continue
+
+        if event_graph.get("event") == "on_chat_model_stream":
+            msg_chunk = event_graph.get("data", {}).get("chunk")
+            if msg_chunk.type != "AIMessageChunk":
+                continue
+
+            if msg_chunk.content:
+                answer += msg_chunk.content
+                yield msg_chunk.content
+
+
+async def run_agent(message_input: str) -> str:
+    answer = ""
+    async for chunk in run_agent_stream(message_input):
+        answer += chunk
     return answer
 
 

@@ -13,9 +13,9 @@ from pydantic import BaseModel, EmailStr, Field, confloat, conint, constr
 
 
 class FirstTransactionDateRequest(BaseModel):
-    portfolio: Optional[str] = Field(None, title='Portfolio')
+    portfolio: Optional[str] = Field(None, title="Portfolio")
     date_field: Optional[constr(min_length=1)] = Field(
-        'transaction_date', title='Date field'
+        "transaction_date", title="Date field"
     )
 
 
@@ -24,17 +24,17 @@ class GenericClassifierRecursiveField(BaseModel):
 
 
 class GenericClassifier(BaseModel):
-    id: Optional[int] = Field(None, title='Id')
-    name: Optional[constr(max_length=255)] = Field(None, title='Name')
-    level: Optional[int] = Field(None, title='Level')
+    id: Optional[int] = Field(None, title="Id")
+    name: Optional[constr(max_length=255)] = Field(None, title="Name")
+    level: Optional[int] = Field(None, title="Level")
     children: Optional[List[GenericClassifierRecursiveField]] = None
 
 
 class GenericClassifierWithoutChildren(BaseModel):
-    id: Optional[int] = Field(None, title='Id')
-    name: Optional[constr(max_length=255)] = Field(None, title='Name')
-    level: Optional[int] = Field(None, title='Level')
-    parent: Optional[int] = Field(None, title='Parent')
+    id: Optional[int] = Field(None, title="Id")
+    name: Optional[constr(max_length=255)] = Field(None, title="Name")
+    level: Optional[int] = Field(None, title="Level")
+    parent: Optional[int] = Field(None, title="Parent")
 
 
 class Kind(Enum):
@@ -50,257 +50,257 @@ class ValueType(Enum):
 
 
 class GenericAttributeType(BaseModel):
-    id: Optional[int] = Field(None, title='ID')
-    user_code: Optional[constr(max_length=255)] = Field(None, title='User code')
+    id: Optional[int] = Field(None, title="ID")
+    user_code: Optional[constr(max_length=255)] = Field(None, title="User code")
     configuration_code: constr(min_length=1, max_length=255) = Field(
-        ..., title='Configuration Code'
+        ..., title="Configuration Code"
     )
     name: constr(min_length=1, max_length=255) = Field(
-        ..., description='Human Readable Name of the object', title='Name'
+        ..., description="Human Readable Name of the object", title="Name"
     )
     short_name: Optional[str] = Field(
         None,
-        description='Short Name of the object. Used in dropdown menus',
-        title='Short name',
+        description="Short Name of the object. Used in dropdown menus",
+        title="Short name",
     )
     public_name: Optional[constr(max_length=255)] = Field(
         None,
-        description='Used if user does not have permissions to view object',
-        title='Public name',
+        description="Used if user does not have permissions to view object",
+        title="Public name",
     )
     notes: Optional[str] = Field(
         None,
-        description='Notes, any useful information about the object',
-        title='Notes',
+        description="Notes, any useful information about the object",
+        title="Notes",
     )
-    prefix: Optional[constr(max_length=255)] = Field(None, title='Prefix')
-    favorites: Optional[str] = Field(None, title='Favorites')
-    expr: Optional[constr(max_length=4096)] = Field('""', title='Expr')
-    can_recalculate: Optional[bool] = Field(None, title='Can recalculate')
-    tooltip: Optional[str] = Field(None, title='Tooltip')
-    kind: Optional[Kind] = Field(None, title='Kind')
-    content_type: str = Field(..., title='Content type')
-    value_type: Optional[ValueType] = Field(None, title='Value type')
-    order: Optional[conint(ge=-2147483648, le=2147483647)] = Field(None, title='Order')
-    is_hidden: Optional[bool] = Field(False, title='Is hidden')
+    prefix: Optional[constr(max_length=255)] = Field(None, title="Prefix")
+    favorites: Optional[str] = Field(None, title="Favorites")
+    expr: Optional[constr(max_length=4096)] = Field('""', title="Expr")
+    can_recalculate: Optional[bool] = Field(None, title="Can recalculate")
+    tooltip: Optional[str] = Field(None, title="Tooltip")
+    kind: Optional[Kind] = Field(None, title="Kind")
+    content_type: str = Field(..., title="Content type")
+    value_type: Optional[ValueType] = Field(None, title="Value type")
+    order: Optional[conint(ge=-2147483648, le=2147483647)] = Field(None, title="Order")
+    is_hidden: Optional[bool] = Field(False, title="Is hidden")
     classifiers: Optional[List[GenericClassifier]] = None
     classifiers_flat: Optional[List[GenericClassifierWithoutChildren]] = None
     deleted_user_code: Optional[constr(max_length=255)] = Field(
-        None, title='Deleted user code'
+        None, title="Deleted user code"
     )
 
 
 class RecalculateAttributes(BaseModel):
-    task_id: Optional[str] = Field(None, title='Task id')
-    task_status: Optional[str] = Field(None, title='Task status')
-    processed_rows: Optional[str] = Field(None, title='Processed rows')
-    total_rows: Optional[str] = Field(None, title='Total rows')
-    stats: Optional[str] = Field(None, title='Stats')
-    stats_file_report: Optional[str] = Field(None, title='Stats file report')
+    task_id: Optional[str] = Field(None, title="Task id")
+    task_status: Optional[str] = Field(None, title="Task status")
+    processed_rows: Optional[str] = Field(None, title="Processed rows")
+    total_rows: Optional[str] = Field(None, title="Total rows")
+    stats: Optional[str] = Field(None, title="Stats")
+    stats_file_report: Optional[str] = Field(None, title="Stats file report")
 
 
 class SourceType(Enum):
-    manual = 'manual'
-    external = 'external'
+    manual = "manual"
+    external = "external"
 
 
 class PortfolioBundle(BaseModel):
-    id: Optional[int] = Field(None, title='ID')
+    id: Optional[int] = Field(None, title="ID")
     name: constr(min_length=1, max_length=255) = Field(
-        ..., description='Human Readable Name of the object', title='Name'
+        ..., description="Human Readable Name of the object", title="Name"
     )
     short_name: Optional[str] = Field(
         None,
-        description='Short Name of the object. Used in dropdown menus',
-        title='Short name',
+        description="Short Name of the object. Used in dropdown menus",
+        title="Short name",
     )
-    user_code: Optional[constr(max_length=255)] = Field(None, title='User code')
+    user_code: Optional[constr(max_length=255)] = Field(None, title="User code")
     public_name: Optional[constr(max_length=255)] = Field(
         None,
-        description='Used if user does not have permissions to view object',
-        title='Public name',
+        description="Used if user does not have permissions to view object",
+        title="Public name",
     )
     notes: Optional[str] = Field(
         None,
-        description='Notes, any useful information about the object',
-        title='Notes',
+        description="Notes, any useful information about the object",
+        title="Notes",
     )
     registers: Optional[List[int]] = None
-    is_active: Optional[bool] = Field(True, title='Is active')
-    actual_at: Optional[datetime] = Field(None, title='Actual at')
-    source_type: Optional[SourceType] = Field('manual', title='Source type')
+    is_active: Optional[bool] = Field(True, title="Is active")
+    actual_at: Optional[datetime] = Field(None, title="Actual at")
+    source_type: Optional[SourceType] = Field("manual", title="Source type")
     source_origin: Optional[constr(min_length=1)] = Field(
-        'manual', title='Source origin'
+        "manual", title="Source origin"
     )
-    external_id: Optional[constr(min_length=1)] = Field(None, title='External id')
-    is_manual_locked: Optional[bool] = Field(False, title='Is manual locked')
-    is_locked: Optional[bool] = Field(True, title='Is locked')
-    created_at: Optional[datetime] = Field(None, title='Created at')
-    modified_at: Optional[datetime] = Field(None, title='Modified at')
-    deleted_at: Optional[datetime] = Field(None, title='Deleted at')
+    external_id: Optional[constr(min_length=1)] = Field(None, title="External id")
+    is_manual_locked: Optional[bool] = Field(False, title="Is manual locked")
+    is_locked: Optional[bool] = Field(True, title="Is locked")
+    created_at: Optional[datetime] = Field(None, title="Created at")
+    modified_at: Optional[datetime] = Field(None, title="Modified at")
+    deleted_at: Optional[datetime] = Field(None, title="Deleted at")
     deleted_user_code: Optional[constr(max_length=255)] = Field(
-        None, title='Deleted user code'
+        None, title="Deleted user code"
     )
 
 
 class PortfolioClass(BaseModel):
-    id: conint(ge=0, le=32767) = Field(..., title='ID')
-    user_code: constr(min_length=1, max_length=255) = Field(..., title='User code')
-    name: Optional[constr(max_length=255)] = Field(None, title='Name')
-    description: Optional[str] = Field(None, title='Description')
+    id: conint(ge=0, le=32767) = Field(..., title="ID")
+    user_code: constr(min_length=1, max_length=255) = Field(..., title="User code")
+    name: Optional[constr(max_length=255)] = Field(None, title="Name")
+    description: Optional[str] = Field(None, title="Description")
 
 
 class GenericClassifierNode(BaseModel):
-    id: Optional[int] = Field(None, title='Id')
-    attribute_type: Optional[int] = Field(None, title='Attribute type')
-    level: Optional[int] = Field(None, title='Level')
-    parent: Optional[int] = Field(None, title='Parent')
-    name: Optional[constr(max_length=255)] = Field(None, title='Name')
+    id: Optional[int] = Field(None, title="Id")
+    attribute_type: Optional[int] = Field(None, title="Attribute type")
+    level: Optional[int] = Field(None, title="Level")
+    parent: Optional[int] = Field(None, title="Parent")
+    name: Optional[constr(max_length=255)] = Field(None, title="Name")
 
 
 class CurrencyView(BaseModel):
-    id: Optional[int] = Field(None, title='ID')
-    user_code: Optional[constr(max_length=255)] = Field(None, title='User code')
+    id: Optional[int] = Field(None, title="ID")
+    user_code: Optional[constr(max_length=255)] = Field(None, title="User code")
     name: constr(min_length=1, max_length=255) = Field(
-        ..., description='Human Readable Name of the object', title='Name'
+        ..., description="Human Readable Name of the object", title="Name"
     )
     short_name: Optional[str] = Field(
         None,
-        description='Short Name of the object. Used in dropdown menus',
-        title='Short name',
+        description="Short Name of the object. Used in dropdown menus",
+        title="Short name",
     )
     public_name: Optional[constr(max_length=255)] = Field(
         None,
-        description='Used if user does not have permissions to view object',
-        title='Public name',
+        description="Used if user does not have permissions to view object",
+        title="Public name",
     )
     deleted_user_code: Optional[constr(max_length=255)] = Field(
-        None, title='Deleted user code'
+        None, title="Deleted user code"
     )
 
 
 class PortfolioView(BaseModel):
-    id: Optional[int] = Field(None, title='ID')
-    user_code: Optional[constr(max_length=255)] = Field(None, title='User code')
+    id: Optional[int] = Field(None, title="ID")
+    user_code: Optional[constr(max_length=255)] = Field(None, title="User code")
     name: constr(min_length=1, max_length=255) = Field(
-        ..., description='Human Readable Name of the object', title='Name'
+        ..., description="Human Readable Name of the object", title="Name"
     )
     short_name: Optional[str] = Field(
         None,
-        description='Short Name of the object. Used in dropdown menus',
-        title='Short name',
+        description="Short Name of the object. Used in dropdown menus",
+        title="Short name",
     )
     public_name: Optional[constr(max_length=255)] = Field(
         None,
-        description='Used if user does not have permissions to view object',
-        title='Public name',
+        description="Used if user does not have permissions to view object",
+        title="Public name",
     )
     deleted_user_code: Optional[constr(max_length=255)] = Field(
-        None, title='Deleted user code'
+        None, title="Deleted user code"
     )
 
 
 class PricingPolicy(BaseModel):
-    id: Optional[int] = Field(None, title='ID')
-    user_code: Optional[constr(max_length=255)] = Field(None, title='User code')
+    id: Optional[int] = Field(None, title="ID")
+    user_code: Optional[constr(max_length=255)] = Field(None, title="User code")
     configuration_code: constr(min_length=1, max_length=255) = Field(
-        ..., title='Configuration Code'
+        ..., title="Configuration Code"
     )
     name: constr(min_length=1, max_length=255) = Field(
-        ..., description='Human Readable Name of the object', title='Name'
+        ..., description="Human Readable Name of the object", title="Name"
     )
     short_name: Optional[str] = Field(
         None,
-        description='Short Name of the object. Used in dropdown menus',
-        title='Short name',
+        description="Short Name of the object. Used in dropdown menus",
+        title="Short name",
     )
     notes: Optional[str] = Field(
         None,
-        description='Notes, any useful information about the object',
-        title='Notes',
+        description="Notes, any useful information about the object",
+        title="Notes",
     )
-    expr: Optional[constr(max_length=4096)] = Field(None, title='Expression')
-    is_active: Optional[bool] = Field(True, title='Is active')
-    actual_at: Optional[datetime] = Field(None, title='Actual at')
-    source_type: Optional[SourceType] = Field('manual', title='Source type')
+    expr: Optional[constr(max_length=4096)] = Field(None, title="Expression")
+    is_active: Optional[bool] = Field(True, title="Is active")
+    actual_at: Optional[datetime] = Field(None, title="Actual at")
+    source_type: Optional[SourceType] = Field("manual", title="Source type")
     source_origin: Optional[constr(min_length=1)] = Field(
-        'manual', title='Source origin'
+        "manual", title="Source origin"
     )
-    external_id: Optional[constr(min_length=1)] = Field(None, title='External id')
-    is_manual_locked: Optional[bool] = Field(False, title='Is manual locked')
-    is_locked: Optional[bool] = Field(True, title='Is locked')
-    created_at: Optional[datetime] = Field(None, title='Created at')
-    modified_at: Optional[datetime] = Field(None, title='Modified at')
-    deleted_at: Optional[datetime] = Field(None, title='Deleted at')
+    external_id: Optional[constr(min_length=1)] = Field(None, title="External id")
+    is_manual_locked: Optional[bool] = Field(False, title="Is manual locked")
+    is_locked: Optional[bool] = Field(True, title="Is locked")
+    created_at: Optional[datetime] = Field(None, title="Created at")
+    modified_at: Optional[datetime] = Field(None, title="Modified at")
+    deleted_at: Optional[datetime] = Field(None, title="Deleted at")
     deleted_user_code: Optional[constr(max_length=255)] = Field(
-        None, title='Deleted user code'
+        None, title="Deleted user code"
     )
 
 
 class PeriodType(Enum):
-    daily = 'daily'
-    ytd = 'ytd'
-    mtd = 'mtd'
-    qtd = 'qtd'
-    inception = 'inception'
+    daily = "daily"
+    ytd = "ytd"
+    mtd = "mtd"
+    qtd = "qtd"
+    inception = "inception"
 
 
 class PerformanceMethod(Enum):
-    modified_dietz = 'modified_dietz'
-    time_weighted = 'time_weighted'
+    modified_dietz = "modified_dietz"
+    time_weighted = "time_weighted"
 
 
 class Status(Enum):
-    ok = 'ok'
-    error = 'error'
+    ok = "ok"
+    error = "error"
 
 
 class PortfolioHistory(BaseModel):
-    id: Optional[int] = Field(None, title='ID')
-    user_code: Optional[constr(max_length=255)] = Field(None, title='User code')
-    portfolio: int = Field(..., title='Portfolio')
-    currency: Optional[int] = Field(None, title='Currency')
-    pricing_policy: int = Field(..., title='Pricing policy')
-    date: Optional[date_aliased] = Field(None, title='Date')
-    date_from: Optional[date_aliased] = Field(None, title='Date from')
-    period_type: Optional[PeriodType] = Field(None, title='Period_type')
-    cost_method: int = Field(..., title='Cost method')
+    id: Optional[int] = Field(None, title="ID")
+    user_code: Optional[constr(max_length=255)] = Field(None, title="User code")
+    portfolio: int = Field(..., title="Portfolio")
+    currency: Optional[int] = Field(None, title="Currency")
+    pricing_policy: int = Field(..., title="Pricing policy")
+    date: Optional[date_aliased] = Field(None, title="Date")
+    date_from: Optional[date_aliased] = Field(None, title="Date from")
+    period_type: Optional[PeriodType] = Field(None, title="Period_type")
+    cost_method: int = Field(..., title="Cost method")
     performance_method: Optional[PerformanceMethod] = Field(
-        None, title='Performance method'
+        None, title="Performance method"
     )
-    benchmark: Optional[constr(max_length=255)] = Field(None, title='Benchmark')
-    nav: Optional[float] = Field(None, description='Net Asset Value', title='Nav')
-    gav: Optional[float] = Field(None, description='Gross Asset Value', title='Gav')
-    cash_flow: Optional[float] = Field(None, title='Cash flow')
-    cash_inflow: Optional[float] = Field(None, title='Cash inflow')
-    cash_outflow: Optional[float] = Field(None, title='Cash outflow')
+    benchmark: Optional[constr(max_length=255)] = Field(None, title="Benchmark")
+    nav: Optional[float] = Field(None, description="Net Asset Value", title="Nav")
+    gav: Optional[float] = Field(None, description="Gross Asset Value", title="Gav")
+    cash_flow: Optional[float] = Field(None, title="Cash flow")
+    cash_inflow: Optional[float] = Field(None, title="Cash inflow")
+    cash_outflow: Optional[float] = Field(None, title="Cash outflow")
     total: Optional[float] = Field(
-        None, description='Total Value of the Portfolio from P&L Report', title='Total'
+        None, description="Total Value of the Portfolio from P&L Report", title="Total"
     )
-    cumulative_return: Optional[float] = Field(None, title='Cumulative return')
-    annualized_return: Optional[float] = Field(None, title='Annualized return')
-    portfolio_volatility: Optional[float] = Field(None, title='Portfolio volatility')
+    cumulative_return: Optional[float] = Field(None, title="Cumulative return")
+    annualized_return: Optional[float] = Field(None, title="Annualized return")
+    portfolio_volatility: Optional[float] = Field(None, title="Portfolio volatility")
     annualized_portfolio_volatility: Optional[float] = Field(
-        None, title='Annualized portfolio volatility'
+        None, title="Annualized portfolio volatility"
     )
-    sharpe_ratio: Optional[float] = Field(None, title='Sharpe_ratio')
+    sharpe_ratio: Optional[float] = Field(None, title="Sharpe_ratio")
     max_annualized_drawdown: Optional[float] = Field(
-        None, title='Max_annualized_drawdown'
+        None, title="Max_annualized_drawdown"
     )
-    betta: Optional[float] = Field(None, title='Betta')
-    alpha: Optional[float] = Field(None, title='Alpha')
-    correlation: Optional[float] = Field(None, title='Correlation')
-    weighted_duration: Optional[float] = Field(None, title='Weighted_duration')
-    created_at: Optional[datetime] = Field(None, title='Created at')
-    modified_at: Optional[datetime] = Field(None, title='Modified at')
-    is_enabled: Optional[bool] = Field(None, title='Is enabled')
+    betta: Optional[float] = Field(None, title="Betta")
+    alpha: Optional[float] = Field(None, title="Alpha")
+    correlation: Optional[float] = Field(None, title="Correlation")
+    weighted_duration: Optional[float] = Field(None, title="Weighted_duration")
+    created_at: Optional[datetime] = Field(None, title="Created at")
+    modified_at: Optional[datetime] = Field(None, title="Modified at")
+    is_enabled: Optional[bool] = Field(None, title="Is enabled")
     error_message: Optional[str] = Field(
-        None, description='Error message if any', title='Error_message'
+        None, description="Error message if any", title="Error_message"
     )
-    status: Optional[Status] = Field(None, title='Status')
-    deleted_at: Optional[datetime] = Field(None, title='Deleted at')
+    status: Optional[Status] = Field(None, title="Status")
+    deleted_at: Optional[datetime] = Field(None, title="Deleted at")
     deleted_user_code: Optional[constr(max_length=255)] = Field(
-        None, title='Deleted user code'
+        None, title="Deleted user code"
     )
     currency_object: Optional[CurrencyView] = None
     portfolio_object: Optional[PortfolioView] = None
@@ -308,103 +308,103 @@ class PortfolioHistory(BaseModel):
 
 
 class SegmentationType(Enum):
-    days = 'days'
-    business_days = 'business_days'
-    business_days_end_of_months = 'business_days_end_of_months'
+    days = "days"
+    business_days = "business_days"
+    business_days_end_of_months = "business_days_end_of_months"
 
 
 class CalculatePortfolioHistory(BaseModel):
-    portfolio: str = Field(..., title='Portfolio')
-    currency: Optional[str] = Field(None, title='Currency')
-    pricing_policy: Optional[str] = Field(None, title='Pricing policy')
-    date: date_aliased = Field(..., title='Date')
+    portfolio: str = Field(..., title="Portfolio")
+    currency: Optional[str] = Field(None, title="Currency")
+    pricing_policy: Optional[str] = Field(None, title="Pricing policy")
+    date: date_aliased = Field(..., title="Date")
     calculation_period_date_from: Optional[date_aliased] = Field(
-        None, title='Calculation period date from'
+        None, title="Calculation period date from"
     )
     segmentation_type: Optional[SegmentationType] = Field(
-        'business_days_end_of_months', title='Segmentation type'
+        "business_days_end_of_months", title="Segmentation type"
     )
-    period_type: Optional[PeriodType] = Field('ytd', title='Period type')
-    cost_method: Optional[str] = Field(None, title='Cost method')
+    period_type: Optional[PeriodType] = Field("ytd", title="Period type")
+    cost_method: Optional[str] = Field(None, title="Cost method")
     performance_method: Optional[PerformanceMethod] = Field(
-        'modified_dietz', title='Performance method'
+        "modified_dietz", title="Performance method"
     )
-    benchmark: Optional[constr(min_length=1)] = Field('sp_500', title='Benchmark')
+    benchmark: Optional[constr(min_length=1)] = Field("sp_500", title="Benchmark")
 
 
 class Params(BaseModel):
-    only_errors: Optional[bool] = Field(False, title='Only errors')
-    round_digits: Optional[conint(ge=0)] = Field(2, title='Round digits')
-    report_ttl: Optional[conint(ge=1)] = Field(90, title='Report ttl')
-    precision: Optional[confloat(ge=0.0)] = Field(1, title='Precision')
-    notifications: Optional[Dict[str, str]] = Field({}, title='Notifications')
+    only_errors: Optional[bool] = Field(False, title="Only errors")
+    round_digits: Optional[conint(ge=0)] = Field(2, title="Round digits")
+    report_ttl: Optional[conint(ge=1)] = Field(90, title="Report ttl")
+    precision: Optional[confloat(ge=0.0)] = Field(1, title="Precision")
+    notifications: Optional[Dict[str, str]] = Field({}, title="Notifications")
 
 
 class PortfolioReconcileGroup(BaseModel):
-    id: Optional[int] = Field(None, title='ID')
+    id: Optional[int] = Field(None, title="ID")
     name: constr(min_length=1, max_length=255) = Field(
-        ..., description='Human Readable Name of the object', title='Name'
+        ..., description="Human Readable Name of the object", title="Name"
     )
     short_name: Optional[str] = Field(
         None,
-        description='Short Name of the object. Used in dropdown menus',
-        title='Short name',
+        description="Short Name of the object. Used in dropdown menus",
+        title="Short name",
     )
-    user_code: Optional[constr(max_length=255)] = Field(None, title='User code')
+    user_code: Optional[constr(max_length=255)] = Field(None, title="User code")
     public_name: Optional[constr(max_length=255)] = Field(
         None,
-        description='Used if user does not have permissions to view object',
-        title='Public name',
+        description="Used if user does not have permissions to view object",
+        title="Public name",
     )
     notes: Optional[str] = Field(
         None,
-        description='Notes, any useful information about the object',
-        title='Notes',
+        description="Notes, any useful information about the object",
+        title="Notes",
     )
     portfolios: List[str]
     params: Params
     last_calculated_at: Optional[datetime] = Field(
-        None, title='Last time calculation was done'
+        None, title="Last time calculation was done"
     )
-    created_at: Optional[datetime] = Field(None, title='Created at')
-    modified_at: Optional[datetime] = Field(None, title='Modified at')
-    deleted_at: Optional[datetime] = Field(None, title='Deleted at')
+    created_at: Optional[datetime] = Field(None, title="Created at")
+    modified_at: Optional[datetime] = Field(None, title="Modified at")
+    deleted_at: Optional[datetime] = Field(None, title="Deleted at")
     deleted_user_code: Optional[constr(max_length=255)] = Field(
-        None, title='Deleted user code'
+        None, title="Deleted user code"
     )
 
 
 class FileReport(BaseModel):
-    id: Optional[int] = Field(None, title='ID')
-    name: constr(min_length=1, max_length=255) = Field(..., title='Name')
-    notes: Optional[str] = Field(None, title='Notes')
-    type: Optional[constr(max_length=255)] = Field(None, title='Type')
-    created_at: Optional[datetime] = Field(None, title='Created at')
-    content_type: Optional[constr(max_length=255)] = Field(None, title='Content type')
-    content_type_verbose: Optional[str] = Field(None, title='Content type verbose')
-    file_url: Optional[str] = Field(None, title='File URL')
+    id: Optional[int] = Field(None, title="ID")
+    name: constr(min_length=1, max_length=255) = Field(..., title="Name")
+    notes: Optional[str] = Field(None, title="Notes")
+    type: Optional[constr(max_length=255)] = Field(None, title="Type")
+    created_at: Optional[datetime] = Field(None, title="Created at")
+    content_type: Optional[constr(max_length=255)] = Field(None, title="Content type")
+    content_type_verbose: Optional[str] = Field(None, title="Content type verbose")
+    file_url: Optional[str] = Field(None, title="File URL")
 
 
 class PortfolioReconcileHistory(BaseModel):
-    id: Optional[int] = Field(None, title='ID')
-    user_code: Optional[constr(max_length=255)] = Field(None, title='User code')
-    portfolio_reconcile_group: int = Field(..., title='Portfolio reconcile group')
-    date: Optional[date_aliased] = Field(None, title='Date')
-    verbose_result: Optional[str] = Field(None, title='Verbose result')
+    id: Optional[int] = Field(None, title="ID")
+    user_code: Optional[constr(max_length=255)] = Field(None, title="User code")
+    portfolio_reconcile_group: int = Field(..., title="Portfolio reconcile group")
+    date: Optional[date_aliased] = Field(None, title="Date")
+    verbose_result: Optional[str] = Field(None, title="Verbose result")
     error_message: Optional[str] = Field(
-        None, description='Error message if any', title='Error_message'
+        None, description="Error message if any", title="Error_message"
     )
-    status: Optional[Status] = Field(None, title='Status')
-    file_report: Optional[int] = Field(None, title='File report')
-    is_enabled: Optional[bool] = Field(None, title='Is enabled')
+    status: Optional[Status] = Field(None, title="Status")
+    file_report: Optional[int] = Field(None, title="File report")
+    is_enabled: Optional[bool] = Field(None, title="Is enabled")
     report_ttl: Optional[conint(ge=0, le=2147483647)] = Field(
-        None, title='Number of days until report expires'
+        None, title="Number of days until report expires"
     )
-    created_at: Optional[datetime] = Field(None, title='Created at')
-    modified_at: Optional[datetime] = Field(None, title='Modified at')
-    deleted_at: Optional[datetime] = Field(None, title='Deleted at')
+    created_at: Optional[datetime] = Field(None, title="Created at")
+    modified_at: Optional[datetime] = Field(None, title="Modified at")
+    deleted_at: Optional[datetime] = Field(None, title="Deleted at")
     deleted_user_code: Optional[constr(max_length=255)] = Field(
-        None, title='Deleted user code'
+        None, title="Deleted user code"
     )
     portfolio_reconcile_group_object: Optional[PortfolioReconcileGroup] = None
     file_report_object: Optional[FileReport] = None
@@ -416,176 +416,176 @@ class BulkCalculateReconcileHistory(BaseModel):
 
 
 class CalculateReconcileHistory(BaseModel):
-    portfolio_reconcile_group: str = Field(..., title='Portfolio reconcile group')
+    portfolio_reconcile_group: str = Field(..., title="Portfolio reconcile group")
     dates: List[date_aliased]
 
 
 class PortfolioReconcileStatus(BaseModel):
     portfolios: List[str]
-    date: date_aliased = Field(..., title='Date')
+    date: date_aliased = Field(..., title="Date")
 
 
 class TransactionClass(BaseModel):
-    id: conint(ge=0, le=32767) = Field(..., title='ID')
-    user_code: constr(min_length=1, max_length=255) = Field(..., title='User code')
-    name: Optional[constr(max_length=255)] = Field(None, title='Name')
-    description: Optional[str] = Field(None, title='Description')
+    id: conint(ge=0, le=32767) = Field(..., title="ID")
+    user_code: constr(min_length=1, max_length=255) = Field(..., title="User code")
+    name: Optional[constr(max_length=255)] = Field(None, title="Name")
+    description: Optional[str] = Field(None, title="Description")
 
 
 class PortfolioRegisterView(BaseModel):
-    id: Optional[int] = Field(None, title='ID')
-    user_code: Optional[constr(max_length=255)] = Field(None, title='User code')
+    id: Optional[int] = Field(None, title="ID")
+    user_code: Optional[constr(max_length=255)] = Field(None, title="User code")
     name: constr(min_length=1, max_length=255) = Field(
-        ..., description='Human Readable Name of the object', title='Name'
+        ..., description="Human Readable Name of the object", title="Name"
     )
     short_name: Optional[str] = Field(
         None,
-        description='Short Name of the object. Used in dropdown menus',
-        title='Short name',
+        description="Short Name of the object. Used in dropdown menus",
+        title="Short name",
     )
     public_name: Optional[constr(max_length=255)] = Field(
         None,
-        description='Used if user does not have permissions to view object',
-        title='Public name',
+        description="Used if user does not have permissions to view object",
+        title="Public name",
     )
     deleted_user_code: Optional[constr(max_length=255)] = Field(
-        None, title='Deleted user code'
+        None, title="Deleted user code"
     )
 
 
 class InstrumentClass(BaseModel):
-    id: conint(ge=0, le=32767) = Field(..., title='ID')
-    user_code: constr(min_length=1, max_length=255) = Field(..., title='User code')
-    name: Optional[constr(max_length=255)] = Field(None, title='Name')
-    description: Optional[str] = Field(None, title='Description')
+    id: conint(ge=0, le=32767) = Field(..., title="ID")
+    user_code: constr(min_length=1, max_length=255) = Field(..., title="User code")
+    name: Optional[constr(max_length=255)] = Field(None, title="Name")
+    description: Optional[str] = Field(None, title="Description")
 
 
 class InstrumentTypeView(BaseModel):
-    id: Optional[int] = Field(None, title='ID')
-    instrument_class: int = Field(..., title='Instrument class')
+    id: Optional[int] = Field(None, title="ID")
+    instrument_class: int = Field(..., title="Instrument class")
     instrument_class_object: Optional[InstrumentClass] = None
-    user_code: Optional[constr(max_length=255)] = Field(None, title='User code')
+    user_code: Optional[constr(max_length=255)] = Field(None, title="User code")
     name: constr(min_length=1, max_length=255) = Field(
-        ..., description='Human Readable Name of the object', title='Name'
+        ..., description="Human Readable Name of the object", title="Name"
     )
     short_name: Optional[str] = Field(
         None,
-        description='Short Name of the object. Used in dropdown menus',
-        title='Short name',
+        description="Short Name of the object. Used in dropdown menus",
+        title="Short name",
     )
     public_name: Optional[constr(max_length=255)] = Field(
         None,
-        description='Used if user does not have permissions to view object',
-        title='Public name',
+        description="Used if user does not have permissions to view object",
+        title="Public name",
     )
     instrument_form_layouts: Optional[str] = Field(
-        None, title='Instrument form layouts'
+        None, title="Instrument form layouts"
     )
     deleted_user_code: Optional[constr(max_length=255)] = Field(
-        None, title='Deleted user code'
+        None, title="Deleted user code"
     )
 
 
 class InstrumentView(BaseModel):
-    id: Optional[int] = Field(None, title='ID')
-    instrument_type: int = Field(..., title='Instrument type')
+    id: Optional[int] = Field(None, title="ID")
+    instrument_type: int = Field(..., title="Instrument type")
     instrument_type_object: Optional[InstrumentTypeView] = None
-    user_code: Optional[constr(max_length=255)] = Field(None, title='User code')
+    user_code: Optional[constr(max_length=255)] = Field(None, title="User code")
     name: constr(min_length=1, max_length=255) = Field(
-        ..., description='Human Readable Name of the object', title='Name'
+        ..., description="Human Readable Name of the object", title="Name"
     )
     short_name: Optional[str] = Field(
         None,
-        description='Short Name of the object. Used in dropdown menus',
-        title='Short name',
+        description="Short Name of the object. Used in dropdown menus",
+        title="Short name",
     )
     public_name: Optional[constr(max_length=255)] = Field(
         None,
-        description='Used if user does not have permissions to view object',
-        title='Public name',
+        description="Used if user does not have permissions to view object",
+        title="Public name",
     )
     notes: Optional[str] = Field(
         None,
-        description='Notes, any useful information about the object',
-        title='Notes',
+        description="Notes, any useful information about the object",
+        title="Notes",
     )
-    is_active: Optional[bool] = Field(None, title='Is active')
+    is_active: Optional[bool] = Field(None, title="Is active")
     is_deleted: Optional[bool] = Field(
         None,
-        description='Mark object as deleted. Does not actually delete the object.',
-        title='Is deleted',
+        description="Mark object as deleted. Does not actually delete the object.",
+        title="Is deleted",
     )
     identifier: Optional[Dict[str, Any]] = Field(
         None,
-        description='Dictionary of identifiers from different sources',
-        title='Identifier',
+        description="Dictionary of identifiers from different sources",
+        title="Identifier",
     )
     has_linked_with_portfolio: Optional[bool] = Field(
-        None, title='Has linked with portfolio'
+        None, title="Has linked with portfolio"
     )
     user_text_1: Optional[constr(max_length=255)] = Field(
-        None, description='User specified field 1', title='User text 1'
+        None, description="User specified field 1", title="User text 1"
     )
     user_text_2: Optional[constr(max_length=255)] = Field(
-        None, description='User specified field 2', title='User text 2'
+        None, description="User specified field 2", title="User text 2"
     )
     user_text_3: Optional[constr(max_length=255)] = Field(
-        None, description='User specified field 3', title='User text 3'
+        None, description="User specified field 3", title="User text 3"
     )
-    maturity_date: Optional[date_aliased] = Field(None, title='Maturity date')
+    maturity_date: Optional[date_aliased] = Field(None, title="Maturity date")
     deleted_user_code: Optional[constr(max_length=255)] = Field(
-        None, title='Deleted user code'
+        None, title="Deleted user code"
     )
 
 
 class PortfolioRegisterRecord(BaseModel):
-    id: Optional[int] = Field(None, title='ID')
-    portfolio: int = Field(..., title='Portfolio')
-    instrument: int = Field(..., title='Instrument')
-    transaction_class: int = Field(..., title='Transaction class')
+    id: Optional[int] = Field(None, title="ID")
+    portfolio: int = Field(..., title="Portfolio")
+    instrument: int = Field(..., title="Instrument")
+    transaction_class: int = Field(..., title="Transaction class")
     transaction_code: Optional[conint(ge=-2147483648, le=2147483647)] = Field(
-        None, title='Transaction code'
+        None, title="Transaction code"
     )
-    transaction_date: Optional[date_aliased] = Field(None, title='Transaction date')
+    transaction_date: Optional[date_aliased] = Field(None, title="Transaction date")
     cash_amount: Optional[float] = Field(
-        None, description='Cash amount', title='Cash amount'
+        None, description="Cash amount", title="Cash amount"
     )
-    cash_currency: int = Field(..., title='Cash currency')
-    fx_rate: Optional[float] = Field(None, title='Fx rate')
+    cash_currency: int = Field(..., title="Cash currency")
+    fx_rate: Optional[float] = Field(None, title="Fx rate")
     cash_amount_valuation_currency: Optional[float] = Field(
         None,
-        description='Cash amount valuation currency',
-        title='Cash amount valuation currency',
+        description="Cash amount valuation currency",
+        title="Cash amount valuation currency",
     )
-    valuation_currency: int = Field(..., title='Valuation currency')
+    valuation_currency: int = Field(..., title="Valuation currency")
     nav_valuation_currency: Optional[float] = Field(
-        None, title='Nav valuation currency'
+        None, title="Nav valuation currency"
     )
     nav_previous_business_day_valuation_currency: Optional[float] = Field(
-        None, title='Nav previous business day valuation currency'
+        None, title="Nav previous business day valuation currency"
     )
     nav_previous_register_record_day_valuation_currency: Optional[float] = Field(
-        None, title='Nav previous register record day valuation currency'
+        None, title="Nav previous register record day valuation currency"
     )
-    n_shares_previous_day: Optional[float] = Field(None, title='N shares previous day')
-    n_shares_added: Optional[float] = Field(None, title='N shares added')
+    n_shares_previous_day: Optional[float] = Field(None, title="N shares previous day")
+    n_shares_added: Optional[float] = Field(None, title="N shares added")
     dealing_price_valuation_currency: Optional[float] = Field(
         None,
-        description='Dealing price valuation currency',
-        title='Dealing price valuation currency',
+        description="Dealing price valuation currency",
+        title="Dealing price valuation currency",
     )
     rolling_shares_of_the_day: Optional[float] = Field(
-        None, title='Rolling shares  of the day'
+        None, title="Rolling shares  of the day"
     )
-    transaction: int = Field(..., title='Transaction')
-    complex_transaction: int = Field(..., title='Complex transaction')
-    portfolio_register: int = Field(..., title='Portfolio register')
+    transaction: int = Field(..., title="Transaction")
+    complex_transaction: int = Field(..., title="Complex transaction")
+    portfolio_register: int = Field(..., title="Portfolio register")
     share_price_calculation_type: Optional[constr(min_length=1, max_length=255)] = (
-        Field(None, title='Price calculation type')
+        Field(None, title="Price calculation type")
     )
-    created_at: Optional[datetime] = Field(None, title='Created at')
-    modified_at: Optional[datetime] = Field(None, title='Modified at')
-    deleted_at: Optional[datetime] = Field(None, title='Deleted at')
+    created_at: Optional[datetime] = Field(None, title="Created at")
+    modified_at: Optional[datetime] = Field(None, title="Modified at")
+    deleted_at: Optional[datetime] = Field(None, title="Deleted at")
     cash_currency_object: Optional[CurrencyView] = None
     valuation_currency_object: Optional[CurrencyView] = None
     transaction_class_object: Optional[TransactionClass] = None
@@ -596,114 +596,114 @@ class PortfolioRegisterRecord(BaseModel):
 
 
 class GenericAttributeTypeView(BaseModel):
-    id: Optional[int] = Field(None, title='ID')
+    id: Optional[int] = Field(None, title="ID")
     user_code: Optional[constr(max_length=1024)] = Field(
         None,
-        description='Unique Code for this object. Used in Configuration and Permissions Logic',
-        title='User code',
+        description="Unique Code for this object. Used in Configuration and Permissions Logic",
+        title="User code",
     )
     name: constr(min_length=1, max_length=255) = Field(
-        ..., description='Human Readable Name of the object', title='Name'
+        ..., description="Human Readable Name of the object", title="Name"
     )
     short_name: Optional[str] = Field(
         None,
-        description='Short Name of the object. Used in dropdown menus',
-        title='Short name',
+        description="Short Name of the object. Used in dropdown menus",
+        title="Short name",
     )
     public_name: Optional[constr(max_length=255)] = Field(
         None,
-        description='Used if user does not have permissions to view object',
-        title='Public name',
+        description="Used if user does not have permissions to view object",
+        title="Public name",
     )
     notes: Optional[str] = Field(
         None,
-        description='Notes, any useful information about the object',
-        title='Notes',
+        description="Notes, any useful information about the object",
+        title="Notes",
     )
-    can_recalculate: Optional[bool] = Field(None, title='Can recalculate')
-    value_type: Optional[ValueType] = Field(None, title='Value type')
-    order: Optional[conint(ge=-2147483648, le=2147483647)] = Field(None, title='Order')
-    is_hidden: Optional[bool] = Field(False, title='Is hidden')
-    kind: Optional[Kind] = Field(None, title='Kind')
+    can_recalculate: Optional[bool] = Field(None, title="Can recalculate")
+    value_type: Optional[ValueType] = Field(None, title="Value type")
+    order: Optional[conint(ge=-2147483648, le=2147483647)] = Field(None, title="Order")
+    is_hidden: Optional[bool] = Field(False, title="Is hidden")
+    kind: Optional[Kind] = Field(None, title="Kind")
 
 
 class GenericClassifierView(BaseModel):
-    id: Optional[int] = Field(None, title='ID')
-    name: Optional[constr(max_length=255)] = Field(None, title='Name')
-    level: Optional[int] = Field(None, title='Level')
-    parent: Optional[int] = Field(None, title='Parent')
+    id: Optional[int] = Field(None, title="ID")
+    name: Optional[constr(max_length=255)] = Field(None, title="Name")
+    level: Optional[int] = Field(None, title="Level")
+    parent: Optional[int] = Field(None, title="Parent")
     parent_object: Optional[GenericClassifierRecursiveField] = None
 
 
 class GenericAttribute(BaseModel):
-    id: Optional[int] = Field(None, title='ID')
+    id: Optional[int] = Field(None, title="ID")
     # attribute_type: str = Field(..., title='Attribute type')
-    attribute_type: int = Field(..., title='Attribute type')
-    value_string: Optional[constr(max_length=255)] = Field(None, title='Value (String)')
-    value_float: Optional[float] = Field(None, title='Value (Float)')
-    value_date: Optional[date_aliased] = Field(None, title='Value (Date)')
-    classifier: Optional[str] = Field(None, title='Classifier')
+    attribute_type: int = Field(..., title="Attribute type")
+    value_string: Optional[constr(max_length=255)] = Field(None, title="Value (String)")
+    value_float: Optional[float] = Field(None, title="Value (Float)")
+    value_date: Optional[date_aliased] = Field(None, title="Value (Date)")
+    classifier: Optional[str] = Field(None, title="Classifier")
     attribute_type_object: Optional[GenericAttributeTypeView] = None
     classifier_object: Optional[GenericClassifierView] = None
 
 
 class PortfolioRegister(BaseModel):
-    id: Optional[int] = Field(None, title='ID')
-    user_code: Optional[constr(max_length=255)] = Field(None, title='User code')
+    id: Optional[int] = Field(None, title="ID")
+    user_code: Optional[constr(max_length=255)] = Field(None, title="User code")
     name: constr(min_length=1, max_length=255) = Field(
-        ..., description='Human Readable Name of the object', title='Name'
+        ..., description="Human Readable Name of the object", title="Name"
     )
     short_name: Optional[str] = Field(
         None,
-        description='Short Name of the object. Used in dropdown menus',
-        title='Short name',
+        description="Short Name of the object. Used in dropdown menus",
+        title="Short name",
     )
     public_name: Optional[constr(max_length=255)] = Field(
         None,
-        description='Used if user does not have permissions to view object',
-        title='Public name',
+        description="Used if user does not have permissions to view object",
+        title="Public name",
     )
     notes: Optional[str] = Field(
         None,
-        description='Notes, any useful information about the object',
-        title='Notes',
+        description="Notes, any useful information about the object",
+        title="Notes",
     )
     is_deleted: Optional[bool] = Field(
         None,
-        description='Mark object as deleted. Does not actually delete the object.',
-        title='Is deleted',
+        description="Mark object as deleted. Does not actually delete the object.",
+        title="Is deleted",
     )
-    is_enabled: Optional[bool] = Field(None, title='Is enabled')
-    portfolio: int = Field(..., title='Portfolio')
+    is_enabled: Optional[bool] = Field(None, title="Is enabled")
+    portfolio: int = Field(..., title="Portfolio")
     portfolio_object: Optional[PortfolioView] = None
-    linked_instrument: Optional[int] = Field(None, title='Linked instrument')
+    linked_instrument: Optional[int] = Field(None, title="Linked instrument")
     linked_instrument_object: Optional[InstrumentView] = None
-    valuation_currency: Optional[int] = Field(None, title='Valuation currency')
+    valuation_currency: Optional[int] = Field(None, title="Valuation currency")
     valuation_currency_object: Optional[CurrencyView] = None
-    valuation_pricing_policy: int = Field(..., title='Valuation pricing policy')
+    valuation_pricing_policy: int = Field(..., title="Valuation pricing policy")
     valuation_pricing_policy_object: Optional[PricingPolicy] = None
-    default_price: Optional[float] = Field(None, title='Default price')
-    is_active: Optional[bool] = Field(True, title='Is active')
-    actual_at: Optional[datetime] = Field(None, title='Actual at')
-    source_type: Optional[SourceType] = Field('manual', title='Source type')
+    default_price: Optional[float] = Field(None, title="Default price")
+    is_active: Optional[bool] = Field(True, title="Is active")
+    actual_at: Optional[datetime] = Field(None, title="Actual at")
+    source_type: Optional[SourceType] = Field("manual", title="Source type")
     source_origin: Optional[constr(min_length=1)] = Field(
-        'manual', title='Source origin'
+        "manual", title="Source origin"
     )
-    external_id: Optional[constr(min_length=1)] = Field(None, title='External id')
-    is_manual_locked: Optional[bool] = Field(False, title='Is manual locked')
-    is_locked: Optional[bool] = Field(True, title='Is locked')
-    created_at: Optional[datetime] = Field(None, title='Created at')
-    modified_at: Optional[datetime] = Field(None, title='Modified at')
-    deleted_at: Optional[datetime] = Field(None, title='Deleted at')
+    external_id: Optional[constr(min_length=1)] = Field(None, title="External id")
+    is_manual_locked: Optional[bool] = Field(False, title="Is manual locked")
+    is_locked: Optional[bool] = Field(True, title="Is locked")
+    created_at: Optional[datetime] = Field(None, title="Created at")
+    modified_at: Optional[datetime] = Field(None, title="Modified at")
+    deleted_at: Optional[datetime] = Field(None, title="Deleted at")
     deleted_user_code: Optional[constr(max_length=255)] = Field(
-        None, title='Deleted user code'
+        None, title="Deleted user code"
     )
     attributes: Optional[List[GenericAttribute]] = None
 
 
 class PrCalculatePriceHistoryRequest(BaseModel):
-    date_from: Optional[date_aliased] = Field(None, title='Date from')
-    date_to: Optional[date_aliased] = Field(None, title='Date to')
+    date_from: Optional[date_aliased] = Field(None, title="Date from")
+    date_to: Optional[date_aliased] = Field(None, title="Date to")
     portfolios: Optional[List[constr(min_length=1)]] = None
 
 
@@ -712,319 +712,319 @@ class PrCalculateRecordsRequest(BaseModel):
 
 
 class PortfolioType(BaseModel):
-    id: Optional[int] = Field(None, title='ID')
-    user_code: Optional[constr(max_length=255)] = Field(None, title='User code')
+    id: Optional[int] = Field(None, title="ID")
+    user_code: Optional[constr(max_length=255)] = Field(None, title="User code")
     configuration_code: constr(min_length=1, max_length=255) = Field(
-        ..., title='Configuration Code'
+        ..., title="Configuration Code"
     )
     name: constr(min_length=1, max_length=255) = Field(
-        ..., description='Human Readable Name of the object', title='Name'
+        ..., description="Human Readable Name of the object", title="Name"
     )
     short_name: Optional[str] = Field(
         None,
-        description='Short Name of the object. Used in dropdown menus',
-        title='Short name',
+        description="Short Name of the object. Used in dropdown menus",
+        title="Short name",
     )
     public_name: Optional[constr(max_length=255)] = Field(
         None,
-        description='Used if user does not have permissions to view object',
-        title='Public name',
+        description="Used if user does not have permissions to view object",
+        title="Public name",
     )
     notes: Optional[str] = Field(
         None,
-        description='Notes, any useful information about the object',
-        title='Notes',
+        description="Notes, any useful information about the object",
+        title="Notes",
     )
     is_deleted: Optional[bool] = Field(
         None,
-        description='Mark object as deleted. Does not actually delete the object.',
-        title='Is deleted',
+        description="Mark object as deleted. Does not actually delete the object.",
+        title="Is deleted",
     )
-    is_enabled: Optional[bool] = Field(None, title='Is enabled')
-    portfolio_class: int = Field(..., title='Portfolio class')
+    is_enabled: Optional[bool] = Field(None, title="Is enabled")
+    portfolio_class: int = Field(..., title="Portfolio class")
     portfolio_class_object: Optional[PortfolioClass] = None
-    created_at: Optional[datetime] = Field(None, title='Created at')
-    modified_at: Optional[datetime] = Field(None, title='Modified at')
-    deleted_at: Optional[datetime] = Field(None, title='Deleted at')
+    created_at: Optional[datetime] = Field(None, title="Created at")
+    modified_at: Optional[datetime] = Field(None, title="Modified at")
+    deleted_at: Optional[datetime] = Field(None, title="Deleted at")
     attributes: Optional[List[GenericAttribute]] = None
     deleted_user_code: Optional[constr(max_length=255)] = Field(
-        None, title='Deleted user code'
+        None, title="Deleted user code"
     )
 
 
 class PortfolioTypeLight(BaseModel):
-    id: Optional[int] = Field(None, title='ID')
-    user_code: Optional[constr(max_length=255)] = Field(None, title='User code')
+    id: Optional[int] = Field(None, title="ID")
+    user_code: Optional[constr(max_length=255)] = Field(None, title="User code")
     name: constr(min_length=1, max_length=255) = Field(
-        ..., description='Human Readable Name of the object', title='Name'
+        ..., description="Human Readable Name of the object", title="Name"
     )
     short_name: Optional[str] = Field(
         None,
-        description='Short Name of the object. Used in dropdown menus',
-        title='Short name',
+        description="Short Name of the object. Used in dropdown menus",
+        title="Short name",
     )
     public_name: Optional[constr(max_length=255)] = Field(
         None,
-        description='Used if user does not have permissions to view object',
-        title='Public name',
+        description="Used if user does not have permissions to view object",
+        title="Public name",
     )
     is_deleted: Optional[bool] = Field(
         None,
-        description='Mark object as deleted. Does not actually delete the object.',
-        title='Is deleted',
+        description="Mark object as deleted. Does not actually delete the object.",
+        title="Is deleted",
     )
-    is_enabled: Optional[bool] = Field(None, title='Is enabled')
+    is_enabled: Optional[bool] = Field(None, title="Is enabled")
     deleted_user_code: Optional[constr(max_length=255)] = Field(
-        None, title='Deleted user code'
+        None, title="Deleted user code"
     )
 
 
 class PortfolioPortfolioRegister(BaseModel):
-    id: Optional[int] = Field(None, title='ID')
-    user_code: Optional[constr(max_length=255)] = Field(None, title='User code')
+    id: Optional[int] = Field(None, title="ID")
+    user_code: Optional[constr(max_length=255)] = Field(None, title="User code")
     name: constr(min_length=1, max_length=255) = Field(
-        ..., description='Human Readable Name of the object', title='Name'
+        ..., description="Human Readable Name of the object", title="Name"
     )
     short_name: Optional[str] = Field(
         None,
-        description='Short Name of the object. Used in dropdown menus',
-        title='Short name',
+        description="Short Name of the object. Used in dropdown menus",
+        title="Short name",
     )
     public_name: Optional[constr(max_length=255)] = Field(
         None,
-        description='Used if user does not have permissions to view object',
-        title='Public name',
+        description="Used if user does not have permissions to view object",
+        title="Public name",
     )
     notes: Optional[str] = Field(
         None,
-        description='Notes, any useful information about the object',
-        title='Notes',
+        description="Notes, any useful information about the object",
+        title="Notes",
     )
     is_deleted: Optional[bool] = Field(
         None,
-        description='Mark object as deleted. Does not actually delete the object.',
-        title='Is deleted',
+        description="Mark object as deleted. Does not actually delete the object.",
+        title="Is deleted",
     )
-    is_enabled: Optional[bool] = Field(None, title='Is enabled')
-    linked_instrument: Optional[int] = Field(None, title='Linked instrument')
+    is_enabled: Optional[bool] = Field(None, title="Is enabled")
+    linked_instrument: Optional[int] = Field(None, title="Linked instrument")
     linked_instrument_object: Optional[InstrumentView] = None
-    valuation_currency: Optional[int] = Field(None, title='Valuation currency')
+    valuation_currency: Optional[int] = Field(None, title="Valuation currency")
     valuation_currency_object: Optional[CurrencyView] = None
-    valuation_pricing_policy: int = Field(..., title='Valuation pricing policy')
+    valuation_pricing_policy: int = Field(..., title="Valuation pricing policy")
     valuation_pricing_policy_object: Optional[PricingPolicy] = None
-    default_price: Optional[float] = Field(None, title='Default price')
-    is_active: Optional[bool] = Field(True, title='Is active')
-    actual_at: Optional[datetime] = Field(None, title='Actual at')
-    source_type: Optional[SourceType] = Field('manual', title='Source type')
+    default_price: Optional[float] = Field(None, title="Default price")
+    is_active: Optional[bool] = Field(True, title="Is active")
+    actual_at: Optional[datetime] = Field(None, title="Actual at")
+    source_type: Optional[SourceType] = Field("manual", title="Source type")
     source_origin: Optional[constr(min_length=1)] = Field(
-        'manual', title='Source origin'
+        "manual", title="Source origin"
     )
-    external_id: Optional[constr(min_length=1)] = Field(None, title='External id')
-    is_manual_locked: Optional[bool] = Field(False, title='Is manual locked')
-    is_locked: Optional[bool] = Field(True, title='Is locked')
-    created_at: Optional[datetime] = Field(None, title='Created at')
-    modified_at: Optional[datetime] = Field(None, title='Modified at')
-    deleted_at: Optional[datetime] = Field(None, title='Deleted at')
+    external_id: Optional[constr(min_length=1)] = Field(None, title="External id")
+    is_manual_locked: Optional[bool] = Field(False, title="Is manual locked")
+    is_locked: Optional[bool] = Field(True, title="Is locked")
+    created_at: Optional[datetime] = Field(None, title="Created at")
+    modified_at: Optional[datetime] = Field(None, title="Modified at")
+    deleted_at: Optional[datetime] = Field(None, title="Deleted at")
     deleted_user_code: Optional[constr(max_length=255)] = Field(
-        None, title='Deleted user code'
+        None, title="Deleted user code"
     )
     attributes: Optional[List[GenericAttribute]] = None
 
 
 class ClientSecretLight(BaseModel):
-    id: Optional[int] = Field(None, title='ID')
-    client: Optional[int] = Field(None, title='Client')
+    id: Optional[int] = Field(None, title="ID")
+    client: Optional[int] = Field(None, title="Client")
     user_code: constr(min_length=1, max_length=1024) = Field(
         ...,
-        description='Unique Code for this object. Used in Configuration and Permissions Logic',
-        title='User code',
+        description="Unique Code for this object. Used in Configuration and Permissions Logic",
+        title="User code",
     )
-    provider: Optional[constr(max_length=255)] = Field(None, title='Provider')
-    portfolio: Optional[constr(max_length=255)] = Field(None, title='Portfolio')
+    provider: Optional[constr(max_length=255)] = Field(None, title="Provider")
+    portfolio: Optional[constr(max_length=255)] = Field(None, title="Portfolio")
     path_to_secret: Optional[constr(max_length=255)] = Field(
-        None, title='Path to secret'
+        None, title="Path to secret"
     )
-    notes: Optional[constr(max_length=255)] = Field(None, title='Notes')
+    notes: Optional[constr(max_length=255)] = Field(None, title="Notes")
 
 
 class Clients(BaseModel):
-    id: Optional[int] = Field(None, title='ID')
-    user_code: Optional[constr(max_length=255)] = Field(None, title='User code')
+    id: Optional[int] = Field(None, title="ID")
+    user_code: Optional[constr(max_length=255)] = Field(None, title="User code")
     name: constr(min_length=1, max_length=255) = Field(
-        ..., description='Human Readable Name of the object', title='Name'
+        ..., description="Human Readable Name of the object", title="Name"
     )
     short_name: Optional[str] = Field(
         None,
-        description='Short Name of the object. Used in dropdown menus',
-        title='Short name',
+        description="Short Name of the object. Used in dropdown menus",
+        title="Short name",
     )
     public_name: Optional[constr(max_length=255)] = Field(
         None,
-        description='Used if user does not have permissions to view object',
-        title='Public name',
+        description="Used if user does not have permissions to view object",
+        title="Public name",
     )
     first_name: Optional[constr(max_length=255)] = Field(
-        None, description='First name of client', title='First name'
+        None, description="First name of client", title="First name"
     )
     last_name: Optional[constr(max_length=255)] = Field(
-        None, description='Last name of client', title='Last name'
+        None, description="Last name of client", title="Last name"
     )
     telephone: Optional[constr(max_length=255)] = Field(
         None,
         description="Telephone number of client (symbol '+' is optional, length from 5 to 15 digits)",
-        title='Telephone',
+        title="Telephone",
     )
     email: Optional[EmailStr] = Field(
         None,
-        description='Email address of client (example email@outlook.com)',
-        title='Email',
+        description="Email address of client (example email@outlook.com)",
+        title="Email",
     )
     notes: Optional[str] = Field(
         None,
-        description='Notes, any useful information about the object',
-        title='Notes',
+        description="Notes, any useful information about the object",
+        title="Notes",
     )
     portfolios: Optional[List[int]] = None
     portfolios_object: Optional[List[PortfolioView]] = None
     client_secrets: Optional[List[int]] = None
     client_secrets_object: Optional[List[ClientSecretLight]] = None
     deleted_user_code: Optional[constr(max_length=255)] = Field(
-        None, title='Deleted user code'
+        None, title="Deleted user code"
     )
 
 
 class AccountTypeView(BaseModel):
-    id: Optional[int] = Field(None, title='ID')
-    user_code: Optional[constr(max_length=255)] = Field(None, title='User code')
+    id: Optional[int] = Field(None, title="ID")
+    user_code: Optional[constr(max_length=255)] = Field(None, title="User code")
     name: constr(min_length=1, max_length=255) = Field(
-        ..., description='Human Readable Name of the object', title='Name'
+        ..., description="Human Readable Name of the object", title="Name"
     )
     short_name: Optional[str] = Field(
         None,
-        description='Short Name of the object. Used in dropdown menus',
-        title='Short name',
+        description="Short Name of the object. Used in dropdown menus",
+        title="Short name",
     )
     public_name: Optional[constr(max_length=255)] = Field(
         None,
-        description='Used if user does not have permissions to view object',
-        title='Public name',
+        description="Used if user does not have permissions to view object",
+        title="Public name",
     )
     deleted_user_code: Optional[constr(max_length=255)] = Field(
-        None, title='Deleted user code'
+        None, title="Deleted user code"
     )
 
 
 class AccountView(BaseModel):
-    id: Optional[int] = Field(None, title='ID')
-    type: str = Field(..., title='Type')
+    id: Optional[int] = Field(None, title="ID")
+    type: str = Field(..., title="Type")
     type_object: Optional[AccountTypeView] = None
-    user_code: Optional[constr(max_length=255)] = Field(None, title='User code')
+    user_code: Optional[constr(max_length=255)] = Field(None, title="User code")
     name: constr(min_length=1, max_length=255) = Field(
-        ..., description='Human Readable Name of the object', title='Name'
+        ..., description="Human Readable Name of the object", title="Name"
     )
     short_name: Optional[str] = Field(
         None,
-        description='Short Name of the object. Used in dropdown menus',
-        title='Short name',
+        description="Short Name of the object. Used in dropdown menus",
+        title="Short name",
     )
     public_name: Optional[constr(max_length=255)] = Field(
         None,
-        description='Used if user does not have permissions to view object',
-        title='Public name',
+        description="Used if user does not have permissions to view object",
+        title="Public name",
     )
     deleted_user_code: Optional[constr(max_length=255)] = Field(
-        None, title='Deleted user code'
+        None, title="Deleted user code"
     )
 
 
 class ResponsibleGroupView(BaseModel):
-    id: Optional[int] = Field(None, title='ID')
+    id: Optional[int] = Field(None, title="ID")
     user_code: Optional[constr(max_length=1024)] = Field(
         None,
-        description='Unique Code for this object. Used in Configuration and Permissions Logic',
-        title='User code',
+        description="Unique Code for this object. Used in Configuration and Permissions Logic",
+        title="User code",
     )
     name: constr(min_length=1, max_length=255) = Field(
-        ..., description='Human Readable Name of the object', title='Name'
+        ..., description="Human Readable Name of the object", title="Name"
     )
     short_name: Optional[str] = Field(
         None,
-        description='Short Name of the object. Used in dropdown menus',
-        title='Short name',
+        description="Short Name of the object. Used in dropdown menus",
+        title="Short name",
     )
     public_name: Optional[constr(max_length=255)] = Field(
         None,
-        description='Used if user does not have permissions to view object',
-        title='Public name',
+        description="Used if user does not have permissions to view object",
+        title="Public name",
     )
 
 
 class ResponsibleView(BaseModel):
-    id: Optional[int] = Field(None, title='ID')
-    group: str = Field(..., title='Group')
+    id: Optional[int] = Field(None, title="ID")
+    group: str = Field(..., title="Group")
     group_object: Optional[ResponsibleGroupView] = None
     user_code: Optional[constr(max_length=1024)] = Field(
         None,
-        description='Unique Code for this object. Used in Configuration and Permissions Logic',
-        title='User code',
+        description="Unique Code for this object. Used in Configuration and Permissions Logic",
+        title="User code",
     )
     name: constr(min_length=1, max_length=255) = Field(
-        ..., description='Human Readable Name of the object', title='Name'
+        ..., description="Human Readable Name of the object", title="Name"
     )
     short_name: Optional[str] = Field(
         None,
-        description='Short Name of the object. Used in dropdown menus',
-        title='Short name',
+        description="Short Name of the object. Used in dropdown menus",
+        title="Short name",
     )
     public_name: Optional[constr(max_length=255)] = Field(
         None,
-        description='Used if user does not have permissions to view object',
-        title='Public name',
+        description="Used if user does not have permissions to view object",
+        title="Public name",
     )
 
 
 class CounterpartyGroupView(BaseModel):
-    id: Optional[int] = Field(None, title='ID')
+    id: Optional[int] = Field(None, title="ID")
     user_code: Optional[constr(max_length=1024)] = Field(
         None,
-        description='Unique Code for this object. Used in Configuration and Permissions Logic',
-        title='User code',
+        description="Unique Code for this object. Used in Configuration and Permissions Logic",
+        title="User code",
     )
     name: constr(min_length=1, max_length=255) = Field(
-        ..., description='Human Readable Name of the object', title='Name'
+        ..., description="Human Readable Name of the object", title="Name"
     )
     short_name: Optional[str] = Field(
         None,
-        description='Short Name of the object. Used in dropdown menus',
-        title='Short name',
+        description="Short Name of the object. Used in dropdown menus",
+        title="Short name",
     )
     public_name: Optional[constr(max_length=255)] = Field(
         None,
-        description='Used if user does not have permissions to view object',
-        title='Public name',
+        description="Used if user does not have permissions to view object",
+        title="Public name",
     )
 
 
 class CounterpartyView(BaseModel):
-    id: Optional[int] = Field(None, title='ID')
-    group: str = Field(..., title='Group')
+    id: Optional[int] = Field(None, title="ID")
+    group: str = Field(..., title="Group")
     group_object: Optional[CounterpartyGroupView] = None
-    user_code: Optional[constr(max_length=255)] = Field(None, title='User code')
+    user_code: Optional[constr(max_length=255)] = Field(None, title="User code")
     name: constr(min_length=1, max_length=255) = Field(
-        ..., description='Human Readable Name of the object', title='Name'
+        ..., description="Human Readable Name of the object", title="Name"
     )
     short_name: Optional[str] = Field(
         None,
-        description='Short Name of the object. Used in dropdown menus',
-        title='Short name',
+        description="Short Name of the object. Used in dropdown menus",
+        title="Short name",
     )
     public_name: Optional[constr(max_length=255)] = Field(
         None,
-        description='Used if user does not have permissions to view object',
-        title='Public name',
+        description="Used if user does not have permissions to view object",
+        title="Public name",
     )
     deleted_user_code: Optional[constr(max_length=255)] = Field(
-        None, title='Deleted user code'
+        None, title="Deleted user code"
     )
 
 
@@ -1036,194 +1036,194 @@ class TransactionUniqueCodeOptions(Enum):
 
 
 class TransactionTypeView(BaseModel):
-    id: Optional[int] = Field(None, title='ID')
-    group: Optional[str] = Field(None, title='Group')
-    user_code: Optional[constr(max_length=255)] = Field(None, title='User code')
+    id: Optional[int] = Field(None, title="ID")
+    group: Optional[str] = Field(None, title="Group")
+    user_code: Optional[constr(max_length=255)] = Field(None, title="User code")
     name: constr(min_length=1, max_length=255) = Field(
-        ..., description='Human Readable Name of the object', title='Name'
+        ..., description="Human Readable Name of the object", title="Name"
     )
     short_name: Optional[str] = Field(
         None,
-        description='Short Name of the object. Used in dropdown menus',
-        title='Short name',
+        description="Short Name of the object. Used in dropdown menus",
+        title="Short name",
     )
     public_name: Optional[constr(max_length=255)] = Field(
         None,
-        description='Used if user does not have permissions to view object',
-        title='Public name',
+        description="Used if user does not have permissions to view object",
+        title="Public name",
     )
     notes: Optional[str] = Field(
         None,
-        description='Notes, any useful information about the object',
-        title='Notes',
+        description="Notes, any useful information about the object",
+        title="Notes",
     )
     is_valid_for_all_portfolios: Optional[bool] = Field(
-        None, title='Is valid for all portfolios'
+        None, title="Is valid for all portfolios"
     )
     is_valid_for_all_instruments: Optional[bool] = Field(
-        None, title='Is valid for all instruments'
+        None, title="Is valid for all instruments"
     )
     is_deleted: Optional[bool] = Field(
         None,
-        description='Mark object as deleted. Does not actually delete the object.',
-        title='Is deleted',
+        description="Mark object as deleted. Does not actually delete the object.",
+        title="Is deleted",
     )
     transaction_unique_code_expr: Optional[constr(max_length=4096)] = Field(
-        None, title='Transaction unique code expr'
+        None, title="Transaction unique code expr"
     )
     transaction_unique_code_options: Optional[TransactionUniqueCodeOptions] = Field(
-        None, title='Transaction unique code options'
+        None, title="Transaction unique code options"
     )
-    user_text_1: Optional[constr(max_length=4096)] = Field(None, title='User text 1')
-    user_text_2: Optional[constr(max_length=4096)] = Field(None, title='User text 2')
-    user_text_3: Optional[constr(max_length=4096)] = Field(None, title='User text 3')
-    user_text_4: Optional[constr(max_length=4096)] = Field(None, title='User text 4')
-    user_text_5: Optional[constr(max_length=4096)] = Field(None, title='User text 5')
-    user_text_6: Optional[constr(max_length=4096)] = Field(None, title='User text 6')
-    user_text_7: Optional[constr(max_length=4096)] = Field(None, title='User text 7')
-    user_text_8: Optional[constr(max_length=4096)] = Field(None, title='User text 8')
-    user_text_9: Optional[constr(max_length=4096)] = Field(None, title='User text 9')
-    user_text_10: Optional[constr(max_length=4096)] = Field(None, title='User text 10')
-    user_text_11: Optional[constr(max_length=4096)] = Field(None, title='User text 11')
-    user_text_12: Optional[constr(max_length=4096)] = Field(None, title='User text 12')
-    user_text_13: Optional[constr(max_length=4096)] = Field(None, title='User text 13')
-    user_text_14: Optional[constr(max_length=4096)] = Field(None, title='User text 14')
-    user_text_15: Optional[constr(max_length=4096)] = Field(None, title='User text 15')
-    user_text_16: Optional[constr(max_length=4096)] = Field(None, title='User text 16')
-    user_text_17: Optional[constr(max_length=4096)] = Field(None, title='User text 17')
-    user_text_18: Optional[constr(max_length=4096)] = Field(None, title='User text 18')
-    user_text_19: Optional[constr(max_length=4096)] = Field(None, title='User text 19')
-    user_text_20: Optional[constr(max_length=4096)] = Field(None, title='User text 20')
-    user_text_21: Optional[constr(max_length=4096)] = Field(None, title='User text 21')
-    user_text_22: Optional[constr(max_length=4096)] = Field(None, title='User text 22')
-    user_text_23: Optional[constr(max_length=4096)] = Field(None, title='User text 23')
-    user_text_24: Optional[constr(max_length=4096)] = Field(None, title='User text 24')
-    user_text_25: Optional[constr(max_length=4096)] = Field(None, title='User text 25')
-    user_text_26: Optional[constr(max_length=4096)] = Field(None, title='User text 26')
-    user_text_27: Optional[constr(max_length=4096)] = Field(None, title='User text 27')
-    user_text_28: Optional[constr(max_length=4096)] = Field(None, title='User text 28')
-    user_text_29: Optional[constr(max_length=4096)] = Field(None, title='User text 29')
-    user_text_30: Optional[constr(max_length=4096)] = Field(None, title='User text 30')
+    user_text_1: Optional[constr(max_length=4096)] = Field(None, title="User text 1")
+    user_text_2: Optional[constr(max_length=4096)] = Field(None, title="User text 2")
+    user_text_3: Optional[constr(max_length=4096)] = Field(None, title="User text 3")
+    user_text_4: Optional[constr(max_length=4096)] = Field(None, title="User text 4")
+    user_text_5: Optional[constr(max_length=4096)] = Field(None, title="User text 5")
+    user_text_6: Optional[constr(max_length=4096)] = Field(None, title="User text 6")
+    user_text_7: Optional[constr(max_length=4096)] = Field(None, title="User text 7")
+    user_text_8: Optional[constr(max_length=4096)] = Field(None, title="User text 8")
+    user_text_9: Optional[constr(max_length=4096)] = Field(None, title="User text 9")
+    user_text_10: Optional[constr(max_length=4096)] = Field(None, title="User text 10")
+    user_text_11: Optional[constr(max_length=4096)] = Field(None, title="User text 11")
+    user_text_12: Optional[constr(max_length=4096)] = Field(None, title="User text 12")
+    user_text_13: Optional[constr(max_length=4096)] = Field(None, title="User text 13")
+    user_text_14: Optional[constr(max_length=4096)] = Field(None, title="User text 14")
+    user_text_15: Optional[constr(max_length=4096)] = Field(None, title="User text 15")
+    user_text_16: Optional[constr(max_length=4096)] = Field(None, title="User text 16")
+    user_text_17: Optional[constr(max_length=4096)] = Field(None, title="User text 17")
+    user_text_18: Optional[constr(max_length=4096)] = Field(None, title="User text 18")
+    user_text_19: Optional[constr(max_length=4096)] = Field(None, title="User text 19")
+    user_text_20: Optional[constr(max_length=4096)] = Field(None, title="User text 20")
+    user_text_21: Optional[constr(max_length=4096)] = Field(None, title="User text 21")
+    user_text_22: Optional[constr(max_length=4096)] = Field(None, title="User text 22")
+    user_text_23: Optional[constr(max_length=4096)] = Field(None, title="User text 23")
+    user_text_24: Optional[constr(max_length=4096)] = Field(None, title="User text 24")
+    user_text_25: Optional[constr(max_length=4096)] = Field(None, title="User text 25")
+    user_text_26: Optional[constr(max_length=4096)] = Field(None, title="User text 26")
+    user_text_27: Optional[constr(max_length=4096)] = Field(None, title="User text 27")
+    user_text_28: Optional[constr(max_length=4096)] = Field(None, title="User text 28")
+    user_text_29: Optional[constr(max_length=4096)] = Field(None, title="User text 29")
+    user_text_30: Optional[constr(max_length=4096)] = Field(None, title="User text 30")
     user_number_1: Optional[constr(max_length=4096)] = Field(
-        None, title='User number 1'
+        None, title="User number 1"
     )
     user_number_2: Optional[constr(max_length=4096)] = Field(
-        None, title='User number 2'
+        None, title="User number 2"
     )
     user_number_3: Optional[constr(max_length=4096)] = Field(
-        None, title='User number 3'
+        None, title="User number 3"
     )
     user_number_4: Optional[constr(max_length=4096)] = Field(
-        None, title='User number 4'
+        None, title="User number 4"
     )
     user_number_5: Optional[constr(max_length=4096)] = Field(
-        None, title='User number 5'
+        None, title="User number 5"
     )
     user_number_6: Optional[constr(max_length=4096)] = Field(
-        None, title='User number 6'
+        None, title="User number 6"
     )
     user_number_7: Optional[constr(max_length=4096)] = Field(
-        None, title='User number 7'
+        None, title="User number 7"
     )
     user_number_8: Optional[constr(max_length=4096)] = Field(
-        None, title='User number 8'
+        None, title="User number 8"
     )
     user_number_9: Optional[constr(max_length=4096)] = Field(
-        None, title='User number 9'
+        None, title="User number 9"
     )
     user_number_10: Optional[constr(max_length=4096)] = Field(
-        None, title='User number 10'
+        None, title="User number 10"
     )
     user_number_11: Optional[constr(max_length=4096)] = Field(
-        None, title='User number 11'
+        None, title="User number 11"
     )
     user_number_12: Optional[constr(max_length=4096)] = Field(
-        None, title='User number 12'
+        None, title="User number 12"
     )
     user_number_13: Optional[constr(max_length=4096)] = Field(
-        None, title='User number 13'
+        None, title="User number 13"
     )
     user_number_14: Optional[constr(max_length=4096)] = Field(
-        None, title='User number 14'
+        None, title="User number 14"
     )
     user_number_15: Optional[constr(max_length=4096)] = Field(
-        None, title='User number 15'
+        None, title="User number 15"
     )
     user_number_16: Optional[constr(max_length=4096)] = Field(
-        None, title='User number 16'
+        None, title="User number 16"
     )
     user_number_17: Optional[constr(max_length=4096)] = Field(
-        None, title='User number 17'
+        None, title="User number 17"
     )
     user_number_18: Optional[constr(max_length=4096)] = Field(
-        None, title='User number 18'
+        None, title="User number 18"
     )
     user_number_19: Optional[constr(max_length=4096)] = Field(
-        None, title='User number 19'
+        None, title="User number 19"
     )
     user_number_20: Optional[constr(max_length=4096)] = Field(
-        None, title='User number 20'
+        None, title="User number 20"
     )
-    user_date_1: Optional[constr(max_length=4096)] = Field(None, title='User date 1')
-    user_date_2: Optional[constr(max_length=4096)] = Field(None, title='User date 2')
-    user_date_3: Optional[constr(max_length=4096)] = Field(None, title='User date 3')
-    user_date_4: Optional[constr(max_length=4096)] = Field(None, title='User date 4')
-    user_date_5: Optional[constr(max_length=4096)] = Field(None, title='User date 5')
+    user_date_1: Optional[constr(max_length=4096)] = Field(None, title="User date 1")
+    user_date_2: Optional[constr(max_length=4096)] = Field(None, title="User date 2")
+    user_date_3: Optional[constr(max_length=4096)] = Field(None, title="User date 3")
+    user_date_4: Optional[constr(max_length=4096)] = Field(None, title="User date 4")
+    user_date_5: Optional[constr(max_length=4096)] = Field(None, title="User date 5")
     deleted_user_code: Optional[constr(max_length=255)] = Field(
-        None, title='Deleted user code'
+        None, title="Deleted user code"
     )
 
 
 class Portfolio(BaseModel):
-    id: Optional[int] = Field(None, title='ID')
-    user_code: Optional[constr(max_length=255)] = Field(None, title='User code')
+    id: Optional[int] = Field(None, title="ID")
+    user_code: Optional[constr(max_length=255)] = Field(None, title="User code")
     name: constr(min_length=1, max_length=255) = Field(
-        ..., description='Human Readable Name of the object', title='Name'
+        ..., description="Human Readable Name of the object", title="Name"
     )
     short_name: Optional[str] = Field(
         None,
-        description='Short Name of the object. Used in dropdown menus',
-        title='Short name',
+        description="Short Name of the object. Used in dropdown menus",
+        title="Short name",
     )
     public_name: Optional[constr(max_length=255)] = Field(
         None,
-        description='Used if user does not have permissions to view object',
-        title='Public name',
+        description="Used if user does not have permissions to view object",
+        title="Public name",
     )
     notes: Optional[str] = Field(
         None,
-        description='Notes, any useful information about the object',
-        title='Notes',
+        description="Notes, any useful information about the object",
+        title="Notes",
     )
-    is_default: Optional[str] = Field(None, title='Is default')
+    is_default: Optional[str] = Field(None, title="Is default")
     is_deleted: Optional[bool] = Field(
         None,
-        description='Mark object as deleted. Does not actually delete the object.',
-        title='Is deleted',
+        description="Mark object as deleted. Does not actually delete the object.",
+        title="Is deleted",
     )
-    is_enabled: Optional[bool] = Field(None, title='Is enabled')
+    is_enabled: Optional[bool] = Field(None, title="Is enabled")
     registers: Optional[List[PortfolioPortfolioRegister]] = None
-    first_transaction: Optional[Dict[str, Any]] = Field(None, title='First transaction')
-    first_transaction_date: Optional[str] = Field(None, title='First transaction date')
-    first_cash_flow_date: Optional[str] = Field(None, title='First cash flow date')
-    portfolio_type: Optional[int] = Field(None, title='Portfolio type')
+    first_transaction: Optional[Dict[str, Any]] = Field(None, title="First transaction")
+    first_transaction_date: Optional[str] = Field(None, title="First transaction date")
+    first_cash_flow_date: Optional[str] = Field(None, title="First cash flow date")
+    portfolio_type: Optional[int] = Field(None, title="Portfolio type")
     portfolio_type_object: Optional[PortfolioType] = None
-    client: Optional[int] = Field(None, title='Client')
+    client: Optional[int] = Field(None, title="Client")
     client_object: Optional[Clients] = None
-    is_active: Optional[bool] = Field(True, title='Is active')
-    actual_at: Optional[datetime] = Field(None, title='Actual at')
-    source_type: Optional[SourceType] = Field('manual', title='Source type')
+    is_active: Optional[bool] = Field(True, title="Is active")
+    actual_at: Optional[datetime] = Field(None, title="Actual at")
+    source_type: Optional[SourceType] = Field("manual", title="Source type")
     source_origin: Optional[constr(min_length=1)] = Field(
-        'manual', title='Source origin'
+        "manual", title="Source origin"
     )
-    external_id: Optional[constr(min_length=1)] = Field(None, title='External id')
-    is_manual_locked: Optional[bool] = Field(False, title='Is manual locked')
-    is_locked: Optional[bool] = Field(True, title='Is locked')
-    created_at: Optional[datetime] = Field(None, title='Created at')
-    modified_at: Optional[datetime] = Field(None, title='Modified at')
-    deleted_at: Optional[datetime] = Field(None, title='Deleted at')
+    external_id: Optional[constr(min_length=1)] = Field(None, title="External id")
+    is_manual_locked: Optional[bool] = Field(False, title="Is manual locked")
+    is_locked: Optional[bool] = Field(True, title="Is locked")
+    created_at: Optional[datetime] = Field(None, title="Created at")
+    modified_at: Optional[datetime] = Field(None, title="Modified at")
+    deleted_at: Optional[datetime] = Field(None, title="Deleted at")
     deleted_user_code: Optional[constr(max_length=255)] = Field(
-        None, title='Deleted user code'
+        None, title="Deleted user code"
     )
     attributes: Optional[List[GenericAttribute]] = None
     resource_groups: Optional[List[constr(min_length=1, max_length=1024)]] = []
@@ -1235,35 +1235,35 @@ class Portfolio(BaseModel):
 
 
 class PortfolioLight(BaseModel):
-    id: Optional[int] = Field(None, title='ID')
-    user_code: Optional[constr(max_length=255)] = Field(None, title='User code')
+    id: Optional[int] = Field(None, title="ID")
+    user_code: Optional[constr(max_length=255)] = Field(None, title="User code")
     name: constr(min_length=1, max_length=255) = Field(
-        ..., description='Human Readable Name of the object', title='Name'
+        ..., description="Human Readable Name of the object", title="Name"
     )
     short_name: Optional[str] = Field(
         None,
-        description='Short Name of the object. Used in dropdown menus',
-        title='Short name',
+        description="Short Name of the object. Used in dropdown menus",
+        title="Short name",
     )
     public_name: Optional[constr(max_length=255)] = Field(
         None,
-        description='Used if user does not have permissions to view object',
-        title='Public name',
+        description="Used if user does not have permissions to view object",
+        title="Public name",
     )
-    is_default: Optional[str] = Field(None, title='Is default')
+    is_default: Optional[str] = Field(None, title="Is default")
     is_deleted: Optional[bool] = Field(
         None,
-        description='Mark object as deleted. Does not actually delete the object.',
-        title='Is deleted',
+        description="Mark object as deleted. Does not actually delete the object.",
+        title="Is deleted",
     )
-    is_enabled: Optional[bool] = Field(None, title='Is enabled')
-    first_transaction: Optional[Dict[str, Any]] = Field(None, title='First transaction')
+    is_enabled: Optional[bool] = Field(None, title="Is enabled")
+    first_transaction: Optional[Dict[str, Any]] = Field(None, title="First transaction")
     first_transaction_date: Optional[date_aliased] = Field(
-        None, title='First transaction date'
+        None, title="First transaction date"
     )
     first_cash_flow_date: Optional[date_aliased] = Field(
-        None, title='First cash flow date'
+        None, title="First cash flow date"
     )
     deleted_user_code: Optional[constr(max_length=255)] = Field(
-        None, title='Deleted user code'
+        None, title="Deleted user code"
     )

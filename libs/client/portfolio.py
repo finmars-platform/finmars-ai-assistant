@@ -69,7 +69,7 @@ class PortfolioClient(BaseHTTPClient):
         return await self.get(
             endpoint=f"portfolios/portfolio/{portfolio_id}/",
             params=params,
-            response_model=Portfolio
+            response_model=Portfolio,
         )
 
     async def list_portfolios_light(
@@ -152,8 +152,7 @@ class PortfolioClient(BaseHTTPClient):
             "space_code": self.space,
         }
         return await self.get(
-            endpoint="portfolios/portfolio/get-inception-date/",
-            params=params
+            endpoint="portfolios/portfolio/get-inception-date/", params=params
         )
 
     async def list_first_transaction_dates(
