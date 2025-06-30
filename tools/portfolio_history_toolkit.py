@@ -40,29 +40,30 @@ class PortfolioHistoryToolkit:
             result = await self.client.portfolio_history.list_portfolio_history(
                 ordering=schema.ordering, page=schema.page, page_size=schema.page_size
             )
+            return result.model_dump_json()
 
-            output = f"Found {result.count} total portfolio history records.\n"
-            if result.results:
-                output += f"Showing {len(result.results)} history records on page {schema.page}:\n\n"
-                for history in result.results:
-                    output += f"ID: {history.id}\n"
-                    output += f"Portfolio: {history.portfolio}\n"
-                    output += f"Currency: {history.currency}\n"
-                    if hasattr(history, "date") and history.date:
-                        output += f"Date: {history.date}\n"
-                    if hasattr(history, "value") and history.value is not None:
-                        output += f"Value: {history.value}\n"
-                    output += f"Created: {history.created_at}\n"
-                    output += "-" * 40 + "\n"
-            else:
-                output += "No portfolio history records found.\n"
-
-            if result.next:
-                output += (
-                    f"\nNext page available. Use page={schema.page + 1} to continue."
-                )
-
-            return output
+            # output = f"Found {result.count} total portfolio history records.\n"
+            # if result.results:
+            #     output += f"Showing {len(result.results)} history records on page {schema.page}:\n\n"
+            #     for history in result.results:
+            #         output += f"ID: {history.id}\n"
+            #         output += f"Portfolio: {history.portfolio}\n"
+            #         output += f"Currency: {history.currency}\n"
+            #         if hasattr(history, "date") and history.date:
+            #             output += f"Date: {history.date}\n"
+            #         if hasattr(history, "value") and history.value is not None:
+            #             output += f"Value: {history.value}\n"
+            #         output += f"Created: {history.created_at}\n"
+            #         output += "-" * 40 + "\n"
+            # else:
+            #     output += "No portfolio history records found.\n"
+            #
+            # if result.next:
+            #     output += (
+            #         f"\nNext page available. Use page={schema.page + 1} to continue."
+            #     )
+            #
+            # return output
         except Exception as e:
             return f"Error listing portfolio history: {str(e)}"
 
@@ -73,29 +74,30 @@ class PortfolioHistoryToolkit:
             history = await self.client.portfolio_history.get_portfolio_history(
                 schema.history_id
             )
+            return history.model_dump_json()
 
-            output = f"Portfolio History Record Details:\n"
-            output += f"ID: {history.id}\n"
-            output += f"Portfolio: {history.portfolio}\n"
-            output += f"Currency: {history.currency}\n"
-            if hasattr(history, "date") and history.date:
-                output += f"Date: {history.date}\n"
-            if hasattr(history, "value") and history.value is not None:
-                output += f"Value: {history.value}\n"
-            if hasattr(history, "nav") and history.nav is not None:
-                output += f"NAV: {history.nav}\n"
-            if hasattr(history, "nav_per_share") and history.nav_per_share is not None:
-                output += f"NAV Per Share: {history.nav_per_share}\n"
-            if (
-                hasattr(history, "shares_outstanding")
-                and history.shares_outstanding is not None
-            ):
-                output += f"Shares Outstanding: {history.shares_outstanding}\n"
-            output += f"Created: {history.created_at}\n"
-            if history.updated_at:
-                output += f"Updated: {history.updated_at}\n"
-
-            return output
+            # output = f"Portfolio History Record Details:\n"
+            # output += f"ID: {history.id}\n"
+            # output += f"Portfolio: {history.portfolio}\n"
+            # output += f"Currency: {history.currency}\n"
+            # if hasattr(history, "date") and history.date:
+            #     output += f"Date: {history.date}\n"
+            # if hasattr(history, "value") and history.value is not None:
+            #     output += f"Value: {history.value}\n"
+            # if hasattr(history, "nav") and history.nav is not None:
+            #     output += f"NAV: {history.nav}\n"
+            # if hasattr(history, "nav_per_share") and history.nav_per_share is not None:
+            #     output += f"NAV Per Share: {history.nav_per_share}\n"
+            # if (
+            #     hasattr(history, "shares_outstanding")
+            #     and history.shares_outstanding is not None
+            # ):
+            #     output += f"Shares Outstanding: {history.shares_outstanding}\n"
+            # output += f"Created: {history.created_at}\n"
+            # if history.updated_at:
+            #     output += f"Updated: {history.updated_at}\n"
+            #
+            # return output
         except Exception as e:
             return f"Error getting portfolio history record {kwargs.get('history_id')}: {str(e)}"
 

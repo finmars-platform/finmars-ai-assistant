@@ -86,8 +86,7 @@ class PortfolioToolkit:
             result = await self.client.portfolios.list_portfolios(
                 ordering=schema.ordering, page=schema.page, page_size=schema.page_size
             )
-            output = result.model_dump_json()
-
+            return result.model_dump_json()
             # output = f"Found {result.count} total portfolios.\n"
             # if result.results:
             #     output += f"Showing {len(result.results)} portfolios on page {schema.page}:\n\n"
@@ -106,8 +105,7 @@ class PortfolioToolkit:
             #     output += (
             #         f"\nNext page available. Use page={schema.page + 1} to continue."
             #     )
-
-            return output
+            # return output
         except Exception as e:
             return f"Error listing portfolios: {str(e)}"
 
@@ -116,19 +114,20 @@ class PortfolioToolkit:
         try:
             schema = GetPortfolioSchema(**kwargs)
             portfolio = await self.client.portfolios.get_portfolio(schema.portfolio_id)
+            return portfolio.model_dump_json()
 
-            output = f"Portfolio Details:\n"
-            output += f"ID: {portfolio.id}\n"
-            output += f"Name: {portfolio.name}\n"
-            if portfolio.description:
-                output += f"Description: {portfolio.description}\n"
-            output += f"Portfolio Type: {portfolio.portfolio_type}\n"
-            output += f"Currency: {portfolio.currency}\n"
-            output += f"Created: {portfolio.created_at}\n"
-            if portfolio.updated_at:
-                output += f"Updated: {portfolio.updated_at}\n"
-
-            return output
+            # output = f"Portfolio Details:\n"
+            # output += f"ID: {portfolio.id}\n"
+            # output += f"Name: {portfolio.name}\n"
+            # if portfolio.description:
+            #     output += f"Description: {portfolio.description}\n"
+            # output += f"Portfolio Type: {portfolio.portfolio_type}\n"
+            # output += f"Currency: {portfolio.currency}\n"
+            # output += f"Created: {portfolio.created_at}\n"
+            # if portfolio.updated_at:
+            #     output += f"Updated: {portfolio.updated_at}\n"
+            #
+            # return output
         except Exception as e:
             return f"Error getting portfolio {kwargs.get('portfolio_id')}: {str(e)}"
 
@@ -139,16 +138,17 @@ class PortfolioToolkit:
             result = await self.client.portfolios.list_portfolios_light(
                 ordering=schema.ordering, page=schema.page, page_size=schema.page_size
             )
+            return result.model_dump_json()
 
-            output = f"Found {result.count} total portfolios (light format).\n"
-            if result.results:
-                output += f"Showing {len(result.results)} portfolios on page {schema.page}:\n\n"
-                for portfolio in result.results:
-                    output += f"ID: {portfolio.id} | Name: {portfolio.name}\n"
-            else:
-                output += "No portfolios found.\n"
-
-            return output
+            # output = f"Found {result.count} total portfolios (light format).\n"
+            # if result.results:
+            #     output += f"Showing {len(result.results)} portfolios on page {schema.page}:\n\n"
+            #     for portfolio in result.results:
+            #         output += f"ID: {portfolio.id} | Name: {portfolio.name}\n"
+            # else:
+            #     output += "No portfolios found.\n"
+            #
+            # return output
         except Exception as e:
             return f"Error listing portfolios (light): {str(e)}"
 
@@ -159,18 +159,19 @@ class PortfolioToolkit:
             result = await self.client.portfolios.list_portfolio_attributes(
                 ordering=schema.ordering, page=schema.page, page_size=schema.page_size
             )
+            return result.model_dump_json()
 
-            output = f"Found {result.count} total portfolio attributes.\n"
-            if result.results:
-                output += f"Showing {len(result.results)} attributes on page {schema.page}:\n\n"
-                for attr in result.results:
-                    output += f"Portfolio ID: {attr.id}\n"
-                    output += f"Name: {attr.name}\n"
-                    output += "-" * 40 + "\n"
-            else:
-                output += "No portfolio attributes found.\n"
-
-            return output
+            # output = f"Found {result.count} total portfolio attributes.\n"
+            # if result.results:
+            #     output += f"Showing {len(result.results)} attributes on page {schema.page}:\n\n"
+            #     for attr in result.results:
+            #         output += f"Portfolio ID: {attr.id}\n"
+            #         output += f"Name: {attr.name}\n"
+            #         output += "-" * 40 + "\n"
+            # else:
+            #     output += "No portfolio attributes found.\n"
+            #
+            # return output
         except Exception as e:
             return f"Error listing portfolio attributes: {str(e)}"
 
@@ -189,22 +190,22 @@ class PortfolioToolkit:
             result = await self.client.portfolios.list_first_transaction_dates(
                 ordering=schema.ordering, page=schema.page, page_size=schema.page_size
             )
+            return result.model_dump_json()
 
-            output = f"Found {result.count} total first transaction date records.\n"
-            if result.results:
-                output += (
-                    f"Showing {len(result.results)} records on page {schema.page}:\n\n"
-                )
-                for record in result.results:
-                    output += f"Portfolio ID: {record.portfolio}\n"
-                    output += (
-                        f"First Transaction Date: {record.first_transaction_date}\n"
-                    )
-                    output += "-" * 40 + "\n"
-            else:
-                output += "No first transaction date records found.\n"
-
-            return output
+            # output = f"Found {result.count} total first transaction date records.\n"
+            # if result.results:
+            #     output += (
+            #         f"Showing {len(result.results)} records on page {schema.page}:\n\n"
+            #     )
+            #     for record in result.results:
+            #         output += f"Portfolio ID: {record.portfolio}\n"
+            #         output += (
+            #             f"First Transaction Date: {record.first_transaction_date}\n"
+            #         )
+            #         output += "-" * 40 + "\n"
+            # else:
+            #     output += "No first transaction date records found.\n"
+            # return output
         except Exception as e:
             return f"Error listing first transaction dates: {str(e)}"
 
@@ -215,12 +216,13 @@ class PortfolioToolkit:
             result = await self.client.portfolios.get_first_transaction_date(
                 schema.portfolio_id
             )
+            return result.model_dump_json()
 
-            output = f"First Transaction Date for Portfolio {schema.portfolio_id}:\n"
-            output += f"Portfolio: {result.portfolio}\n"
-            output += f"First Transaction Date: {result.first_transaction_date}\n"
-
-            return output
+            # output = f"First Transaction Date for Portfolio {schema.portfolio_id}:\n"
+            # output += f"Portfolio: {result.portfolio}\n"
+            # output += f"First Transaction Date: {result.first_transaction_date}\n"
+            #
+            # return output
         except Exception as e:
             return f"Error getting first transaction date for portfolio {kwargs.get('portfolio_id')}: {str(e)}"
 

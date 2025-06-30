@@ -104,26 +104,27 @@ class PortfolioTypeToolkit:
             result = await self.client.portfolio_types.list_portfolio_types(
                 ordering=schema.ordering, page=schema.page, page_size=schema.page_size
             )
+            return result.model_dump_json()
 
-            output = f"Found {result.count} total portfolio types.\n"
-            if result.results:
-                output += f"Showing {len(result.results)} portfolio types on page {schema.page}:\n\n"
-                for ptype in result.results:
-                    output += f"ID: {ptype.id}\n"
-                    output += f"Name: {ptype.name}\n"
-                    if ptype.description:
-                        output += f"Description: {ptype.description}\n"
-                    output += f"Created: {ptype.created_at}\n"
-                    output += "-" * 40 + "\n"
-            else:
-                output += "No portfolio types found.\n"
-
-            if result.next:
-                output += (
-                    f"\nNext page available. Use page={schema.page + 1} to continue."
-                )
-
-            return output
+            # output = f"Found {result.count} total portfolio types.\n"
+            # if result.results:
+            #     output += f"Showing {len(result.results)} portfolio types on page {schema.page}:\n\n"
+            #     for ptype in result.results:
+            #         output += f"ID: {ptype.id}\n"
+            #         output += f"Name: {ptype.name}\n"
+            #         if ptype.description:
+            #             output += f"Description: {ptype.description}\n"
+            #         output += f"Created: {ptype.created_at}\n"
+            #         output += "-" * 40 + "\n"
+            # else:
+            #     output += "No portfolio types found.\n"
+            #
+            # if result.next:
+            #     output += (
+            #         f"\nNext page available. Use page={schema.page + 1} to continue."
+            #     )
+            #
+            # return output
         except Exception as e:
             return f"Error listing portfolio types: {str(e)}"
 
@@ -134,17 +135,18 @@ class PortfolioTypeToolkit:
             ptype = await self.client.portfolio_types.get_portfolio_type(
                 schema.portfolio_type_id
             )
+            return ptype.model_dump_json()
 
-            output = f"Portfolio Type Details:\n"
-            output += f"ID: {ptype.id}\n"
-            output += f"Name: {ptype.name}\n"
-            if ptype.description:
-                output += f"Description: {ptype.description}\n"
-            output += f"Created: {ptype.created_at}\n"
-            if ptype.updated_at:
-                output += f"Updated: {ptype.updated_at}\n"
-
-            return output
+            # output = f"Portfolio Type Details:\n"
+            # output += f"ID: {ptype.id}\n"
+            # output += f"Name: {ptype.name}\n"
+            # if ptype.description:
+            #     output += f"Description: {ptype.description}\n"
+            # output += f"Created: {ptype.created_at}\n"
+            # if ptype.updated_at:
+            #     output += f"Updated: {ptype.updated_at}\n"
+            #
+            # return output
         except Exception as e:
             return f"Error getting portfolio type {kwargs.get('portfolio_type_id')}: {str(e)}"
 
@@ -155,16 +157,17 @@ class PortfolioTypeToolkit:
             result = await self.client.portfolio_types.list_portfolio_types_light(
                 ordering=schema.ordering, page=schema.page, page_size=schema.page_size
             )
+            return result.model_dump_json()
 
-            output = f"Found {result.count} total portfolio types (light format).\n"
-            if result.results:
-                output += f"Showing {len(result.results)} portfolio types on page {schema.page}:\n\n"
-                for ptype in result.results:
-                    output += f"ID: {ptype.id} | Name: {ptype.name}\n"
-            else:
-                output += "No portfolio types found.\n"
-
-            return output
+            # output = f"Found {result.count} total portfolio types (light format).\n"
+            # if result.results:
+            #     output += f"Showing {len(result.results)} portfolio types on page {schema.page}:\n\n"
+            #     for ptype in result.results:
+            #         output += f"ID: {ptype.id} | Name: {ptype.name}\n"
+            # else:
+            #     output += "No portfolio types found.\n"
+            #
+            # return output
         except Exception as e:
             return f"Error listing portfolio types (light): {str(e)}"
 
@@ -174,17 +177,18 @@ class PortfolioTypeToolkit:
             attributes = (
                 await self.client.portfolio_types.get_portfolio_type_attributes()
             )
+            return attributes.model_dump_json()
 
-            output = f"Found {len(attributes)} portfolio type attributes:\n\n"
-            for attr in attributes:
-                output += f"Name: {attr.name}\n"
-                if attr.value:
-                    output += f"Value: {attr.value}\n"
-                if attr.attribute_type:
-                    output += f"Type: {attr.attribute_type}\n"
-                output += "-" * 40 + "\n"
-
-            return output
+            # output = f"Found {len(attributes)} portfolio type attributes:\n\n"
+            # for attr in attributes:
+            #     output += f"Name: {attr.name}\n"
+            #     if attr.value:
+            #         output += f"Value: {attr.value}\n"
+            #     if attr.attribute_type:
+            #         output += f"Type: {attr.attribute_type}\n"
+            #     output += "-" * 40 + "\n"
+            #
+            # return output
         except Exception as e:
             return f"Error getting portfolio type attributes: {str(e)}"
 
@@ -195,20 +199,21 @@ class PortfolioTypeToolkit:
             result = await self.client.portfolio_types.list_portfolio_attribute_types(
                 ordering=schema.ordering, page=schema.page, page_size=schema.page_size
             )
+            return result.model_dump_json()
 
-            output = f"Found {result.count} total portfolio attribute types.\n"
-            if result.results:
-                output += f"Showing {len(result.results)} attribute types on page {schema.page}:\n\n"
-                for attr_type in result.results:
-                    output += f"ID: {attr_type.id}\n"
-                    output += f"Name: {attr_type.name}\n"
-                    if attr_type.description:
-                        output += f"Description: {attr_type.description}\n"
-                    output += "-" * 40 + "\n"
-            else:
-                output += "No portfolio attribute types found.\n"
-
-            return output
+            # output = f"Found {result.count} total portfolio attribute types.\n"
+            # if result.results:
+            #     output += f"Showing {len(result.results)} attribute types on page {schema.page}:\n\n"
+            #     for attr_type in result.results:
+            #         output += f"ID: {attr_type.id}\n"
+            #         output += f"Name: {attr_type.name}\n"
+            #         if attr_type.description:
+            #             output += f"Description: {attr_type.description}\n"
+            #         output += "-" * 40 + "\n"
+            # else:
+            #     output += "No portfolio attribute types found.\n"
+            #
+            # return output
         except Exception as e:
             return f"Error listing portfolio attribute types: {str(e)}"
 
@@ -219,14 +224,15 @@ class PortfolioTypeToolkit:
             attr_type = await self.client.portfolio_types.get_portfolio_attribute_type(
                 schema.attribute_type_id
             )
+            return attr_type.model_dump_json()
 
-            output = f"Portfolio Attribute Type Details:\n"
-            output += f"ID: {attr_type.id}\n"
-            output += f"Name: {attr_type.name}\n"
-            if attr_type.description:
-                output += f"Description: {attr_type.description}\n"
-
-            return output
+            # output = f"Portfolio Attribute Type Details:\n"
+            # output += f"ID: {attr_type.id}\n"
+            # output += f"Name: {attr_type.name}\n"
+            # if attr_type.description:
+            #     output += f"Description: {attr_type.description}\n"
+            #
+            # return output
         except Exception as e:
             return f"Error getting portfolio attribute type {kwargs.get('attribute_type_id')}: {str(e)}"
 
@@ -237,14 +243,15 @@ class PortfolioTypeToolkit:
             result = await self.client.portfolio_types.get_portfolio_attribute_type_objects_to_recalculate(
                 schema.attribute_type_id
             )
+            return result.model_dump_json()
 
-            output = f"Objects to recalculate for attribute type {schema.attribute_type_id}:\n"
-            if hasattr(result, "portfolios") and result.portfolios:
-                output += f"Portfolios: {len(result.portfolios)} items\n"
-            if hasattr(result, "portfolio_types") and result.portfolio_types:
-                output += f"Portfolio Types: {len(result.portfolio_types)} items\n"
-
-            return output
+            # output = f"Objects to recalculate for attribute type {schema.attribute_type_id}:\n"
+            # if hasattr(result, "portfolios") and result.portfolios:
+            #     output += f"Portfolios: {len(result.portfolios)} items\n"
+            # if hasattr(result, "portfolio_types") and result.portfolio_types:
+            #     output += f"Portfolio Types: {len(result.portfolio_types)} items\n"
+            #
+            # return output
         except Exception as e:
             return f"Error getting objects to recalculate for attribute type {kwargs.get('attribute_type_id')}: {str(e)}"
 
@@ -259,20 +266,21 @@ class PortfolioTypeToolkit:
                     page_size=schema.page_size,
                 )
             )
+            return result.model_dump_json()
 
-            output = f"Found {result.count} total portfolio type attribute types.\n"
-            if result.results:
-                output += f"Showing {len(result.results)} attribute types on page {schema.page}:\n\n"
-                for attr_type in result.results:
-                    output += f"ID: {attr_type.id}\n"
-                    output += f"Name: {attr_type.name}\n"
-                    if attr_type.description:
-                        output += f"Description: {attr_type.description}\n"
-                    output += "-" * 40 + "\n"
-            else:
-                output += "No portfolio type attribute types found.\n"
-
-            return output
+            # output = f"Found {result.count} total portfolio type attribute types.\n"
+            # if result.results:
+            #     output += f"Showing {len(result.results)} attribute types on page {schema.page}:\n\n"
+            #     for attr_type in result.results:
+            #         output += f"ID: {attr_type.id}\n"
+            #         output += f"Name: {attr_type.name}\n"
+            #         if attr_type.description:
+            #             output += f"Description: {attr_type.description}\n"
+            #         output += "-" * 40 + "\n"
+            # else:
+            #     output += "No portfolio type attribute types found.\n"
+            #
+            # return output
         except Exception as e:
             return f"Error listing portfolio type attribute types: {str(e)}"
 
@@ -285,14 +293,15 @@ class PortfolioTypeToolkit:
                     schema.attribute_type_id
                 )
             )
+            return attr_type.model_dump_json()
 
-            output = f"Portfolio Type Attribute Type Details:\n"
-            output += f"ID: {attr_type.id}\n"
-            output += f"Name: {attr_type.name}\n"
-            if attr_type.description:
-                output += f"Description: {attr_type.description}\n"
-
-            return output
+            # output = f"Portfolio Type Attribute Type Details:\n"
+            # output += f"ID: {attr_type.id}\n"
+            # output += f"Name: {attr_type.name}\n"
+            # if attr_type.description:
+            #     output += f"Description: {attr_type.description}\n"
+            #
+            # return output
         except Exception as e:
             return f"Error getting portfolio type attribute type {kwargs.get('attribute_type_id')}: {str(e)}"
 
@@ -303,14 +312,15 @@ class PortfolioTypeToolkit:
             result = await self.client.portfolio_types.get_portfolio_type_attribute_type_objects_to_recalculate(
                 schema.attribute_type_id
             )
+            return result.model_dump_json()
 
-            output = f"Objects to recalculate for portfolio type attribute type {schema.attribute_type_id}:\n"
-            if hasattr(result, "portfolios") and result.portfolios:
-                output += f"Portfolios: {len(result.portfolios)} items\n"
-            if hasattr(result, "portfolio_types") and result.portfolio_types:
-                output += f"Portfolio Types: {len(result.portfolio_types)} items\n"
-
-            return output
+            # output = f"Objects to recalculate for portfolio type attribute type {schema.attribute_type_id}:\n"
+            # if hasattr(result, "portfolios") and result.portfolios:
+            #     output += f"Portfolios: {len(result.portfolios)} items\n"
+            # if hasattr(result, "portfolio_types") and result.portfolio_types:
+            #     output += f"Portfolio Types: {len(result.portfolio_types)} items\n"
+            #
+            # return output
         except Exception as e:
             return f"Error getting objects to recalculate for portfolio type attribute type {kwargs.get('attribute_type_id')}: {str(e)}"
 

@@ -84,27 +84,28 @@ class PortfolioRegisterToolkit:
             result = await self.client.portfolio_registers.list_portfolio_registers(
                 ordering=schema.ordering, page=schema.page, page_size=schema.page_size
             )
+            return result.model_dump_json()
 
-            output = f"Found {result.count} total portfolio registers.\n"
-            if result.results:
-                output += f"Showing {len(result.results)} registers on page {schema.page}:\n\n"
-                for register in result.results:
-                    output += f"ID: {register.id}\n"
-                    output += f"Name: {register.name}\n"
-                    if register.description:
-                        output += f"Description: {register.description}\n"
-                    output += f"Portfolio: {register.portfolio}\n"
-                    output += f"Created: {register.created_at}\n"
-                    output += "-" * 40 + "\n"
-            else:
-                output += "No portfolio registers found.\n"
-
-            if result.next:
-                output += (
-                    f"\nNext page available. Use page={schema.page + 1} to continue."
-                )
-
-            return output
+            # output = f"Found {result.count} total portfolio registers.\n"
+            # if result.results:
+            #     output += f"Showing {len(result.results)} registers on page {schema.page}:\n\n"
+            #     for register in result.results:
+            #         output += f"ID: {register.id}\n"
+            #         output += f"Name: {register.name}\n"
+            #         if register.description:
+            #             output += f"Description: {register.description}\n"
+            #         output += f"Portfolio: {register.portfolio}\n"
+            #         output += f"Created: {register.created_at}\n"
+            #         output += "-" * 40 + "\n"
+            # else:
+            #     output += "No portfolio registers found.\n"
+            #
+            # if result.next:
+            #     output += (
+            #         f"\nNext page available. Use page={schema.page + 1} to continue."
+            #     )
+            #
+            # return output
         except Exception as e:
             return f"Error listing portfolio registers: {str(e)}"
 
@@ -115,18 +116,19 @@ class PortfolioRegisterToolkit:
             register = await self.client.portfolio_registers.get_portfolio_register(
                 schema.register_id
             )
+            return register.model_dump_json()
 
-            output = f"Portfolio Register Details:\n"
-            output += f"ID: {register.id}\n"
-            output += f"Name: {register.name}\n"
-            if register.description:
-                output += f"Description: {register.description}\n"
-            output += f"Portfolio: {register.portfolio}\n"
-            output += f"Created: {register.created_at}\n"
-            if register.updated_at:
-                output += f"Updated: {register.updated_at}\n"
-
-            return output
+            # output = f"Portfolio Register Details:\n"
+            # output += f"ID: {register.id}\n"
+            # output += f"Name: {register.name}\n"
+            # if register.description:
+            #     output += f"Description: {register.description}\n"
+            # output += f"Portfolio: {register.portfolio}\n"
+            # output += f"Created: {register.created_at}\n"
+            # if register.updated_at:
+            #     output += f"Updated: {register.updated_at}\n"
+            #
+            # return output
         except Exception as e:
             return f"Error getting portfolio register {kwargs.get('register_id')}: {str(e)}"
 
@@ -141,28 +143,29 @@ class PortfolioRegisterToolkit:
                     page_size=schema.page_size,
                 )
             )
+            return result.model_dump_json()
 
-            output = f"Found {result.count} total portfolio register records.\n"
-            if result.results:
-                output += (
-                    f"Showing {len(result.results)} records on page {schema.page}:\n\n"
-                )
-                for record in result.results:
-                    output += f"ID: {record.id}\n"
-                    output += f"Register: {record.register}\n"
-                    if hasattr(record, "value") and record.value:
-                        output += f"Value: {record.value}\n"
-                    output += f"Created: {record.created_at}\n"
-                    output += "-" * 40 + "\n"
-            else:
-                output += "No portfolio register records found.\n"
-
-            if result.next:
-                output += (
-                    f"\nNext page available. Use page={schema.page + 1} to continue."
-                )
-
-            return output
+            # output = f"Found {result.count} total portfolio register records.\n"
+            # if result.results:
+            #     output += (
+            #         f"Showing {len(result.results)} records on page {schema.page}:\n\n"
+            #     )
+            #     for record in result.results:
+            #         output += f"ID: {record.id}\n"
+            #         output += f"Register: {record.register}\n"
+            #         if hasattr(record, "value") and record.value:
+            #             output += f"Value: {record.value}\n"
+            #         output += f"Created: {record.created_at}\n"
+            #         output += "-" * 40 + "\n"
+            # else:
+            #     output += "No portfolio register records found.\n"
+            #
+            # if result.next:
+            #     output += (
+            #         f"\nNext page available. Use page={schema.page + 1} to continue."
+            #     )
+            #
+            # return output
         except Exception as e:
             return f"Error listing portfolio register records: {str(e)}"
 
@@ -175,17 +178,18 @@ class PortfolioRegisterToolkit:
                     schema.record_id
                 )
             )
+            return record.model_dump_json()
 
-            output = f"Portfolio Register Record Details:\n"
-            output += f"ID: {record.id}\n"
-            output += f"Register: {record.register}\n"
-            if hasattr(record, "value") and record.value:
-                output += f"Value: {record.value}\n"
-            output += f"Created: {record.created_at}\n"
-            if record.updated_at:
-                output += f"Updated: {record.updated_at}\n"
-
-            return output
+            # output = f"Portfolio Register Record Details:\n"
+            # output += f"ID: {record.id}\n"
+            # output += f"Register: {record.register}\n"
+            # if hasattr(record, "value") and record.value:
+            #     output += f"Value: {record.value}\n"
+            # output += f"Created: {record.created_at}\n"
+            # if record.updated_at:
+            #     output += f"Updated: {record.updated_at}\n"
+            #
+            # return output
         except Exception as e:
             return f"Error getting portfolio register record {kwargs.get('record_id')}: {str(e)}"
 
@@ -196,20 +200,21 @@ class PortfolioRegisterToolkit:
             result = await self.client.portfolio_registers.list_portfolio_register_attribute_types(
                 ordering=schema.ordering, page=schema.page, page_size=schema.page_size
             )
+            return result.model_dump_json()
 
-            output = f"Found {result.count} total portfolio register attribute types.\n"
-            if result.results:
-                output += f"Showing {len(result.results)} attribute types on page {schema.page}:\n\n"
-                for attr_type in result.results:
-                    output += f"ID: {attr_type.id}\n"
-                    output += f"Name: {attr_type.name}\n"
-                    if attr_type.description:
-                        output += f"Description: {attr_type.description}\n"
-                    output += "-" * 40 + "\n"
-            else:
-                output += "No portfolio register attribute types found.\n"
-
-            return output
+            # output = f"Found {result.count} total portfolio register attribute types.\n"
+            # if result.results:
+            #     output += f"Showing {len(result.results)} attribute types on page {schema.page}:\n\n"
+            #     for attr_type in result.results:
+            #         output += f"ID: {attr_type.id}\n"
+            #         output += f"Name: {attr_type.name}\n"
+            #         if attr_type.description:
+            #             output += f"Description: {attr_type.description}\n"
+            #         output += "-" * 40 + "\n"
+            # else:
+            #     output += "No portfolio register attribute types found.\n"
+            #
+            # return output
         except Exception as e:
             return f"Error listing portfolio register attribute types: {str(e)}"
 
@@ -220,14 +225,15 @@ class PortfolioRegisterToolkit:
             attr_type = await self.client.portfolio_registers.get_portfolio_register_attribute_type(
                 schema.attribute_type_id
             )
+            return attr_type.model_dump_json()
 
-            output = f"Portfolio Register Attribute Type Details:\n"
-            output += f"ID: {attr_type.id}\n"
-            output += f"Name: {attr_type.name}\n"
-            if attr_type.description:
-                output += f"Description: {attr_type.description}\n"
-
-            return output
+            # output = f"Portfolio Register Attribute Type Details:\n"
+            # output += f"ID: {attr_type.id}\n"
+            # output += f"Name: {attr_type.name}\n"
+            # if attr_type.description:
+            #     output += f"Description: {attr_type.description}\n"
+            #
+            # return output
         except Exception as e:
             return f"Error getting portfolio register attribute type {kwargs.get('attribute_type_id')}: {str(e)}"
 
@@ -238,14 +244,15 @@ class PortfolioRegisterToolkit:
             result = await self.client.portfolio_registers.get_portfolio_register_attribute_type_objects_to_recalculate(
                 schema.attribute_type_id
             )
+            return result.model_dump_json()
 
-            output = f"Objects to recalculate for register attribute type {schema.attribute_type_id}:\n"
-            if hasattr(result, "portfolios") and result.portfolios:
-                output += f"Portfolios: {len(result.portfolios)} items\n"
-            if hasattr(result, "registers") and result.registers:
-                output += f"Registers: {len(result.registers)} items\n"
-
-            return output
+            # output = f"Objects to recalculate for register attribute type {schema.attribute_type_id}:\n"
+            # if hasattr(result, "portfolios") and result.portfolios:
+            #     output += f"Portfolios: {len(result.portfolios)} items\n"
+            # if hasattr(result, "registers") and result.registers:
+            #     output += f"Registers: {len(result.registers)} items\n"
+            #
+            # return output
         except Exception as e:
             return f"Error getting objects to recalculate for register attribute type {kwargs.get('attribute_type_id')}: {str(e)}"
 
