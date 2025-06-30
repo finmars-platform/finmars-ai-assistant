@@ -1,3 +1,4 @@
+import os
 from typing import List, Union, Generator, Iterator, Optional
 from pprint import pprint
 import time
@@ -12,7 +13,7 @@ from utils.agent_utils.async_loop_to_sync import sync_generator_from_async
 
 class Pipeline:
     def __init__(self):
-        self.name = "Finmars AI Assistant"
+        self.name = os.getenv("PIPELINE_NAME", "Finmars AI Assistant Local")
         self.description = "This is a finmars ai assistant pipeline"
         self.debug = False
         self.version = "0.0.1"

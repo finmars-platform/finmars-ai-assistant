@@ -13,3 +13,8 @@ COPY agents   ./agents
 COPY libs     ./libs
 COPY tools     ./tools
 COPY pipelines ./pipelines
+COPY utils ./utils
+COPY config.py ./config.py
+COPY main.py ./main.py
+COPY schemas.py ./schemas.py
+COPY start.sh ./start.sh

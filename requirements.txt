@@ -23,6 +23,7 @@ pytest==8.4.0
 httpx==0.28.1
 pydantic[email]
 langgraph==0.4.8
+langgraph-prebuilt==0.2.2
 langfuse==3.0.2
 langchain-openai==0.3.23
 langchain==0.3.25

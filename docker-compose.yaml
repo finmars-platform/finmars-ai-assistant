@@ -9,6 +9,8 @@ services:
     container_name: open-webui-finmars
     ports:
       - "8881:8080"
+    networks:
+      - arch-network
     extra_hosts:
       - "host.docker.internal:host-gateway"
     environment:
@@ -18,8 +20,31 @@ services:
     volumes:
       - open-webui:/app/backend/data
     restart: always
+
+  agent-pipelines:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: agent-pipelines
+    ports:
+      - "9299:9099"
     networks:
       - arch-network
+    depends_on:
+      - open-webui
+    environment:
+      - TZ=${TZ:-Europe/Luxembourg}
+      - PIPELINES_API_KEY=${PIPELINES_API_KEY:-test}
+      - PIPELINE_NAME=${PIPELINE_NAME:-Finmars AI Assistant Docker}
+      - LANGFUSE_HOST=${LANGFUSE_HOST:-langfuse-web}
+      - LANGFUSE_PUBLIC_KEY=${LANGFUSE_PUBLIC_KEY}
+      - LANGFUSE_SECRET_KEY=${LANGFUSE_SECRET_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - FINMARS_EXPERT_TOKEN=${FINMARS_EXPERT_TOKEN}
+      - FINMARS_BASE_URL=${FINMARS_BASE_URL}
+      - FINMARS_REALM=${FINMARS_REALM}
+      - FINMARS_SPACE=${FINMARS_SPACE}
+    restart: always
 
   langfuse-worker:
     image: langfuse/langfuse-worker:3
@@ -35,6 +60,8 @@ services:
         condition: service_healthy
     ports:
       - 127.0.0.1:3030:3030
+    networks:
+      - langfuse-network
     environment: &langfuse-worker-env
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/postgres # CHANGEME
       SALT: "mysalt" # CHANGEME
@@ -86,6 +113,9 @@ services:
     depends_on: *langfuse-depends-on
     ports:
       - 3000:3000
+    networks:
+      - arch-network
+      - langfuse-network
     environment:
       <<: *langfuse-worker-env
       NEXTAUTH_URL: http://localhost:3000
@@ -114,6 +144,8 @@ services:
     ports:
       - 127.0.0.1:8123:8123
       - 127.0.0.1:9000:9000
+    networks:
+      - langfuse-network
     healthcheck:
       test: wget --no-verbose --tries=1 --spider http://localhost:8123/ping || exit 1
       interval: 5s
@@ -133,6 +165,8 @@ services:
     ports:
       - 9090:9000
       - 127.0.0.1:9091:9001
+    networks:
+      - langfuse-network
     volumes:
       - langfuse_minio_data:/data
     healthcheck:
@@ -150,6 +184,8 @@ services:
       --requirepass ${REDIS_AUTH:-myredissecret}
     ports:
       - 127.0.0.1:6377:6379
+    networks:
+      - langfuse-network
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 3s
@@ -170,6 +206,8 @@ services:
       POSTGRES_DB: postgres
     ports:
       - 127.0.0.1:5455:5432
+    networks:
+      - langfuse-network
     volumes:
       - langfuse_postgres_data:/var/lib/postgresql/data
 
@@ -188,4 +226,6 @@ volumes:
 
 networks:
   arch-network:
+    driver: bridge
+  langfuse-network:
     driver: bridge

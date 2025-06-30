@@ -1,0 +1,1 @@
+uvicorn main:app --port 9099 --host 0.0.0.0 --forwarded-allow-ips '*' --reload

@@ -69,7 +69,7 @@ OPENAI_API_KEY=your-openai-api-key
 # Optional: Use a different OpenAI-compatible endpoint
 # OPENAI_BASE_URL=https://api.openai.com/v1
 
-# Optional: Langfuse configuration
+# Langfuse configuration (!!! CHECK 1.1 Create Langfuse Keys and setup in .env (.env.docker) step below)
 LANGFUSE_PUBLIC_KEY=your-public-key
 LANGFUSE_SECRET_KEY=your-secret-key
 LANGFUSE_HOST=http://localhost:3000
@@ -84,7 +84,7 @@ PIPELINES_API_KEY=your-pipelines-key
 
 ```bash
 # Start all Docker services in the background
-docker-compose --env-file .env up -d
+docker-compose --env-file .env.docker up -d
 
 # Verify all services are running
 docker-compose ps
@@ -97,6 +97,17 @@ This starts:
 - **Open WebUI** at http://localhost:8881
 - **Langfuse** at http://localhost:3000
 - Supporting databases (PostgreSQL, ClickHouse, Redis, MinIO)
+
+### 1.1 Create Langfuse Keys and setup in .env (.env.docker)
+![img.png](docs/img.png)
+
+### 1.2 Setup agent-pipelines Connection service in Open-WebUI service
+![img.png](docs/img_1.png)
+
+### 1.3 Restart docker-compose.yaml
+```bash
+docker-compose --env-file .env.docker up -d
+```
 
 ### 2. Run the ReAct Agent
 
