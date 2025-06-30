@@ -27,6 +27,20 @@ Pipelines is a **FastAPI application** with a fully **OpenAI-compatible API inte
 - Seamless integration with existing OpenAI SDK implementations
 - Standard request/response formats for chat completions, embeddings, and other endpoints
 
+#### Agent Pipelines Service
+The project includes an `agent-pipelines` service in Docker Compose that:
+- Runs as a FastAPI application on port 9299
+- Provides OpenAI-compatible API endpoints
+- Includes Swagger documentation at http://localhost:9299/docs
+- Main endpoint: `/v1/chat/completions` for chat interactions
+- Integrates with Langfuse for observability
+- Connects to Open WebUI for a seamless chat interface
+
+
+![img_2.png](docs/img_2.png)
+
+![img_3.png](docs/img_3.png)
+
 ### 3. Agent Architecture
 Agents are implemented using:
 - **LangGraph** with ReAct pattern as the primary framework
@@ -309,6 +323,9 @@ docker-compose down
 
 #### Available Services:
 - **Open WebUI**: http://localhost:8881 - Chat interface for interacting with agents
+- **Agent Pipelines**: http://localhost:9299 - FastAPI service providing OpenAI-compatible API
+  - Swagger docs: http://localhost:9299/docs
+  - Chat completions endpoint to make requests to Finmars Agent: `/v1/chat/completions`
 - **Langfuse**: http://localhost:3000 - Observability and prompt management
 - **PostgreSQL**: Port 5432 - Database for Langfuse
 - **ClickHouse**: Port 8123 - Analytics database for Langfuse

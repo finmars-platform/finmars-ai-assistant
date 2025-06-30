@@ -95,6 +95,7 @@ docker-compose logs -f
 
 This starts:
 - **Open WebUI** at http://localhost:8881
+- **Agent Pipelines** at http://localhost:9299 (FastAPI service with OpenAI-compatible API)
 - **Langfuse** at http://localhost:3000
 - Supporting databases (PostgreSQL, ClickHouse, Redis, MinIO)
 
@@ -132,6 +133,18 @@ Example interactions:
 - **Open WebUI**: http://localhost:8881
   - Default login: Create an account on first access
   - Configure to use your agent endpoint
+
+- **Agent Pipelines API**: http://localhost:9299
+  - FastAPI service providing OpenAI-compatible API
+  - Access Swagger documentation at http://localhost:9299/docs
+  - Main endpoint of Finmars Agent: `/v1/chat/completions` (OpenAI-compatible chat completions)
+  - Compatible with any OpenAI SDK by changing the base URL
+
+
+![img_2.png](docs/img_2.png)
+
+![img_3.png](docs/img_3.png)
+
 
 - **Langfuse**: http://localhost:3000
   - View traces of agent executions
