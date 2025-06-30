@@ -1,4 +1,4 @@
-from langchain_core.messages import HumanMessage
+from langchain_core.messages import HumanMessage, BaseMessage
 from langchain_core.runnables import RunnableConfig
 from langfuse.langchain import CallbackHandler
 
@@ -7,7 +7,7 @@ from agents.react_agent.agent_react_builder import create_finmars_agent_react
 from libs.utils.prompt_map_builder import build_map_prompts_cfg
 
 
-async def arun_agent_stream(message_input: str):
+async def arun_agent_stream(messages: list[BaseMessage]):
     langfuse_handler = CallbackHandler()
 
     map_prompts_cfg = await build_map_prompts_cfg(tags=simple_react_tag)
@@ -29,9 +29,7 @@ async def arun_agent_stream(message_input: str):
     answer = ""
     async for event_graph in agent.astream_events(
         {
-            "messages": [
-                HumanMessage(content=message_input),
-            ]
+            "messages": messages,
         },
         version="v2",
         config=config,
@@ -49,9 +47,9 @@ async def arun_agent_stream(message_input: str):
                 yield msg_chunk.content
 
 
-async def run_agent(message_input: str) -> str:
+async def run_agent(messages: list[BaseMessage]) -> str:
     answer = ""
-    async for chunk in arun_agent_stream(message_input):
+    async for chunk in arun_agent_stream(messages=messages):
         answer += chunk
     return answer
 
@@ -59,6 +57,12 @@ async def run_agent(message_input: str) -> str:
 if __name__ == "__main__":
     import asyncio
 
-    # response = asyncio.run(run_agent("What is the inception date of the portfolio?"))
-    response = asyncio.run(run_agent("Show for me portfolio list top 5 on 1 page"))
+    # response = asyncio.run(run_agent(messages=[HumanMessage(content="What is the inception date of the portfolio?")]))
+    response = asyncio.run(
+        run_agent(
+            messages=[
+                HumanMessage(content="Show for me portfolio list top 5 on 1 page")
+            ]
+        )
+    )
     print(f"ANSWER: {response}")

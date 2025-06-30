@@ -3,8 +3,11 @@ from typing import List, Union, Generator, Iterator, Optional
 from pprint import pprint
 import time
 
+from langchain_core.messages import BaseMessage
+
 from agents.react_agent.runner import arun_agent_stream
 from utils.agent_utils.async_loop_to_sync import sync_generator_from_async
+from utils.agent_utils.lc_converter import convert_to_lc_messages
 
 
 # Uncomment to disable SSL verification warnings if needed.
@@ -71,9 +74,9 @@ class Pipeline:
             }
         }
 
-        for chunk in sync_generator_from_async(
-            arun_agent_stream, message_input=user_message
-        ):
+        messages_lc: list[BaseMessage] = convert_to_lc_messages(messages=messages)
+
+        for chunk in sync_generator_from_async(arun_agent_stream, messages=messages_lc):
             yield chunk
 
         yield {
