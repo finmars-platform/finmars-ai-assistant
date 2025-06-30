@@ -126,3 +126,6 @@ Example interactions:
   - View traces of agent executions
   - Manage prompts
   - Analyze performance
+
+В конфлюенс:
+1. Настойка других провайдеров llm (deepseek, ollama etc)
