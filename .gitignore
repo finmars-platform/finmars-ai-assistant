@@ -2,3 +2,4 @@
 .idea
 sketches/
 task_definition/
+/pipelines/finmars-ai-assistant/*.json
