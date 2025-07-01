@@ -1,3 +1,4 @@
+from typing import Optional
 from langchain_core.messages import HumanMessage, BaseMessage
 from langchain_core.runnables import RunnableConfig
 from langfuse.langchain import CallbackHandler
@@ -5,12 +6,13 @@ from langfuse.langchain import CallbackHandler
 from agents.react_agent import simple_react_tag
 from agents.react_agent.agent_react_builder import create_finmars_agent_react
 from libs.utils.prompt_map_builder import build_map_prompts_cfg
+from libs.utils.langfuse_manager import PromptSource
 
 
-async def arun_agent_stream(messages: list[BaseMessage]):
+async def arun_agent_stream(messages: list[BaseMessage], prompt_source: Optional[PromptSource] = None):
     langfuse_handler = CallbackHandler()
 
-    map_prompts_cfg = await build_map_prompts_cfg(tags=simple_react_tag)
+    map_prompts_cfg = await build_map_prompts_cfg(tags=simple_react_tag, prompt_source=prompt_source)
     config = RunnableConfig(
         **{
             "callbacks": [langfuse_handler],
@@ -47,9 +49,9 @@ async def arun_agent_stream(messages: list[BaseMessage]):
                 yield msg_chunk.content
 
 
-async def run_agent(messages: list[BaseMessage]) -> str:
+async def run_agent(messages: list[BaseMessage], prompt_source: Optional[PromptSource] = None) -> str:
     answer = ""
-    async for chunk in arun_agent_stream(messages=messages):
+    async for chunk in arun_agent_stream(messages=messages, prompt_source=prompt_source):
         answer += chunk
     return answer
 
@@ -57,12 +59,24 @@ async def run_agent(messages: list[BaseMessage]) -> str:
 if __name__ == "__main__":
     import asyncio
 
+    # Example 1: Use default prompt source (from environment variable or Langfuse)
     # response = asyncio.run(run_agent(messages=[HumanMessage(content="What is the inception date of the portfolio?")]))
+    
+    # Example 2: Explicitly use prompts from code
+    # response = asyncio.run(
+    #     run_agent(
+    #         messages=[HumanMessage(content="Show for me portfolio list top 5 on 1 page")],
+    #         prompt_source=PromptSource.CODE
+    #     )
+    # )
+    
+    # Example 3: Explicitly use prompts from Langfuse
     response = asyncio.run(
         run_agent(
             messages=[
                 HumanMessage(content="Show for me portfolio list top 5 on 1 page")
-            ]
+            ],
+            prompt_source=PromptSource.LANGFUSE
         )
     )
     print(f"ANSWER: {response}")

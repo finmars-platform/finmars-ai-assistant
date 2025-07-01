@@ -1,7 +1,8 @@
-from libs.utils.langfuse_manager import LangfusePromptName, LangFusePromptManager
+from typing import Optional
+from libs.utils.langfuse_manager import LangfusePromptName, LangFusePromptManager, PromptSource
 
 
-async def build_map_prompts_cfg(tags: list[str]):
+async def build_map_prompts_cfg(tags: list[str], prompt_source: Optional[PromptSource] = None):
     map_prompts_cfg = dict()
 
     map_prompts_cfg[LangfusePromptName.SIMPLE_REACT_SYSTEM_PROMPT] = (
@@ -14,6 +15,7 @@ async def build_map_prompts_cfg(tags: list[str]):
                 "base_url": None,
             },
             return_config=True,
+            prompt_source=prompt_source,
         )
     )
 

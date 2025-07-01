@@ -8,6 +8,7 @@ from langchain_core.messages import BaseMessage
 from agents.react_agent.runner import arun_agent_stream
 from utils.agent_utils.async_loop_to_sync import sync_generator_from_async
 from utils.agent_utils.lc_converter import convert_to_lc_messages
+from libs.utils.langfuse_manager import PromptSource
 
 
 # Uncomment to disable SSL verification warnings if needed.
@@ -21,6 +22,12 @@ class Pipeline:
         self.debug = False
         self.version = "0.0.1"
         self.author = "Dmitrii Koriakov"
+        
+        # Configure prompt source from environment variable
+        # Options: "code" or "langfuse" (default: "langfuse")
+        # prompt_source_env = os.getenv("PROMPT_SOURCE", PromptSource.LANGFUSE.value)
+        prompt_source_env = os.getenv("PROMPT_SOURCE", PromptSource.CODE.value)
+        self.prompt_source = PromptSource(prompt_source_env)
 
     async def on_startup(self):
         # This function is called when the server is started.
@@ -76,7 +83,11 @@ class Pipeline:
 
         messages_lc: list[BaseMessage] = convert_to_lc_messages(messages=messages)
 
-        for chunk in sync_generator_from_async(arun_agent_stream, messages=messages_lc):
+        for chunk in sync_generator_from_async(
+            arun_agent_stream, 
+            messages=messages_lc,
+            prompt_source=self.prompt_source
+        ):
             yield chunk
 
         yield {

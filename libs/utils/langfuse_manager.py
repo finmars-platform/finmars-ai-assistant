@@ -1,3 +1,4 @@
+import os
 from typing import Tuple, Optional, Dict, Any, List
 
 from langchain_core.messages import ToolMessage, BaseMessage
@@ -23,6 +24,11 @@ class TypeMessage(str, BaseEnum):
     AI = "ai"
     HUMAN = "human"
     TOOL = "tool"
+
+
+class PromptSource(str, BaseEnum):
+    CODE = "code"
+    LANGFUSE = "langfuse"
 
 
 class LangfusePromptName(str, BaseEnum):
@@ -72,11 +78,35 @@ class LangFusePromptManager:
         config: Optional[Dict[str, Any]] = None,
         tags: Optional[List[str]] = None,
         return_config: Optional[bool] = None,
+        prompt_source: Optional[PromptSource] = None,
     ) -> (
         BaseMessage
         | SystemMessagePromptTemplate
         | Tuple[BaseMessage | SystemMessagePromptTemplate, Dict[str, Any]]
     ):
+        # Determine prompt source from parameter or environment variable
+        if prompt_source is None:
+            prompt_source = PromptSource(
+                os.getenv("PROMPT_SOURCE", PromptSource.LANGFUSE.value)
+            )
+        
+        # If prompt source is CODE, load from local code
+        if prompt_source == PromptSource.CODE:
+            prompt_msg: BaseMessage | Tuple[str, str] = MAP_PROMPTS[name]
+            
+            # If the prompt_msg is a tuple, convert it to langchain msg
+            if isinstance(prompt_msg, tuple):
+                prompt_msg = await from_tuple_to_lc_msg(prompt_msg)
+            
+            logger.info(
+                f"[LOADED PROMPT FROM CODE FOR {name.value}] CONTENT: {repr(prompt_msg)}"
+            )
+            
+            if return_config:
+                return prompt_msg, config
+            return prompt_msg
+        
+        # Otherwise, try to load from Langfuse
         prompt_from_langfuse_config = None
         try:
             prompt_from_langfuse: ChatPromptClient = (
