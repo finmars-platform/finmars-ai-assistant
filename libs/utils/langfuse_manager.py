@@ -87,7 +87,7 @@ class LangFusePromptManager:
         # Determine prompt source from parameter or environment variable
         if prompt_source is None:
             prompt_source = PromptSource(
-                os.getenv("PROMPT_SOURCE", PromptSource.LANGFUSE.value)
+                os.getenv("PROMPT_SOURCE", PromptSource.CODE.value)
             )
         
         # If prompt source is CODE, load from local code

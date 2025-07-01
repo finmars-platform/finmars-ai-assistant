@@ -74,6 +74,10 @@ LANGFUSE_PUBLIC_KEY=your-public-key
 LANGFUSE_SECRET_KEY=your-secret-key
 LANGFUSE_HOST=http://localhost:3000
 
+# Prompt source configuration
+# Options: "code" or "langfuse" (default: "code")
+PROMPT_SOURCE=code
+
 # For Open WebUI integration
 PIPELINES_API_KEY=your-pipelines-key
 ```

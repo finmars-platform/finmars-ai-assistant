@@ -181,6 +181,40 @@ The project integrates Langfuse at multiple levels:
    )
    ```
 
+### 5.1. Prompt Management System
+
+The project supports flexible prompt management with the ability to load prompts from either local code or Langfuse:
+
+#### Configuration Options
+
+1. **Environment Variable** (Recommended):
+   ```bash
+   # Use prompts from local code (default)
+   export PROMPT_SOURCE=code
+   
+   # Use prompts from Langfuse
+   export PROMPT_SOURCE=langfuse
+   ```
+
+2. **Programmatic Usage**:
+   ```python
+   from libs.utils.langfuse_manager import PromptSource
+   from agents.react_agent.runner import run_agent
+   
+   # Use local prompts
+   response = await run_agent(messages, prompt_source=PromptSource.CODE)
+   
+   # Use Langfuse prompts
+   response = await run_agent(messages, prompt_source=PromptSource.LANGFUSE)
+   ```
+
+#### Benefits
+
+- **Development Flexibility**: Use local prompts during development for rapid iteration
+- **Production Control**: Manage prompts in Langfuse for A/B testing and versioning
+- **Zero Code Changes**: Switch between sources using environment variables
+- **Automatic Sync**: If a prompt doesn't exist in Langfuse, it's automatically created from code
+
 ## Current Implementation Status
 
 ### ✅ Phase 1: Core Infrastructure (Completed)
@@ -298,6 +332,11 @@ export OPENAI_BASE_URL='https://api.openai.com/v1'  # Optional, for custom endpo
 export LANGFUSE_PUBLIC_KEY='your-public-key'
 export LANGFUSE_SECRET_KEY='your-secret-key'
 export LANGFUSE_HOST='http://localhost:3000'  # Or your Langfuse URL
+
+# Prompt Source Configuration
+# Options: "code" (use local prompts) or "langfuse" (use Langfuse prompts)
+# Default: "code"
+export PROMPT_SOURCE='code'
 
 # Open WebUI Pipelines (for future integration)
 export PIPELINES_API_KEY='your-pipelines-key'
