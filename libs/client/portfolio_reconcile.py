@@ -5,7 +5,7 @@ from ..schema.responses import (
     PortfolioReconcileGroupListResponse,
     PortfolioReconcileHistoryListResponse,
 )
-from ..schema.via_data_model_codegen.finmars_schema import (
+from ..schema.via_data_model_codegen.portfolio_schema import (
     PortfolioReconcileGroup,
     PortfolioReconcileHistory,
     PortfolioReconcileStatus,

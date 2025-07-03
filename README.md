@@ -112,7 +112,7 @@ The project uses two distinct types of Pydantic models:
 The main schema files include:
 - `base.py` - Base enums and types (SourceTypeEnum, StatusEnum, etc.)
 - `responses.py` - Paginated response models for API endpoints
-- `via_data_model_codegen/finmars_schema.py` - Auto-generated models from OpenAPI spec
+- `via_data_model_codegen/portfolio_schema.py` - Auto-generated models from OpenAPI spec
 
 ##### Tool-Calling Input Schemas
 - **Purpose**: Define input structures for LLM tool calls
@@ -427,7 +427,7 @@ finmars-ai-assistant/
 │   │   ├── README.md                # Schema generation documentation
 │   │   └── via_data_model_codegen/  # Auto-generated models
 │   │       ├── __init__.py          # Generated schema exports
-│   │       └── finmars_schema.py    # Complete API models
+│   │       └── portfolio_schema.py    # Complete API models
 │   ├── basic/                       # Basic utilities
 │   │   └── base_enum.py             # Base enum with string representation
 │   ├── logger/                      # Logging configuration
@@ -656,9 +656,9 @@ The project uses `datamodel-codegen` to automatically generate Pydantic models f
 
 ```bash
 datamodel-codegen \
-  --input ./libs/openapi/portfolio/openapi.json \
+  --input ./libs/openapi/report/openapi.json \
   --input-file-type openapi \
-  --output ./libs/schema/via_data_model_codegen/finmars_schema.py \
+  --output ./libs/schema/via_data_model_codegen/report_schema.py \
   --target-python-version 3.12 \
   --output-model-type pydantic_v2.BaseModel
 ```

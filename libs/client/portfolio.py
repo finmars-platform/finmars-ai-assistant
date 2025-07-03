@@ -6,7 +6,7 @@ from ..schema.responses import (
     PortfolioLightListResponse,
     FirstTransactionDateListResponse,
 )
-from ..schema.via_data_model_codegen.finmars_schema import (
+from ..schema.via_data_model_codegen.portfolio_schema import (
     Portfolio,
     PortfolioLight,
     FirstTransactionDateRequest,

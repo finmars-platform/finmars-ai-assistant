@@ -2,7 +2,7 @@ from typing import Optional
 
 from .base import BaseHTTPClient
 from ..schema.responses import PortfolioHistoryListResponse
-from ..schema.via_data_model_codegen.finmars_schema import PortfolioHistory
+from ..schema.via_data_model_codegen.portfolio_schema import PortfolioHistory
 
 
 class PortfolioHistoryClient(BaseHTTPClient):

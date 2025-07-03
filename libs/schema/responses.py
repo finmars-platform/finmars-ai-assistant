@@ -2,7 +2,7 @@ from typing import Optional, List, Generic, TypeVar
 from pydantic import BaseModel, Field
 
 from libs.schema.base import PaginatedResponse
-from libs.schema.via_data_model_codegen.finmars_schema import (
+from libs.schema.via_data_model_codegen.portfolio_schema import (
     Portfolio,
     PortfolioLight,
     PortfolioType,
