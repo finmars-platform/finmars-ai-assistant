@@ -19,7 +19,7 @@
   },
   "servers": [
     {
-      "url": "http://eu-central.finmars.com/"
+      "url": "https://eu-central.finmars.com/"
     }
   ],
   "security": [

@@ -19,7 +19,7 @@
   },
   "host": "eu-central.finmars.com",
   "schemes": [
-    "http"
+    "https"
   ],
   "basePath": "/",
   "consumes": [

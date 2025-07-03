@@ -13,7 +13,7 @@ info:
     backgroundColor: '#000'
     href: /realm0v4ry/docs/api/v1/
 servers:
-- url: http://eu-central.finmars.com/
+- url: https://eu-central.finmars.com/
 security:
 - Bearer: []
 - SingleSignOn: []
