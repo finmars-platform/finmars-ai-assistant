@@ -656,7 +656,7 @@ The project uses `datamodel-codegen` to automatically generate Pydantic models f
 
 ```bash
 datamodel-codegen \
-  --input ./libs/openapi/report/openapi.json \
+  --input ./libs/openapi/report/openapi_v3.json \
   --input-file-type openapi \
   --output ./libs/schema/via_data_model_codegen/report_schema.py \
   --target-python-version 3.12 \
