@@ -6,6 +6,7 @@ from .portfolio_type import PortfolioTypeClient
 from .portfolio_register import PortfolioRegisterClient
 from .portfolio_history import PortfolioHistoryClient
 from .portfolio_reconcile import PortfolioReconcileClient
+from .balance_report import BalanceReportClient
 
 
 class FinmarsPortfolioClient:
@@ -75,6 +76,14 @@ class FinmarsPortfolioClient:
         )
 
         self.portfolio_reconcile = PortfolioReconcileClient(
+            base_url=base_url,
+            realm=realm,
+            space=space,
+            api_key=api_key,
+            timeout=timeout,
+        )
+        
+        self.balance_report = BalanceReportClient(
             base_url=base_url,
             realm=realm,
             space=space,

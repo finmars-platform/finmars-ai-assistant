@@ -10,6 +10,7 @@ Available Toolkits:
 - PortfolioRegisterToolkit: Portfolio register operations
 - PortfolioHistoryToolkit: Historical portfolio data access
 - PortfolioReconcileToolkit: Portfolio reconciliation operations
+- BalanceReportToolkit: Balance report with holdings and allocations
 
 Each toolkit follows the same pattern:
 1. LLM-optimized input schemas (separate from API payload models)
@@ -32,6 +33,10 @@ from .portfolio_reconcile_toolkit import (
     PortfolioReconcileToolkit,
     build_portfolio_reconcile_tools,
 )
+from .balance_report_toolkit import (
+    BalanceReportToolkit,
+    build_balance_report_tools,
+)
 
 __all__ = [
     # Toolkit classes
@@ -40,12 +45,14 @@ __all__ = [
     "PortfolioRegisterToolkit",
     "PortfolioHistoryToolkit",
     "PortfolioReconcileToolkit",
+    "BalanceReportToolkit",
     # Tool builder functions
     "build_portfolio_tools",
     "build_portfolio_type_tools",
     "build_portfolio_register_tools",
     "build_portfolio_history_tools",
     "build_portfolio_reconcile_tools",
+    "build_balance_report_tools",
 ]
 
 
@@ -62,4 +69,5 @@ def build_all_tools():
     tools.extend(build_portfolio_register_tools())
     tools.extend(build_portfolio_history_tools())
     tools.extend(build_portfolio_reconcile_tools())
+    tools.extend(build_balance_report_tools())
     return tools

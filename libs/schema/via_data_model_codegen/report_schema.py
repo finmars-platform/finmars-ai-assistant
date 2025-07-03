@@ -486,7 +486,7 @@ class BackendBalanceReportGroups(BaseModel):
     items: Optional[str] = Field(None, title='Items')
 
 
-class BackendBalanceReportItems(BaseModel):
+class BackendBalanceReportItemsBase(BaseModel):
     report_instance_id: Optional[constr(min_length=1)] = Field(
         None, title='Report instance id'
     )
@@ -566,7 +566,10 @@ class BackendBalanceReportItems(BaseModel):
     page_size: Optional[conint(ge=1)] = Field(None, title='Page size')
     created_at: Optional[datetime] = Field(None, title='Created at')
     calculate_pl: Optional[bool] = Field(False, title='Calculate pl')
-    items: Optional[str] = Field(None, title='Items')
+
+
+class BackendBalanceReportItems(BackendBalanceReportItemsBase):
+    items: Optional[list[dict]] = Field(None, title='Items')
 
 
 class PeriodType(Enum):

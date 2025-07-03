@@ -81,3 +81,19 @@ class BaseHTTPClient:
             params=params,
             response_model=response_model,
         )
+
+    async def post(
+        self,
+        endpoint: str,
+        json_data: Optional[Dict[str, Any]] = None,
+        params: Optional[Dict[str, Any]] = None,
+        response_model: Optional[Type[T]] = None,
+    ) -> T:
+        """Make a POST request."""
+        return await self._make_request(
+            method="POST",
+            endpoint=endpoint,
+            params=params,
+            json_data=json_data,
+            response_model=response_model,
+        )
