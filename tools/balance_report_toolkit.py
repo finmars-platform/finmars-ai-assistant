@@ -76,7 +76,9 @@ class BalanceReportToolkit:
             
             # Make the API call
             result: BackendBalanceReportItems = await self.client.balance_report.get_balance_report_items(request_data)
-            
+
+            report_currency = result.report_currency
+
             # Post-process: Extract the required information
             items = result.items if hasattr(result, 'items') else []
             
@@ -90,7 +92,7 @@ class BalanceReportToolkit:
             # Extract portfolio information
             output = f"Balance Report for Portfolio: {schema.portfolio_code}\n"
             output += f"Report Date: {report_date}\n"
-            output += f"Currency: USD\n\n"
+            output += f"Currency: {report_currency}\n\n"
             
             if not items:
                 output += "No holdings found in this portfolio.\n"
