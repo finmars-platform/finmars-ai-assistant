@@ -75,7 +75,7 @@ class BalanceReportToolkit:
             )
             
             # Make the API call
-            result = await self.client.balance_report.get_balance_report_items(request_data)
+            result: BackendBalanceReportItems = await self.client.balance_report.get_balance_report_items(request_data)
             
             # Post-process: Extract the required information
             items = result.items if hasattr(result, 'items') else []
