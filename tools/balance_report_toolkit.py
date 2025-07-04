@@ -3,6 +3,7 @@ import json
 import traceback
 from typing import List, Dict, Any
 from datetime import datetime
+from enum import Enum
 from pydantic import BaseModel, Field
 from langchain_core.tools import StructuredTool, BaseTool
 
@@ -11,11 +12,21 @@ from libs.logger.logger import logger
 from libs.schema.via_data_model_codegen.report_schema import BackendBalanceReportItems, DateField
 
 
+class ReportCurrency(str, Enum):
+    """Supported report currencies"""
+    USD = "USD"
+    EUR = "EUR"
+
+
 class GetBalanceReportSchema(BaseModel):
     """Input schema for getting balance report"""
     
     portfolio_code: str = Field(
         description="The portfolio user code (user_code from portfolio)"
+    )
+    report_currency: ReportCurrency = Field(
+        default=ReportCurrency.USD,
+        description="The currency for the report (USD or EUR)"
     )
 
 
@@ -54,7 +65,7 @@ class BalanceReportToolkit:
                 portfolio_mode=1,
                 portfolios=[schema.portfolio_code],
                 pricing_policy="com.finmars.standard-pricing:standard",
-                report_currency="USD",
+                report_currency=schema.report_currency.value,
                 report_date=report_date,
                 report_type=1,
                 #show_balance_exposure_details=True,
@@ -116,7 +127,7 @@ class BalanceReportToolkit:
                     # Extract shares and value information from actual API response
                     shares = item.get("position_size", 0.0)
                     # Using the amount_invested (negative value represents investment)
-                    amount_invested = abs(item.get("amount_invested", 0.0))
+                    amount_invested = abs(item.get("amount_invested", 0.0) or 0.0)
                     
                     if shares != 0:  # Can be negative for short positions
                         holdings.append({
@@ -126,7 +137,12 @@ class BalanceReportToolkit:
                             "value": amount_invested
                         })
                         total_value += amount_invested
-            
+
+                    output += "-" * 80 + "\n"
+                    output += f"Source:\n"
+                    output += json.dumps(item, ensure_ascii=False)
+                    output += "\n" + "-" * 80 + "\n"
+
             # Calculate allocations and format output
             for holding in holdings:
                 allocation = (holding["value"] / total_value * 100) if total_value > 0 else 0
@@ -162,6 +178,7 @@ def build_balance_report_tools() -> List[BaseTool]:
                 "- What allocation (%) of each instrument\n"
                 "- How many shares for each company/instrument\n"
                 "- Total portfolio value and number of holdings\n"
+                "- Any other questions related to Balance Report\n"
                 "Returns a formatted report with all holdings details."
             ),
             args_schema=GetBalanceReportSchema,
