@@ -394,6 +394,11 @@ docker-compose down
    python cli/main.py list-portfolios --page 1 --page-size 10
    ```
 
+5. **Interact with agent via LangChain API** (OpenAI-compatible):
+   ```bash
+   python scripts/interact_to_agent_via_api.py
+   ```
+
 ## Project Structure
 ```
 finmars-ai-assistant/
@@ -628,6 +633,42 @@ The agent can help with:
 - **Historical Data**: Access portfolio history and transaction dates
 - **Reconciliation**: Check reconciliation status and groups
 - **Attribute Management**: Query portfolio and type-specific attributes
+
+### Interacting with Agent via LangChain API
+
+The project includes a script that demonstrates how to interact with the agent using LangChain's ChatOpenAI interface, which is compatible with the OpenAI API:
+
+```python
+# Run the interactive chat client
+python scripts/interact_to_agent_via_api.py
+```
+
+This script provides:
+- **Interactive Chat Interface**: Continuous conversation with the agent
+- **Streaming Support**: Real-time response streaming for better UX
+- **Automatic Retry Logic**: Retries failed requests up to 3 times
+- **Simple API Integration**: Uses standard LangChain ChatOpenAI client
+
+Example usage:
+```python
+from langchain_openai import ChatOpenAI
+from langchain_core.messages import HumanMessage
+
+# Initialize client with custom endpoint
+chat = ChatOpenAI(
+    base_url="http://localhost:9199/v1",
+    api_key="test",
+    model="finmars-ai-assistant"
+)
+
+# Send a message
+response = chat.invoke([
+    HumanMessage(content="List all active portfolios")
+])
+print(response.content)
+```
+
+This demonstrates how any OpenAI-compatible client can interact with the Finmars agent by simply changing the `base_url`.
 
 ## Command Line Interface
 

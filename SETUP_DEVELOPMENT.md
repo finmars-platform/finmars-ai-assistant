@@ -155,5 +155,47 @@ Example interactions:
   - Manage prompts
   - Analyze performance
 
+### 4. Interact with Agent via LangChain API
+
+The project includes a script that demonstrates how to interact with the agent using LangChain's OpenAI-compatible interface:
+
+```bash
+# Run the interactive chat client
+python scripts/interact_to_agent_via_api.py
+```
+
+This script provides:
+- **Interactive Chat Interface**: Type messages and get responses from the agent
+- **Streaming Support**: Real-time response streaming
+- **Automatic Retry Logic**: Retries failed requests up to 3 times
+- **Session History**: Maintains conversation context
+
+Example of using the API programmatically:
+```python
+from langchain_openai import ChatOpenAI
+from langchain_core.messages import HumanMessage, SystemMessage
+
+# Initialize the client
+chat = ChatOpenAI(
+    base_url="http://localhost:9199/v1",
+    api_key="test",
+    model="finmars-ai-assistant",
+    temperature=0.0,
+    streaming=True
+)
+
+# Send messages
+messages = [
+    SystemMessage(content="You are a helpful AI assistant."),
+    HumanMessage(content="List all active portfolios")
+]
+
+# Get streaming response
+for chunk in chat.stream(messages):
+    print(chunk.content, end="", flush=True)
+```
+
+This demonstrates how any OpenAI-compatible client can interact with the Finmars agent by simply changing the `base_url` parameter.
+
 В конфлюенс:
 1. Настойка других провайдеров llm (deepseek, ollama etc)
