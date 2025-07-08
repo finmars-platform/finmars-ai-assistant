@@ -1,8 +1,8 @@
 import asyncio
 import json
 import traceback
-from typing import List, Dict, Any
-from datetime import datetime
+from typing import List, Dict, Any, Optional
+from datetime import datetime, date
 from enum import Enum
 from pydantic import BaseModel, Field
 from langchain_core.tools import StructuredTool, BaseTool
@@ -28,6 +28,10 @@ class GetBalanceReportSchema(BaseModel):
         default=ReportCurrency.USD,
         description="The currency for the report (USD or EUR)"
     )
+    report_date: Optional[str] = Field(
+        default=None,
+        description="The date for the balance report in YYYY-MM-DD format (e.g., '2024-03-15'). If not provided, today's date will be used."
+    )
 
 
 class BalanceReportToolkit:
@@ -42,7 +46,14 @@ class BalanceReportToolkit:
             schema = GetBalanceReportSchema(**kwargs)
             
             # Pre-process: Build the request according to requirements
-            report_date = datetime.now().date()
+            # Parse report_date if provided, otherwise use today's date
+            if schema.report_date:
+                try:
+                    report_date = datetime.strptime(schema.report_date, "%Y-%m-%d").date()
+                except ValueError:
+                    return f"Error: Invalid date format. Please use YYYY-MM-DD format (e.g., '2024-03-15')"
+            else:
+                report_date = datetime.now().date()
             
             request_data = BackendBalanceReportItems(
                 account_mode=1,
