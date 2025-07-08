@@ -1,3 +1,4 @@
+import json
 from typing import Optional
 from langchain_core.messages import HumanMessage, BaseMessage
 from langchain_core.runnables import RunnableConfig
@@ -29,6 +30,7 @@ async def arun_agent_stream(messages: list[BaseMessage], prompt_source: Optional
 
     # Set trace attributes dynamically via metadata
     answer = ""
+    prev_event_is_agent_thinking = True
     async for event_graph in agent.astream_events(
         {
             "messages": messages,
@@ -39,12 +41,61 @@ async def arun_agent_stream(messages: list[BaseMessage], prompt_source: Optional
         if "skip" in event_graph.get("tags", []):
             continue
 
-        if event_graph.get("event") == "on_chat_model_stream":
+        if event_graph.get("event") == 'on_tool_end':
+            tool_output = event_graph.get("data", {}).get("output")
+            tool_output_status = ""
+            tool_output_name = ""
+
+            if hasattr(tool_output, "status"):
+                tool_output_status = tool_output.status
+
+            if hasattr(tool_output, "name"):
+                tool_output_name = tool_output.name
+
+            yield {
+                "event": {
+                    "type": "status",
+                    "data": {
+                        "description": f"Agent got response from {tool_output_name} tool with status: {tool_output_status}...",
+                        "done": False,
+                    },
+                }
+            }
+            prev_event_is_agent_thinking = False
+
+        elif event_graph.get("event") == 'on_tool_start':
+            tool_name: str = event_graph.get("name")
+            tool_input_data: dict = event_graph.get("data", {}).get("input", {})
+            yield {
+                "event": {
+                    "type": "status",
+                    "data": {
+                        "description": f"Agent call {tool_name} tool with input: {json.dumps(tool_input_data)}...",
+                        "done": False,
+                    },
+                }
+            }
+            prev_event_is_agent_thinking = False
+
+        elif event_graph.get("event") == "on_chat_model_stream":
             msg_chunk = event_graph.get("data", {}).get("chunk")
             if msg_chunk.type != "AIMessageChunk":
                 continue
 
             if msg_chunk.content:
+
+                if not prev_event_is_agent_thinking:
+                    yield {
+                        "event": {
+                            "type": "status",
+                            "data": {
+                                "description": "Agent is analysing tool responses...",
+                                "done": False,
+                            },
+                        }
+                    }
+                    prev_event_is_agent_thinking = True
+
                 answer += msg_chunk.content
                 yield msg_chunk.content
 
