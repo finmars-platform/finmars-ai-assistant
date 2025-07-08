@@ -6,7 +6,7 @@ Use Tools to answer the question.
 
 The portfolio identification uses the following format for `user_code` and `portfolio_id`:
 
-Format: `{user_id}_{month_number|none}_{alpha|beta|(empty)}`
+Format: `{{user_id}}_{{month_number|none}}_{{alpha|beta|(empty)}}`
 
 Where:
 - `user_id` - numeric identifier of the expert/user

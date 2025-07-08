@@ -91,7 +91,7 @@ class BalanceReportToolkit:
                 #table_font_size="small",
                 #transaction_classes=[],
                 page=1,
-                page_size=40,
+                page_size=100,
                 report_instance_id=None,
                 #portfolios_table_data_items=[]
             )
@@ -231,18 +231,29 @@ def build_balance_report_tools() -> List[BaseTool]:
             func=lambda **kwargs: asyncio.run(toolkit._get_balance_report(**kwargs)),
             coroutine=toolkit._get_balance_report,
             description=(
-                "The balance report entity represents a report that shows the current balance and holdings of a user's accounts and assets. "
-                "This report can be used to provide an overview of the user's financial status at a given point in time. "
-                "Each balance report object includes details such as the date and time of the report, "
-                "the total balance of the user's accounts and assets, and a list of account "
-                "and asset objects with their individual balances."
-                "Get balance report for a portfolio showing:\n"
-                "- What companies/instruments are in the portfolio\n"
-                "- What allocation (%) of each instrument\n"
-                "- How many shares for each company/instrument\n"
-                "- Total portfolio value and number of holdings\n"
-                "- Any other questions related to Balance Report\n"
-                "Returns a formatted report with all holdings details."
+                "Get a comprehensive balance report for a portfolio that answers questions about portfolio content and composition. "
+                "Use this tool to:\n"
+                "- Find out what companies/stocks/instruments are in a portfolio\n"
+                "- Get the percentage/allocation of specific companies in the portfolio\n"
+                "- See the shares count for each holding\n"
+                "- Analyze portfolio concentration and diversification\n"
+                "- Check for short positions (negative shares/values)\n"
+                "- View total portfolio value and exposure\n"
+                "- Get historical reports by specifying a date\n"
+                "\n"
+                "The report includes:\n"
+                "- Complete list of holdings with names and codes\n"
+                "- Share quantities and percentages\n"
+                "- Market values and allocation percentages\n"
+                "- Exposure amounts and percentages\n"
+                "- Total portfolio metrics\n"
+                "\n"
+                "Example questions this tool can answer:\n"
+                "- What companies are in portfolio X?\n"
+                "- What is the percentage of Apple in this portfolio?\n"
+                "- Show me the top holdings in portfolio Y\n"
+                "- Is the portfolio diversified or concentrated?\n"
+                "- Are there any short positions?"
             ),
             args_schema=GetBalanceReportSchema,
             response_format="content",

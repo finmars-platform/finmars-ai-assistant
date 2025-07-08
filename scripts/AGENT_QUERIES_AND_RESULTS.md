@@ -141,7 +141,7 @@ This document contains all possible queries for the Finmars AI Assistant agent a
 ## 6. BalanceReportToolkit Queries
 
 ### 6.1 Get Balance Report in USD
-**Query:** "Show me the balance report for portfolio 1_12_beta in USD"
+**Query:** "Show me the balance report for portfolio 1_12_ in USD"
 **Expected Result:** Comprehensive balance report including:
 - Portfolio holdings (companies/instruments)
 - Allocation percentages
@@ -150,8 +150,44 @@ This document contains all possible queries for the Finmars AI Assistant agent a
 - Total portfolio value
 
 ### 6.2 Get Balance Report in EUR
-**Query:** "Generate a balance report for portfolio 1_12_beta in EUR"
+**Query:** "Generate a balance report for portfolio 1_12_ in EUR"
 **Expected Result:** Same as above but with values in EUR
+
+### 6.3 Portfolio Content Analysis
+**Query:** "What companies/stocks/instruments are in portfolio 1_12_?"
+**Expected Result:** List of all holdings with their codes and names
+
+### 6.4 Specific Company Percentage
+**Query:** "What is the percentage of SPDR MSCI Global Stocks in portfolio 1_12_?"
+**Expected Result:** Allocation percentage of the specific instrument
+
+### 6.5 Portfolio Composition
+**Query:** "Show me the top holdings in portfolio 1_12_"
+**Expected Result:** Holdings sorted by allocation percentage
+
+### 6.6 Portfolio Concentration
+**Query:** "Is portfolio 1_12_ diversified or concentrated?"
+**Expected Result:** Analysis based on number of holdings and allocation percentages
+
+### 6.7 Short Positions
+**Query:** "Are there any short positions in portfolio 1_12_?"
+**Expected Result:** List of any holdings with negative shares/values
+
+### 6.8 Historical Report
+**Query:** "Show me the balance report for portfolio 1_12_ as of 2024-12-31"
+**Expected Result:** Balance report for the specified date
+
+### 6.9 Exposure Analysis
+**Query:** "What is the total exposure of portfolio 1_12_?"
+**Expected Result:** Total exposure amount and breakdown by instrument
+
+### 6.10 Specific Company Check
+**Query:** "Does portfolio 1_12_ contain Apple stock?"
+**Expected Result:** Yes/No answer with details if Apple (AAPL) is present, including shares and percentage
+
+### 6.11 Apple Percentage Analysis
+**Query:** "What percentage of portfolio 1_12_ is invested in Apple?"
+**Expected Result:** Allocation percentage of Apple stock if present, or indication that Apple is not in the portfolio
 
 ## Testing Results
 
