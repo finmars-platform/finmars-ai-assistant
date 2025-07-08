@@ -858,14 +858,26 @@ If you need exposure in a different currency or for a different date, please let
 
 ### 6.11 Apple Percentage Analysis
 
-**Query:** "What percentage of portfolio 1_12_ is invested in Apple?"
+**Query:** "What percentage of portfolio 2_12_ is invested in Apple? give me detailed info"
 
 **Agent Response:**
 ```
-Apple Inc. is not listed among the holdings in portfolio 1_12_. Therefore, 0% of this portfolio is currently invested in Apple.
+In portfolio 2_12_, Apple Inc (US0378331005) represents 0.40% of the portfolio by position size (shares). Here are the details:
+
+- Instrument: Apple Inc (US0378331005)
+- Shares (Position Size): 454.00
+- Percentage of Portfolio (by shares): 0.40%
+
+Additional context:
+- The portfolio contains 31 holdings.
+- The largest holding by shares is Canaan Inc (58.79%).
+- Apple is a relatively small position in this portfolio.
+- The report is as of 2025-07-08, in USD.
+
+If you need more details (such as market value or exposure, if available), let me know!
 ```
 
-**Result:** ✅ Correctly identified that Apple is not in the portfolio
+**Result:** ✅ Correctly identified Apple 
 
 ---
 
