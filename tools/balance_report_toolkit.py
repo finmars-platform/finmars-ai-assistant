@@ -125,32 +125,42 @@ class BalanceReportToolkit:
                     instrument_name = item.get("instrument.name", "Unknown")
                     
                     # Extract shares and value information from actual API response
-                    shares = item.get("position_size", 0.0)
-                    # Using the amount_invested (negative value represents investment)
-                    amount_invested = abs(item.get("amount_invested", 0.0) or 0.0)
+                    shares = item.get("position_size", 0.0) # Count of акций
+
+                    # Выдавать
+                    market_value = item.get("market_value", 0.0) # market_value, why sometimes is empty?? `position_size * price`
+                    exposure = item.get("exposure", 0.0) # exposure, why sometimes is empty??
+
+                    # Если вдруг чего-то нет, агент должен предложить другую дату и тп
+                    # Данные предыдущие, шаг назад, где данные есть
+                    # Какие именно шаги нужны, чтобы это получить
+                    # `item` <- позиции долларов портфеля
                     
                     if shares != 0:  # Can be negative for short positions
                         holdings.append({
                             "code": instrument_code,
                             "name": instrument_name,
                             "shares": shares,
-                            "value": amount_invested
+                            "value": market_value
                         })
-                        total_value += amount_invested
+                        if shares > 0:
+                            total_value += market_value
 
-                    output += "-" * 80 + "\n"
-                    output += f"Source:\n"
-                    output += json.dumps(item, ensure_ascii=False)
-                    output += "\n" + "-" * 80 + "\n"
+                    # output += "-" * 80 + "\n"
+                    # output += f"Source:\n"
+                    # output += json.dumps(item, ensure_ascii=False)
+                    # output += "\n" + "-" * 80 + "\n"
 
             # Calculate allocations and format output
             for holding in holdings:
-                allocation = (holding["value"] / total_value * 100) if total_value > 0 else 0
-                
                 output += f"Instrument: {holding['name']} ({holding['code']})\n"
                 output += f"  - Shares: {holding['shares']:,.2f}\n"
                 output += f"  - Market Value: ${holding['value']:,.2f}\n"
-                output += f"  - Allocation: {allocation:.2f}%\n\n"
+                if holding['value'] > 0:
+                    allocation = (holding["value"] / total_value * 100) if total_value > 0 else 0
+                    output += f"  - Allocation: {allocation:.2f}%\n\n"
+                else:
+                    output += f"  - Allocation: Short Position\n\n"
             
             output += "-" * 80 + "\n"
             output += f"Total Portfolio Value: ${total_value:,.2f}\n"
@@ -173,6 +183,11 @@ def build_balance_report_tools() -> List[BaseTool]:
             func=lambda **kwargs: asyncio.run(toolkit._get_balance_report(**kwargs)),
             coroutine=toolkit._get_balance_report,
             description=(
+                "The balance report entity represents a report that shows the current balance and holdings of a user's accounts and assets. "
+                "This report can be used to provide an overview of the user's financial status at a given point in time. "
+                "Each balance report object includes details such as the date and time of the report, "
+                "the total balance of the user's accounts and assets, and a list of account "
+                "and asset objects with their individual balances."
                 "Get balance report for a portfolio showing:\n"
                 "- What companies/instruments are in the portfolio\n"
                 "- What allocation (%) of each instrument\n"
