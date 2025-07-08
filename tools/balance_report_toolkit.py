@@ -91,10 +91,11 @@ class BalanceReportToolkit:
                 #table_font_size="small",
                 #transaction_classes=[],
                 page=1,
-                page_size=100,
+                page_size=200,
                 report_instance_id=None,
                 #portfolios_table_data_items=[]
             )
+            input_str = request_data.model_dump_json()
             
             # Make the API call
             result: BackendBalanceReportItems = await self.client.balance_report.get_balance_report_items(request_data)
@@ -112,7 +113,8 @@ class BalanceReportToolkit:
                     return f"Error: Could not parse items from response"
             
             # Extract portfolio information
-            output = f"Balance Report for Portfolio: {schema.portfolio_code}\n"
+            output = f"The FULL request to get Balance Report was: {input_str}\n\n\n"
+            output += f"RESPONSE:\nBalance Report for Portfolio: {schema.portfolio_code}\n"
             output += f"Report Date: {report_date}\n"
             output += f"Currency: {report_currency}\n\n"
             
@@ -138,31 +140,32 @@ class BalanceReportToolkit:
                     instrument_name = item.get("instrument.name", "Unknown")
                     
                     # Extract shares and value information from actual API response
-                    shares = item.get("position_size", 0.0) # Count of акций
+                    shares = item.get("position_size") # Count of акций
 
                     # Выдавать
-                    market_value = item.get("market_value", 0.0) # market_value, why sometimes is empty?? `position_size * price`
-                    exposure = item.get("exposure", 0.0) # exposure, why sometimes is empty??
+                    market_value = item.get("market_value") # market_value, why sometimes is empty?? `position_size * price`
+                    exposure = item.get("exposure") # exposure, why sometimes is empty??
 
                     # Если вдруг чего-то нет, агент должен предложить другую дату и тп
                     # Данные предыдущие, шаг назад, где данные есть
                     # Какие именно шаги нужны, чтобы это получить
                     # `item` <- позиции долларов портфеля
-                    
-                    if shares != 0:  # Can be negative for short positions
-                        holdings.append({
-                            "code": instrument_code,
-                            "name": instrument_name,
-                            "shares": shares,
-                            "value": market_value,
-                            "exposure": exposure
-                        })
-                        if shares > 0:
-                            total_shares += shares
-                        if market_value > 0:
-                            total_value += market_value
-                        if exposure > 0:
-                            total_exposure += exposure
+
+                    holdings.append({
+                        "code": instrument_code,
+                        "name": instrument_name,
+                        "shares": shares,
+                        "value": market_value,
+                        "exposure": exposure
+                    })
+                    if isinstance(shares, (int, float)) and shares > 0:
+                        total_shares += shares
+
+                    if isinstance(market_value, (int, float)) and market_value > 0:
+                        total_value += market_value
+
+                    if isinstance(exposure, (int, float)) and exposure > 0:
+                        total_exposure += exposure
 
                     # output += "-" * 80 + "\n"
                     # output += f"Source:\n"
@@ -170,44 +173,55 @@ class BalanceReportToolkit:
                     # output += "\n" + "-" * 80 + "\n"
 
             # Calculate allocations and format output
+            shares_pct_total = []
+            market_value_pct_total = []
+            exposure_pct_total = []
             for holding in holdings:
                 output += f"Instrument: {holding['name']} ({holding['code']})\n"
                 
                 # Shares with percentage
-                output += f"  - Shares: {holding['shares']:,.2f}"
-                if holding['shares'] < 0:
-                    output += " (Short Position)\n"
-                elif total_shares > 0 and holding['shares'] > 0:
-                    shares_pct = (holding['shares'] / total_shares * 100)
-                    output += f" ({shares_pct:.2f}%)\n"
+                if isinstance(holding['shares'], (int, float)):
+                    output += f"  - Shares: {holding['shares']:,.2f}"
+                    if holding['shares'] < 0:
+                        output += " (Short Position)\n"
+                    elif total_shares > 0 and holding['shares'] > 0:
+                        shares_pct = (holding['shares'] / total_shares * 100)
+                        shares_pct_total.append(shares_pct)
+                        output += f" ({shares_pct:.2f}%)\n"
+                    else:
+                        output += "\n"
                 else:
-                    output += "\n"
+                    output += "  - Shares: N/A\n"
                 
                 # Market Value with percentage
-                output += f"  - Market Value: ${holding['value']:,.2f}"
-                if holding['value'] < 0:
-                    output += " (Short Position)\n"
-                elif total_value > 0 and holding['value'] > 0:
-                    market_value_pct = (holding['value'] / total_value * 100)
-                    output += f" ({market_value_pct:.2f}%)\n"
+                if isinstance(holding['value'], (int, float)):
+                    output += f"  - Market Value: ${holding['value']:,.2f}"
+                    if holding['value'] < 0:
+                        output += " (Short Position)\n"
+                    elif total_value > 0 and holding['value'] > 0:
+                        market_value_pct = (holding['value'] / total_value * 100)
+                        market_value_pct_total.append(market_value_pct)
+                        output += f" ({market_value_pct:.2f}%)\n"
+                    else:
+                        output += "\n"
                 else:
-                    output += "\n"
+                    output += "  - Market Value: N/A\n"
                 
                 # Exposure with percentage
-                output += f"  - Exposure: ${holding['exposure']:,.2f}"
-                if holding['exposure'] < 0:
-                    output += " (Short Position)\n"
-                elif total_exposure > 0 and holding['exposure'] > 0:
-                    exposure_pct = (holding['exposure'] / total_exposure * 100)
-                    output += f" ({exposure_pct:.2f}%)\n"
+                if isinstance(holding['exposure'], (int, float)):
+                    output += f"  - Exposure: ${holding['exposure']:,.2f}"
+                    if holding['exposure'] < 0:
+                        output += " (Short Position)\n"
+                    elif total_exposure > 0 and holding['exposure'] > 0:
+                        exposure_pct = (holding['exposure'] / total_exposure * 100)
+                        exposure_pct_total.append(exposure_pct)
+                        output += f" ({exposure_pct:.2f}%)\n"
+                    else:
+                        output += "\n"
                 else:
-                    output += "\n"
+                    output += "  - Exposure: N/A\n"
                 
-                if holding['value'] > 0:
-                    allocation = (holding["value"] / total_value * 100) if total_value > 0 else 0
-                    output += f"  - Allocation: {allocation:.2f}%\n\n"
-                else:
-                    output += f"  - Allocation: Short Position\n\n"
+                output += "\n"
             
             output += "-" * 80 + "\n"
             output += f"Total Portfolio Value: ${total_value:,.2f}\n"
@@ -244,14 +258,16 @@ def build_balance_report_tools() -> List[BaseTool]:
                 "The report includes:\n"
                 "- Complete list of holdings with names and codes\n"
                 "- Share quantities and percentages\n"
-                "- Market values and allocation percentages\n"
+                "- Market values with allocation percentages\n"
                 "- Exposure amounts and percentages\n"
                 "- Total portfolio metrics\n"
                 "\n"
                 "Example questions this tool can answer:\n"
                 "- What companies are in portfolio X?\n"
-                "- What is the percentage of Apple in this portfolio?\n"
-                "- Show me the top holdings in portfolio Y\n"
+                "- What is the percentage/allocation of Apple in this portfolio?\n"
+                "- Show me the allocations in portfolio Y\n"
+                "- What is the portfolio allocation breakdown?\n"
+                "- Show me the top holdings in portfolio Z\n"
                 "- Is the portfolio diversified or concentrated?\n"
                 "- Are there any short positions?"
             ),
