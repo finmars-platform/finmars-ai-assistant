@@ -112,7 +112,9 @@ class BalanceReportToolkit:
             output += "Portfolio Holdings:\n"
             output += "=" * 80 + "\n\n"
             
+            total_shares = 0.0
             total_value = 0.0
+            total_exposure = 0.0
             holdings = []
             
             # Process each item to extract instrument info
@@ -141,10 +143,15 @@ class BalanceReportToolkit:
                             "code": instrument_code,
                             "name": instrument_name,
                             "shares": shares,
-                            "value": market_value
+                            "value": market_value,
+                            "exposure": exposure
                         })
                         if shares > 0:
+                            total_shares += shares
+                        if market_value > 0:
                             total_value += market_value
+                        if exposure > 0:
+                            total_exposure += exposure
 
                     # output += "-" * 80 + "\n"
                     # output += f"Source:\n"
@@ -154,8 +161,37 @@ class BalanceReportToolkit:
             # Calculate allocations and format output
             for holding in holdings:
                 output += f"Instrument: {holding['name']} ({holding['code']})\n"
-                output += f"  - Shares: {holding['shares']:,.2f}\n"
-                output += f"  - Market Value: ${holding['value']:,.2f}\n"
+                
+                # Shares with percentage
+                output += f"  - Shares: {holding['shares']:,.2f}"
+                if holding['shares'] < 0:
+                    output += " (Short Position)\n"
+                elif total_shares > 0 and holding['shares'] > 0:
+                    shares_pct = (holding['shares'] / total_shares * 100)
+                    output += f" ({shares_pct:.2f}%)\n"
+                else:
+                    output += "\n"
+                
+                # Market Value with percentage
+                output += f"  - Market Value: ${holding['value']:,.2f}"
+                if holding['value'] < 0:
+                    output += " (Short Position)\n"
+                elif total_value > 0 and holding['value'] > 0:
+                    market_value_pct = (holding['value'] / total_value * 100)
+                    output += f" ({market_value_pct:.2f}%)\n"
+                else:
+                    output += "\n"
+                
+                # Exposure with percentage
+                output += f"  - Exposure: ${holding['exposure']:,.2f}"
+                if holding['exposure'] < 0:
+                    output += " (Short Position)\n"
+                elif total_exposure > 0 and holding['exposure'] > 0:
+                    exposure_pct = (holding['exposure'] / total_exposure * 100)
+                    output += f" ({exposure_pct:.2f}%)\n"
+                else:
+                    output += "\n"
+                
                 if holding['value'] > 0:
                     allocation = (holding["value"] / total_value * 100) if total_value > 0 else 0
                     output += f"  - Allocation: {allocation:.2f}%\n\n"
@@ -164,6 +200,7 @@ class BalanceReportToolkit:
             
             output += "-" * 80 + "\n"
             output += f"Total Portfolio Value: ${total_value:,.2f}\n"
+            output += f"Total Portfolio Exposure: ${total_exposure:,.2f}\n"
             output += f"Number of Holdings: {len(holdings)}\n"
             return output
             
