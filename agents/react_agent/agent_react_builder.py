@@ -1,4 +1,12 @@
 from typing import Optional
+from datetime import datetime
+import os
+try:
+    from zoneinfo import ZoneInfo
+except ImportError:
+    # Fallback for Python < 3.9
+    from datetime import timezone
+    ZoneInfo = None
 
 from langchain_core.prompts import (
     ChatPromptTemplate,
@@ -17,6 +25,39 @@ from tools import build_all_tools
 
 
 def create_agent_prompt(sys_msg) -> ChatPromptTemplate:
+    # Get timezone from environment variable, default to UTC
+    tz_name = os.getenv('TZ', 'UTC')
+    
+    # Get current date, time, and timezone
+    try:
+        if ZoneInfo:
+            tz = ZoneInfo(tz_name)
+            current_time = datetime.now(tz)
+        else:
+            # Fallback for older Python versions
+            from datetime import timezone
+            current_time = datetime.now(timezone.utc)
+            tz_name = 'UTC'  # Force UTC for fallback
+    except Exception:
+        # If timezone is invalid, fall back to UTC
+        if ZoneInfo:
+            tz = ZoneInfo('UTC')
+            current_time = datetime.now(tz)
+            tz_name = 'UTC'
+        else:
+            from datetime import timezone
+            current_time = datetime.now(timezone.utc)
+            tz_name = 'UTC'
+    
+    # Format the datetime information
+    datetime_info = f"\n\n### Current date and time: {current_time.strftime('%Y-%m-%d %H:%M:%S')} {tz_name}"
+    
+    # Add datetime info to the system message content
+    if hasattr(sys_msg, 'content'):
+        sys_msg.content = sys_msg.content + datetime_info
+    elif hasattr(sys_msg, 'prompt') and hasattr(sys_msg.prompt, 'template'):
+        sys_msg.prompt.template = sys_msg.prompt.template + datetime_info
+    
     return ChatPromptTemplate.from_messages(
         [
             sys_msg,
