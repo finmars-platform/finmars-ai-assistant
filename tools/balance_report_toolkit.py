@@ -18,6 +18,14 @@ class ReportCurrency(str, Enum):
     EUR = "EUR"
 
 
+class SortBy(str, Enum):
+    """Sorting options for the balance report"""
+    SHARES = "shares"
+    MARKET_VALUE = "market_value"
+    EXPOSURE = "exposure"
+    NAME = "name"
+
+
 class GetBalanceReportSchema(BaseModel):
     """Input schema for getting balance report"""
     
@@ -31,6 +39,14 @@ class GetBalanceReportSchema(BaseModel):
     report_date: Optional[str] = Field(
         default=None,
         description="The date for the balance report in YYYY-MM-DD format (e.g., '2024-03-15'). If not provided, today's date will be used."
+    )
+    sort_by: Optional[SortBy] = Field(
+        default=None,
+        description="Sort holdings by shares, market_value, exposure, or name. If not provided, holdings will be shown in original order."
+    )
+    descending: bool = Field(
+        default=True,
+        description="Sort in descending order (highest to lowest). Set to false for ascending order."
     )
 
 
@@ -172,6 +188,28 @@ class BalanceReportToolkit:
                     # output += json.dumps(item, ensure_ascii=False)
                     # output += "\n" + "-" * 80 + "\n"
 
+            # Sort holdings if requested
+            if schema.sort_by:
+                def sort_key(holding):
+                    if schema.sort_by == SortBy.SHARES:
+                        val = holding['shares']
+                        return val if isinstance(val, (int, float)) else (-float('inf') if schema.descending else float('inf'))
+                    elif schema.sort_by == SortBy.MARKET_VALUE:
+                        val = holding['value']
+                        return val if isinstance(val, (int, float)) else (-float('inf') if schema.descending else float('inf'))
+                    elif schema.sort_by == SortBy.EXPOSURE:
+                        val = holding['exposure']
+                        return val if isinstance(val, (int, float)) else (-float('inf') if schema.descending else float('inf'))
+                    elif schema.sort_by == SortBy.NAME:
+                        return holding['name'].lower()
+                    return 0
+                
+                holdings.sort(key=sort_key, reverse=schema.descending if schema.sort_by != SortBy.NAME else not schema.descending)
+                
+                # Add sorting info to output
+                output += f"Sorted by: {schema.sort_by.value} ({'descending' if schema.descending else 'ascending'})\n"
+                output += "=" * 80 + "\n\n"
+
             # Calculate allocations and format output
             shares_pct_total = []
             market_value_pct_total = []
@@ -181,7 +219,7 @@ class BalanceReportToolkit:
                 
                 # Shares with percentage
                 if isinstance(holding['shares'], (int, float)):
-                    output += f"  - Shares: {holding['shares']:,.2f}"
+                    output += f"  - Shares (Position Size): {holding['shares']:,.2f}"
                     if holding['shares'] < 0:
                         output += " (Short Position)\n"
                     elif total_shares > 0 and holding['shares'] > 0:
@@ -224,6 +262,7 @@ class BalanceReportToolkit:
                 output += "\n"
             
             output += "-" * 80 + "\n"
+            output += f"Total Portfolio Position Size (Shares): {total_shares:,.2f}\n"
             output += f"Total Portfolio Value: ${total_value:,.2f}\n"
             output += f"Total Portfolio Exposure: ${total_exposure:,.2f}\n"
             output += f"Number of Holdings: {len(holdings)}\n"
@@ -254,6 +293,7 @@ def build_balance_report_tools() -> List[BaseTool]:
                 "- Check for short positions (negative shares/values)\n"
                 "- View total portfolio value and exposure\n"
                 "- Get historical reports by specifying a date\n"
+                "- Sort holdings by shares (the same as `position_size`), market value, exposure, or name\n"
                 "\n"
                 "The report includes:\n"
                 "- Complete list of holdings with names and codes\n"

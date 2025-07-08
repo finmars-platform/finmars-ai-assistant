@@ -189,6 +189,42 @@ This document contains all possible queries for the Finmars AI Assistant agent a
 **Query:** "What percentage of portfolio 1_12_ is invested in Apple?"
 **Expected Result:** Allocation percentage of Apple stock if present, or indication that Apple is not in the portfolio
 
+### 6.12 Portfolio Allocation Breakdown
+**Query:** "Show me the allocation breakdown for portfolio 1_12_"
+**Expected Result:** All holdings with their allocation percentages (from market value)
+
+### 6.13 Allocation Query
+**Query:** "What is the allocation of SPDR MSCI Global Stocks in portfolio 1_12_?"
+**Expected Result:** The allocation percentage from the market value field
+
+### 6.14 Sort by Shares Descending
+**Query:** "Show me holdings in portfolio 1_12_ sorted by shares in descending order"
+**Expected Result:** Holdings sorted from highest to lowest share count
+
+### 6.15 Sort by Market Value
+**Query:** "Show me the top holdings in portfolio 1_12_ sorted by market value"
+**Expected Result:** Holdings sorted by market value in descending order (largest positions first)
+
+### 6.16 Sort by Name Alphabetically
+**Query:** "List holdings in portfolio 1_12_ sorted alphabetically by name"
+**Expected Result:** Holdings sorted A-Z by instrument name
+
+### 6.17 Sort by Exposure Ascending
+**Query:** "Show holdings in portfolio 1_12_ sorted by exposure in ascending order"
+**Expected Result:** Holdings sorted from lowest to highest exposure
+
+### 6.18 Top 10 Holdings by Shares
+**Query:** "What are the top 10 holdings by share count in portfolio 1_12_?"
+**Expected Result:** Holdings sorted by shares descending, showing largest positions
+
+### 6.19 Smallest Positions
+**Query:** "Show me the smallest positions in portfolio 1_12_ sorted by shares ascending"
+**Expected Result:** Holdings sorted from smallest to largest share count
+
+### 6.20 Sort with Missing Values
+**Query:** "Sort portfolio 1_12_ holdings by market value when some values are missing"
+**Expected Result:** Holdings sorted with null/N/A values placed at the end for descending sort
+
 ## Testing Results
 
 Below are the actual results from testing each query with the agent:
