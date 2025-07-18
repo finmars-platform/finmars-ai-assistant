@@ -1,4 +1,5 @@
 import asyncio
+import json
 from typing import Optional, List
 from pydantic import BaseModel, Field
 from langchain_core.tools import StructuredTool, BaseTool
@@ -33,14 +34,15 @@ class PortfolioHistoryToolkit:
     def __init__(self):
         self.client = FinmarsPortfolioClient()
 
-    async def _list_portfolio_history(self, **kwargs) -> str:
+    async def _list_portfolio_history(self, **kwargs) -> tuple[str, dict | list | None]:
         """List all portfolio history records with pagination and filtering"""
         try:
             schema = ListPortfolioHistorySchema(**kwargs)
             result = await self.client.portfolio_history.list_portfolio_history(
                 ordering=schema.ordering, page=schema.page, page_size=schema.page_size
             )
-            return result.model_dump_json()
+            result_json = json.loads(result.model_dump_json())
+            return result.model_dump_json(), result_json
 
             # output = f"Found {result.count} total portfolio history records.\n"
             # if result.results:
@@ -65,16 +67,17 @@ class PortfolioHistoryToolkit:
             #
             # return output
         except Exception as e:
-            return f"Error listing portfolio history: {str(e)}"
+            return f"Error listing portfolio history: {str(e)}", None
 
-    async def _get_portfolio_history(self, **kwargs) -> str:
+    async def _get_portfolio_history(self, **kwargs) -> tuple[str, dict | list | None]:
         """Get a specific portfolio history record by ID"""
         try:
             schema = GetPortfolioHistorySchema(**kwargs)
             history = await self.client.portfolio_history.get_portfolio_history(
                 schema.history_id
             )
-            return history.model_dump_json()
+            history_json = json.loads(history.model_dump_json())
+            return history.model_dump_json(), history_json
 
             # output = f"Portfolio History Record Details:\n"
             # output += f"ID: {history.id}\n"
@@ -99,7 +102,7 @@ class PortfolioHistoryToolkit:
             #
             # return output
         except Exception as e:
-            return f"Error getting portfolio history record {kwargs.get('history_id')}: {str(e)}"
+            return f"Error getting portfolio history record {kwargs.get('history_id')}: {str(e)}", None
 
 
 def build_portfolio_history_tools() -> List[BaseTool]:
@@ -121,7 +124,7 @@ def build_portfolio_history_tools() -> List[BaseTool]:
             ),
             args_schema=ListPortfolioHistorySchema,
             # response_format="content_and_artifact",
-            response_format="content",
+            response_format="content_and_artifact",
         ),
         StructuredTool.from_function(
             name="get_portfolio_history",
@@ -135,7 +138,7 @@ def build_portfolio_history_tools() -> List[BaseTool]:
             ),
             args_schema=GetPortfolioHistorySchema,
             # response_format="content_and_artifact",
-            response_format="content",
+            response_format="content_and_artifact",
         ),
     ]
 

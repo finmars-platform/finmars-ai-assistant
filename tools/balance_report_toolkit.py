@@ -42,7 +42,7 @@ class BalanceReportToolkit:
     def __init__(self):
         self.client = FinmarsPortfolioClient()
         
-    async def _get_balance_report(self, **kwargs) -> str:
+    async def _get_balance_report(self, **kwargs) -> tuple[str, dict | list | None]:
         """Get balance report with portfolio holdings information"""
         try:
             schema = GetBalanceReportSchema(**kwargs)
@@ -53,7 +53,7 @@ class BalanceReportToolkit:
                 try:
                     report_date = datetime.strptime(schema.report_date, "%Y-%m-%d").date()
                 except ValueError:
-                    return f"Error: Invalid date format. Please use YYYY-MM-DD format (e.g., '2024-03-15')"
+                    return f"Error: Invalid date format. Please use YYYY-MM-DD format (e.g., '2024-03-15')", None
             else:
                 report_date = datetime.now().date()
             
@@ -102,6 +102,8 @@ class BalanceReportToolkit:
             # Make the API call
             result: BackendBalanceReportItems = await self.client.balance_report.get_balance_report_items(request_data)
 
+            result_artifact = json.loads(result.model_dump_json())
+
             report_currency = result.report_currency
 
             # Post-process: Extract the required information
@@ -112,7 +114,7 @@ class BalanceReportToolkit:
                 try:
                     items = json.loads(items)
                 except:
-                    return f"Error: Could not parse items from response"
+                    return f"Error: Could not parse items from response", None
             
             # Extract portfolio information
             output = f"The FULL request to get Balance Report was: {input_str}\n\n\n"
@@ -122,7 +124,7 @@ class BalanceReportToolkit:
             
             if not items:
                 output += "No holdings found in this portfolio.\n"
-                return output
+                return output, result_artifact
             
             output += "Portfolio Holdings:\n"
             output += "=" * 80 + "\n\n"
@@ -252,12 +254,12 @@ class BalanceReportToolkit:
             output += f"Total Portfolio Value: ${total_value:,.2f}\n"
             output += f"Total Portfolio Exposure: ${total_exposure:,.2f}\n"
             output += f"Number of Holdings: {len(holdings)}\n"
-            return output
+            return output, result_artifact
             
         except Exception as e:
             exc = traceback.format_exc()
             logger.error(exc)
-            return f"Error getting balance report for portfolio {kwargs.get('portfolio_code')}: {str(e)}"
+            return f"Error getting balance report for portfolio {kwargs.get('portfolio_code')}: {str(e)}", None
 
 
 def build_balance_report_tools() -> List[BaseTool]:
@@ -298,7 +300,7 @@ def build_balance_report_tools() -> List[BaseTool]:
                 "- Are there any short positions?"
             ),
             args_schema=GetBalanceReportSchema,
-            response_format="content",
+            response_format="content_and_artifact",
         ),
     ]
     

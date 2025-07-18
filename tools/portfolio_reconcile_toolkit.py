@@ -1,4 +1,5 @@
 import asyncio
+import json
 from typing import Optional, List
 from pydantic import BaseModel, Field
 from langchain_core.tools import StructuredTool, BaseTool
@@ -65,7 +66,7 @@ class PortfolioReconcileToolkit:
     def __init__(self):
         self.client = FinmarsPortfolioClient()
 
-    async def _list_portfolio_reconcile_groups(self, **kwargs) -> str:
+    async def _list_portfolio_reconcile_groups(self, **kwargs) -> tuple[str, dict | list | None]:
         """List all portfolio reconcile groups with pagination and filtering"""
         try:
             schema = ListPortfolioReconcileGroupsSchema(**kwargs)
@@ -76,7 +77,8 @@ class PortfolioReconcileToolkit:
                     page_size=schema.page_size,
                 )
             )
-            return result.model_dump_json()
+            result_json = json.loads(result.model_dump_json())
+            return result.model_dump_json(), result_json
 
             # output = f"Found {result.count} total portfolio reconcile groups.\n"
             # if result.results:
@@ -100,16 +102,17 @@ class PortfolioReconcileToolkit:
             #
             # return output
         except Exception as e:
-            return f"Error listing portfolio reconcile groups: {str(e)}"
+            return f"Error listing portfolio reconcile groups: {str(e)}", None
 
-    async def _get_portfolio_reconcile_group(self, **kwargs) -> str:
+    async def _get_portfolio_reconcile_group(self, **kwargs) -> tuple[str, dict | list | None]:
         """Get a specific portfolio reconcile group by ID"""
         try:
             schema = GetPortfolioReconcileGroupSchema(**kwargs)
             group = await self.client.portfolio_reconcile.get_portfolio_reconcile_group(
                 schema.group_id
             )
-            return group.model_dump_json()
+            group_json = json.loads(group.model_dump_json())
+            return group.model_dump_json(), group_json
 
             # output = f"Portfolio Reconcile Group Details:\n"
             # output += f"ID: {group.id}\n"
@@ -126,9 +129,9 @@ class PortfolioReconcileToolkit:
             #
             # return output
         except Exception as e:
-            return f"Error getting portfolio reconcile group {kwargs.get('group_id')}: {str(e)}"
+            return f"Error getting portfolio reconcile group {kwargs.get('group_id')}: {str(e)}", None
 
-    async def _list_portfolio_reconcile_history(self, **kwargs) -> str:
+    async def _list_portfolio_reconcile_history(self, **kwargs) -> tuple[str, dict | list | None]:
         """List all portfolio reconcile history records"""
         try:
             schema = ListPortfolioReconcileHistorySchema(**kwargs)
@@ -139,7 +142,8 @@ class PortfolioReconcileToolkit:
                     page_size=schema.page_size,
                 )
             )
-            return result.model_dump_json()
+            result_json = json.loads(result.model_dump_json())
+            return result.model_dump_json(), result_json
 
             # output = (
             #     f"Found {result.count} total portfolio reconcile history records.\n"
@@ -168,9 +172,9 @@ class PortfolioReconcileToolkit:
             #
             # return output
         except Exception as e:
-            return f"Error listing portfolio reconcile history: {str(e)}"
+            return f"Error listing portfolio reconcile history: {str(e)}", None
 
-    async def _get_portfolio_reconcile_history(self, **kwargs) -> str:
+    async def _get_portfolio_reconcile_history(self, **kwargs) -> tuple[str, dict | list | None]:
         """Get a specific portfolio reconcile history record by ID"""
         try:
             schema = GetPortfolioReconcileHistorySchema(**kwargs)
@@ -179,7 +183,8 @@ class PortfolioReconcileToolkit:
                     schema.history_id
                 )
             )
-            return history.model_dump_json()
+            history_json = json.loads(history.model_dump_json())
+            return history.model_dump_json(), history_json
 
             # output = f"Portfolio Reconcile History Record Details:\n"
             # output += f"ID: {history.id}\n"
@@ -199,9 +204,9 @@ class PortfolioReconcileToolkit:
             #
             # return output
         except Exception as e:
-            return f"Error getting portfolio reconcile history record {kwargs.get('history_id')}: {str(e)}"
+            return f"Error getting portfolio reconcile history record {kwargs.get('history_id')}: {str(e)}", None
 
-    async def _list_portfolio_reconcile_status(self, **kwargs) -> str:
+    async def _list_portfolio_reconcile_status(self, **kwargs) -> tuple[str, dict | list | None]:
         """List portfolio reconcile status"""
         try:
             schema = ListPortfolioReconcileStatusSchema(**kwargs)
@@ -212,7 +217,8 @@ class PortfolioReconcileToolkit:
                     page_size=schema.page_size,
                 )
             )
-            return status.model_dump_json()
+            status_json = json.loads(status.model_dump_json())
+            return status.model_dump_json(), status_json
 
             # output = f"Portfolio Reconcile Status:\n"
             # if (
@@ -242,7 +248,7 @@ class PortfolioReconcileToolkit:
             #
             # return output
         except Exception as e:
-            return f"Error getting portfolio reconcile status: {str(e)}"
+            return f"Error getting portfolio reconcile status: {str(e)}", None
 
 
 def build_portfolio_reconcile_tools() -> List[BaseTool]:
@@ -264,7 +270,7 @@ def build_portfolio_reconcile_tools() -> List[BaseTool]:
             ),
             args_schema=ListPortfolioReconcileGroupsSchema,
             # response_format="content_and_artifact",
-            response_format="content",
+            response_format="content_and_artifact",
         ),
         StructuredTool.from_function(
             name="get_portfolio_reconcile_group",
@@ -279,7 +285,7 @@ def build_portfolio_reconcile_tools() -> List[BaseTool]:
             ),
             args_schema=GetPortfolioReconcileGroupSchema,
             # response_format="content_and_artifact",
-            response_format="content",
+            response_format="content_and_artifact",
         ),
         StructuredTool.from_function(
             name="list_portfolio_reconcile_history",
@@ -295,7 +301,7 @@ def build_portfolio_reconcile_tools() -> List[BaseTool]:
             ),
             args_schema=ListPortfolioReconcileHistorySchema,
             # response_format="content_and_artifact",
-            response_format="content",
+            response_format="content_and_artifact",
         ),
         StructuredTool.from_function(
             name="get_portfolio_reconcile_history",
@@ -310,7 +316,7 @@ def build_portfolio_reconcile_tools() -> List[BaseTool]:
             ),
             args_schema=GetPortfolioReconcileHistorySchema,
             # response_format="content_and_artifact",
-            response_format="content",
+            response_format="content_and_artifact",
         ),
         StructuredTool.from_function(
             name="get_portfolio_reconcile_status",
@@ -326,7 +332,7 @@ def build_portfolio_reconcile_tools() -> List[BaseTool]:
             ),
             args_schema=ListPortfolioReconcileStatusSchema,
             # response_format="content_and_artifact",
-            response_format="content",
+            response_format="content_and_artifact",
         ),
     ]
 

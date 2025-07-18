@@ -1,4 +1,5 @@
 import asyncio
+import json
 from typing import Optional, List
 from pydantic import BaseModel, Field
 from langchain_core.tools import StructuredTool, BaseTool
@@ -97,14 +98,15 @@ class PortfolioTypeToolkit:
     def __init__(self):
         self.client = FinmarsPortfolioClient()
 
-    async def _list_portfolio_types(self, **kwargs) -> str:
+    async def _list_portfolio_types(self, **kwargs) -> tuple[str, dict | list | None]:
         """List all portfolio types with pagination and filtering"""
         try:
             schema = ListPortfolioTypesSchema(**kwargs)
             result = await self.client.portfolio_types.list_portfolio_types(
                 ordering=schema.ordering, page=schema.page, page_size=schema.page_size
             )
-            return result.model_dump_json()
+            result_json = json.loads(result.model_dump_json())
+            return result.model_dump_json(), result_json
 
             # output = f"Found {result.count} total portfolio types.\n"
             # if result.results:
@@ -126,16 +128,17 @@ class PortfolioTypeToolkit:
             #
             # return output
         except Exception as e:
-            return f"Error listing portfolio types: {str(e)}"
+            return f"Error listing portfolio types: {str(e)}", None
 
-    async def _get_portfolio_type(self, **kwargs) -> str:
+    async def _get_portfolio_type(self, **kwargs) -> tuple[str, dict | list | None]:
         """Get a specific portfolio type by ID"""
         try:
             schema = GetPortfolioTypeSchema(**kwargs)
             ptype = await self.client.portfolio_types.get_portfolio_type(
                 schema.portfolio_type_id
             )
-            return ptype.model_dump_json()
+            ptype_json = json.loads(ptype.model_dump_json())
+            return ptype.model_dump_json(), ptype_json
 
             # output = f"Portfolio Type Details:\n"
             # output += f"ID: {ptype.id}\n"
@@ -148,16 +151,17 @@ class PortfolioTypeToolkit:
             #
             # return output
         except Exception as e:
-            return f"Error getting portfolio type {kwargs.get('portfolio_type_id')}: {str(e)}"
+            return f"Error getting portfolio type {kwargs.get('portfolio_type_id')}: {str(e)}", None
 
-    async def _list_portfolio_types_light(self, **kwargs) -> str:
+    async def _list_portfolio_types_light(self, **kwargs) -> tuple[str, dict | list | None]:
         """List portfolio types in light format (minimal data)"""
         try:
             schema = ListPortfolioTypesLightSchema(**kwargs)
             result = await self.client.portfolio_types.list_portfolio_types_light(
                 ordering=schema.ordering, page=schema.page, page_size=schema.page_size
             )
-            return result.model_dump_json()
+            result_json = json.loads(result.model_dump_json())
+            return result.model_dump_json(), result_json
 
             # output = f"Found {result.count} total portfolio types (light format).\n"
             # if result.results:
@@ -169,15 +173,16 @@ class PortfolioTypeToolkit:
             #
             # return output
         except Exception as e:
-            return f"Error listing portfolio types (light): {str(e)}"
+            return f"Error listing portfolio types (light): {str(e)}", None
 
-    async def _get_portfolio_type_attributes(self, **kwargs) -> str:
+    async def _get_portfolio_type_attributes(self, **kwargs) -> tuple[str, dict | list | None]:
         """Get portfolio type attributes"""
         try:
             attributes = (
                 await self.client.portfolio_types.get_portfolio_type_attributes()
             )
-            return attributes.model_dump_json()
+            attributes_json = json.loads(attributes.model_dump_json())
+            return attributes.model_dump_json(), attributes_json
 
             # output = f"Found {len(attributes)} portfolio type attributes:\n\n"
             # for attr in attributes:
@@ -190,16 +195,17 @@ class PortfolioTypeToolkit:
             #
             # return output
         except Exception as e:
-            return f"Error getting portfolio type attributes: {str(e)}"
+            return f"Error getting portfolio type attributes: {str(e)}", None
 
-    async def _list_portfolio_attribute_types(self, **kwargs) -> str:
+    async def _list_portfolio_attribute_types(self, **kwargs) -> tuple[str, dict | list | None]:
         """List portfolio attribute types"""
         try:
             schema = ListPortfolioAttributeTypesSchema(**kwargs)
             result = await self.client.portfolio_types.list_portfolio_attribute_types(
                 ordering=schema.ordering, page=schema.page, page_size=schema.page_size
             )
-            return result.model_dump_json()
+            result_json = json.loads(result.model_dump_json())
+            return result.model_dump_json(), result_json
 
             # output = f"Found {result.count} total portfolio attribute types.\n"
             # if result.results:
@@ -215,16 +221,17 @@ class PortfolioTypeToolkit:
             #
             # return output
         except Exception as e:
-            return f"Error listing portfolio attribute types: {str(e)}"
+            return f"Error listing portfolio attribute types: {str(e)}", None
 
-    async def _get_portfolio_attribute_type(self, **kwargs) -> str:
+    async def _get_portfolio_attribute_type(self, **kwargs) -> tuple[str, dict | list | None]:
         """Get a specific portfolio attribute type by ID"""
         try:
             schema = GetPortfolioAttributeTypeSchema(**kwargs)
             attr_type = await self.client.portfolio_types.get_portfolio_attribute_type(
                 schema.attribute_type_id
             )
-            return attr_type.model_dump_json()
+            attr_type_json = json.loads(attr_type.model_dump_json())
+            return attr_type.model_dump_json(), attr_type_json
 
             # output = f"Portfolio Attribute Type Details:\n"
             # output += f"ID: {attr_type.id}\n"
@@ -234,16 +241,17 @@ class PortfolioTypeToolkit:
             #
             # return output
         except Exception as e:
-            return f"Error getting portfolio attribute type {kwargs.get('attribute_type_id')}: {str(e)}"
+            return f"Error getting portfolio attribute type {kwargs.get('attribute_type_id')}: {str(e)}", None
 
-    async def _get_objects_to_recalculate(self, **kwargs) -> str:
+    async def _get_objects_to_recalculate(self, **kwargs) -> tuple[str, dict | list | None]:
         """Get objects to recalculate for a portfolio attribute type"""
         try:
             schema = GetObjectsToRecalculateSchema(**kwargs)
             result = await self.client.portfolio_types.get_portfolio_attribute_type_objects_to_recalculate(
                 schema.attribute_type_id
             )
-            return result.model_dump_json()
+            result_json = json.loads(result.model_dump_json())
+            return result.model_dump_json(), result_json
 
             # output = f"Objects to recalculate for attribute type {schema.attribute_type_id}:\n"
             # if hasattr(result, "portfolios") and result.portfolios:
@@ -253,9 +261,9 @@ class PortfolioTypeToolkit:
             #
             # return output
         except Exception as e:
-            return f"Error getting objects to recalculate for attribute type {kwargs.get('attribute_type_id')}: {str(e)}"
+            return f"Error getting objects to recalculate for attribute type {kwargs.get('attribute_type_id')}: {str(e)}", None
 
-    async def _list_portfolio_type_attribute_types(self, **kwargs) -> str:
+    async def _list_portfolio_type_attribute_types(self, **kwargs) -> tuple[str, dict | list | None]:
         """List portfolio type attribute types"""
         try:
             schema = ListPortfolioTypeAttributeTypesSchema(**kwargs)
@@ -266,7 +274,8 @@ class PortfolioTypeToolkit:
                     page_size=schema.page_size,
                 )
             )
-            return result.model_dump_json()
+            result_json = json.loads(result.model_dump_json())
+            return result.model_dump_json(), result_json
 
             # output = f"Found {result.count} total portfolio type attribute types.\n"
             # if result.results:
@@ -282,9 +291,9 @@ class PortfolioTypeToolkit:
             #
             # return output
         except Exception as e:
-            return f"Error listing portfolio type attribute types: {str(e)}"
+            return f"Error listing portfolio type attribute types: {str(e)}", None
 
-    async def _get_portfolio_type_attribute_type(self, **kwargs) -> str:
+    async def _get_portfolio_type_attribute_type(self, **kwargs) -> tuple[str, dict | list | None]:
         """Get a specific portfolio type attribute type by ID"""
         try:
             schema = GetPortfolioTypeAttributeTypeSchema(**kwargs)
@@ -293,7 +302,8 @@ class PortfolioTypeToolkit:
                     schema.attribute_type_id
                 )
             )
-            return attr_type.model_dump_json()
+            attr_type_json = json.loads(attr_type.model_dump_json())
+            return attr_type.model_dump_json(), attr_type_json
 
             # output = f"Portfolio Type Attribute Type Details:\n"
             # output += f"ID: {attr_type.id}\n"
@@ -303,16 +313,17 @@ class PortfolioTypeToolkit:
             #
             # return output
         except Exception as e:
-            return f"Error getting portfolio type attribute type {kwargs.get('attribute_type_id')}: {str(e)}"
+            return f"Error getting portfolio type attribute type {kwargs.get('attribute_type_id')}: {str(e)}", None
 
-    async def _get_portfolio_type_objects_to_recalculate(self, **kwargs) -> str:
+    async def _get_portfolio_type_objects_to_recalculate(self, **kwargs) -> tuple[str, dict | list | None]:
         """Get objects to recalculate for a portfolio type attribute type"""
         try:
             schema = GetObjectsToRecalculateSchema(**kwargs)
             result = await self.client.portfolio_types.get_portfolio_type_attribute_type_objects_to_recalculate(
                 schema.attribute_type_id
             )
-            return result.model_dump_json()
+            result_json = json.loads(result.model_dump_json())
+            return result.model_dump_json(), result_json
 
             # output = f"Objects to recalculate for portfolio type attribute type {schema.attribute_type_id}:\n"
             # if hasattr(result, "portfolios") and result.portfolios:
@@ -322,7 +333,7 @@ class PortfolioTypeToolkit:
             #
             # return output
         except Exception as e:
-            return f"Error getting objects to recalculate for portfolio type attribute type {kwargs.get('attribute_type_id')}: {str(e)}"
+            return f"Error getting objects to recalculate for portfolio type attribute type {kwargs.get('attribute_type_id')}: {str(e)}", None
 
 
 def build_portfolio_type_tools() -> List[BaseTool]:
@@ -341,7 +352,7 @@ def build_portfolio_type_tools() -> List[BaseTool]:
             ),
             args_schema=ListPortfolioTypesSchema,
             # response_format="content_and_artifact",
-            response_format="content",
+            response_format="content_and_artifact",
         ),
         StructuredTool.from_function(
             name="get_portfolio_type",
@@ -353,7 +364,7 @@ def build_portfolio_type_tools() -> List[BaseTool]:
             ),
             args_schema=GetPortfolioTypeSchema,
             # response_format="content_and_artifact",
-            response_format="content",
+            response_format="content_and_artifact",
         ),
         StructuredTool.from_function(
             name="list_portfolio_types_light",
@@ -367,7 +378,7 @@ def build_portfolio_type_tools() -> List[BaseTool]:
             ),
             args_schema=ListPortfolioTypesLightSchema,
             # response_format="content_and_artifact",
-            response_format="content",
+            response_format="content_and_artifact",
         ),
         StructuredTool.from_function(
             name="get_portfolio_type_attributes",
@@ -381,7 +392,7 @@ def build_portfolio_type_tools() -> List[BaseTool]:
             ),
             args_schema=GetPortfolioTypeAttributesSchema,
             # response_format="content_and_artifact",
-            response_format="content",
+            response_format="content_and_artifact",
         ),
         StructuredTool.from_function(
             name="list_portfolio_attribute_types",
@@ -395,7 +406,7 @@ def build_portfolio_type_tools() -> List[BaseTool]:
             ),
             args_schema=ListPortfolioAttributeTypesSchema,
             # response_format="content_and_artifact",
-            response_format="content",
+            response_format="content_and_artifact",
         ),
         StructuredTool.from_function(
             name="get_portfolio_attribute_type",
@@ -409,7 +420,7 @@ def build_portfolio_type_tools() -> List[BaseTool]:
             ),
             args_schema=GetPortfolioAttributeTypeSchema,
             # response_format="content_and_artifact",
-            response_format="content",
+            response_format="content_and_artifact",
         ),
         StructuredTool.from_function(
             name="get_portfolio_attribute_objects_to_recalculate",
@@ -423,7 +434,7 @@ def build_portfolio_type_tools() -> List[BaseTool]:
             ),
             args_schema=GetObjectsToRecalculateSchema,
             # response_format="content_and_artifact",
-            response_format="content",
+            response_format="content_and_artifact",
         ),
         StructuredTool.from_function(
             name="list_portfolio_type_attribute_types",
@@ -437,7 +448,7 @@ def build_portfolio_type_tools() -> List[BaseTool]:
             ),
             args_schema=ListPortfolioTypeAttributeTypesSchema,
             # response_format="content_and_artifact",
-            response_format="content",
+            response_format="content_and_artifact",
         ),
         StructuredTool.from_function(
             name="get_portfolio_type_attribute_type",
@@ -451,7 +462,7 @@ def build_portfolio_type_tools() -> List[BaseTool]:
             ),
             args_schema=GetPortfolioTypeAttributeTypeSchema,
             # response_format="content_and_artifact",
-            response_format="content",
+            response_format="content_and_artifact",
         ),
         StructuredTool.from_function(
             name="get_portfolio_type_attribute_objects_to_recalculate",
@@ -465,7 +476,7 @@ def build_portfolio_type_tools() -> List[BaseTool]:
             ),
             args_schema=GetObjectsToRecalculateSchema,
             # response_format="content_and_artifact",
-            response_format="content",
+            response_format="content_and_artifact",
         ),
     ]
 

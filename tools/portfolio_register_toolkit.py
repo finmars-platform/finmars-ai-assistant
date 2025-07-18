@@ -1,4 +1,5 @@
 import asyncio
+import json
 from typing import Optional, List
 from pydantic import BaseModel, Field
 from langchain_core.tools import StructuredTool, BaseTool
@@ -77,14 +78,15 @@ class PortfolioRegisterToolkit:
     def __init__(self):
         self.client = FinmarsPortfolioClient()
 
-    async def _list_portfolio_registers(self, **kwargs) -> str:
+    async def _list_portfolio_registers(self, **kwargs) -> tuple[str, dict | list | None]:
         """List all portfolio registers with pagination and filtering"""
         try:
             schema = ListPortfolioRegistersSchema(**kwargs)
             result = await self.client.portfolio_registers.list_portfolio_registers(
                 ordering=schema.ordering, page=schema.page, page_size=schema.page_size
             )
-            return result.model_dump_json()
+            result_json = json.loads(result.model_dump_json())
+            return result.model_dump_json(), result_json
 
             # output = f"Found {result.count} total portfolio registers.\n"
             # if result.results:
@@ -107,16 +109,17 @@ class PortfolioRegisterToolkit:
             #
             # return output
         except Exception as e:
-            return f"Error listing portfolio registers: {str(e)}"
+            return f"Error listing portfolio registers: {str(e)}", None
 
-    async def _get_portfolio_register(self, **kwargs) -> str:
+    async def _get_portfolio_register(self, **kwargs) -> tuple[str, dict | list | None]:
         """Get a specific portfolio register by ID"""
         try:
             schema = GetPortfolioRegisterSchema(**kwargs)
             register = await self.client.portfolio_registers.get_portfolio_register(
                 schema.register_id
             )
-            return register.model_dump_json()
+            register_json = json.loads(register.model_dump_json())
+            return register.model_dump_json(), register_json
 
             # output = f"Portfolio Register Details:\n"
             # output += f"ID: {register.id}\n"
@@ -130,9 +133,9 @@ class PortfolioRegisterToolkit:
             #
             # return output
         except Exception as e:
-            return f"Error getting portfolio register {kwargs.get('register_id')}: {str(e)}"
+            return f"Error getting portfolio register {kwargs.get('register_id')}: {str(e)}", None
 
-    async def _list_portfolio_register_records(self, **kwargs) -> str:
+    async def _list_portfolio_register_records(self, **kwargs) -> tuple[str, dict | list | None]:
         """List all portfolio register records"""
         try:
             schema = ListPortfolioRegisterRecordsSchema(**kwargs)
@@ -143,7 +146,8 @@ class PortfolioRegisterToolkit:
                     page_size=schema.page_size,
                 )
             )
-            return result.model_dump_json()
+            result_json = json.loads(result.model_dump_json())
+            return result.model_dump_json(), result_json
 
             # output = f"Found {result.count} total portfolio register records.\n"
             # if result.results:
@@ -167,9 +171,9 @@ class PortfolioRegisterToolkit:
             #
             # return output
         except Exception as e:
-            return f"Error listing portfolio register records: {str(e)}"
+            return f"Error listing portfolio register records: {str(e)}", None
 
-    async def _get_portfolio_register_record(self, **kwargs) -> str:
+    async def _get_portfolio_register_record(self, **kwargs) -> tuple[str, dict | list | None]:
         """Get a specific portfolio register record by ID"""
         try:
             schema = GetPortfolioRegisterRecordSchema(**kwargs)
@@ -178,7 +182,8 @@ class PortfolioRegisterToolkit:
                     schema.record_id
                 )
             )
-            return record.model_dump_json()
+            record_json = json.loads(record.model_dump_json())
+            return record.model_dump_json(), record_json
 
             # output = f"Portfolio Register Record Details:\n"
             # output += f"ID: {record.id}\n"
@@ -191,16 +196,17 @@ class PortfolioRegisterToolkit:
             #
             # return output
         except Exception as e:
-            return f"Error getting portfolio register record {kwargs.get('record_id')}: {str(e)}"
+            return f"Error getting portfolio register record {kwargs.get('record_id')}: {str(e)}", None
 
-    async def _list_portfolio_register_attribute_types(self, **kwargs) -> str:
+    async def _list_portfolio_register_attribute_types(self, **kwargs) -> tuple[str, dict | list | None]:
         """List portfolio register attribute types"""
         try:
             schema = ListPortfolioRegisterAttributeTypesSchema(**kwargs)
             result = await self.client.portfolio_registers.list_portfolio_register_attribute_types(
                 ordering=schema.ordering, page=schema.page, page_size=schema.page_size
             )
-            return result.model_dump_json()
+            result_json = json.loads(result.model_dump_json())
+            return result.model_dump_json(), result_json
 
             # output = f"Found {result.count} total portfolio register attribute types.\n"
             # if result.results:
@@ -216,16 +222,17 @@ class PortfolioRegisterToolkit:
             #
             # return output
         except Exception as e:
-            return f"Error listing portfolio register attribute types: {str(e)}"
+            return f"Error listing portfolio register attribute types: {str(e)}", None
 
-    async def _get_portfolio_register_attribute_type(self, **kwargs) -> str:
+    async def _get_portfolio_register_attribute_type(self, **kwargs) -> tuple[str, dict | list | None]:
         """Get a specific portfolio register attribute type by ID"""
         try:
             schema = GetPortfolioRegisterAttributeTypeSchema(**kwargs)
             attr_type = await self.client.portfolio_registers.get_portfolio_register_attribute_type(
                 schema.attribute_type_id
             )
-            return attr_type.model_dump_json()
+            attr_type_json = json.loads(attr_type.model_dump_json())
+            return attr_type.model_dump_json(), attr_type_json
 
             # output = f"Portfolio Register Attribute Type Details:\n"
             # output += f"ID: {attr_type.id}\n"
@@ -235,16 +242,17 @@ class PortfolioRegisterToolkit:
             #
             # return output
         except Exception as e:
-            return f"Error getting portfolio register attribute type {kwargs.get('attribute_type_id')}: {str(e)}"
+            return f"Error getting portfolio register attribute type {kwargs.get('attribute_type_id')}: {str(e)}", None
 
-    async def _get_register_objects_to_recalculate(self, **kwargs) -> str:
+    async def _get_register_objects_to_recalculate(self, **kwargs) -> tuple[str, dict | list | None]:
         """Get objects to recalculate for a portfolio register attribute type"""
         try:
             schema = GetRegisterObjectsToRecalculateSchema(**kwargs)
             result = await self.client.portfolio_registers.get_portfolio_register_attribute_type_objects_to_recalculate(
                 schema.attribute_type_id
             )
-            return result.model_dump_json()
+            result_json = json.loads(result.model_dump_json())
+            return result.model_dump_json(), result_json
 
             # output = f"Objects to recalculate for register attribute type {schema.attribute_type_id}:\n"
             # if hasattr(result, "portfolios") and result.portfolios:
@@ -254,7 +262,7 @@ class PortfolioRegisterToolkit:
             #
             # return output
         except Exception as e:
-            return f"Error getting objects to recalculate for register attribute type {kwargs.get('attribute_type_id')}: {str(e)}"
+            return f"Error getting objects to recalculate for register attribute type {kwargs.get('attribute_type_id')}: {str(e)}", None
 
 
 def build_portfolio_register_tools() -> List[BaseTool]:
@@ -275,7 +283,7 @@ def build_portfolio_register_tools() -> List[BaseTool]:
             ),
             args_schema=ListPortfolioRegistersSchema,
             # response_format="content_and_artifact",
-            response_format="content",
+            response_format="content_and_artifact",
         ),
         StructuredTool.from_function(
             name="get_portfolio_register",
@@ -289,7 +297,7 @@ def build_portfolio_register_tools() -> List[BaseTool]:
             ),
             args_schema=GetPortfolioRegisterSchema,
             # response_format="content_and_artifact",
-            response_format="content",
+            response_format="content_and_artifact",
         ),
         StructuredTool.from_function(
             name="list_portfolio_register_records",
@@ -304,7 +312,7 @@ def build_portfolio_register_tools() -> List[BaseTool]:
             ),
             args_schema=ListPortfolioRegisterRecordsSchema,
             # response_format="content_and_artifact",
-            response_format="content",
+            response_format="content_and_artifact",
         ),
         StructuredTool.from_function(
             name="get_portfolio_register_record",
@@ -318,7 +326,7 @@ def build_portfolio_register_tools() -> List[BaseTool]:
             ),
             args_schema=GetPortfolioRegisterRecordSchema,
             # response_format="content_and_artifact",
-            response_format="content",
+            response_format="content_and_artifact",
         ),
         StructuredTool.from_function(
             name="list_portfolio_register_attribute_types",
@@ -332,7 +340,7 @@ def build_portfolio_register_tools() -> List[BaseTool]:
             ),
             args_schema=ListPortfolioRegisterAttributeTypesSchema,
             # response_format="content_and_artifact",
-            response_format="content",
+            response_format="content_and_artifact",
         ),
         StructuredTool.from_function(
             name="get_portfolio_register_attribute_type",
@@ -346,7 +354,7 @@ def build_portfolio_register_tools() -> List[BaseTool]:
             ),
             args_schema=GetPortfolioRegisterAttributeTypeSchema,
             # response_format="content_and_artifact",
-            response_format="content",
+            response_format="content_and_artifact",
         ),
         StructuredTool.from_function(
             name="get_register_attribute_objects_to_recalculate",
@@ -360,7 +368,7 @@ def build_portfolio_register_tools() -> List[BaseTool]:
             ),
             args_schema=GetRegisterObjectsToRecalculateSchema,
             # response_format="content_and_artifact",
-            response_format="content",
+            response_format="content_and_artifact",
         ),
     ]
 

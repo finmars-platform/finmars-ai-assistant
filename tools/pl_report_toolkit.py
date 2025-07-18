@@ -53,7 +53,7 @@ class PLReportToolkit:
     def __init__(self):
         self.client = FinmarsPortfolioClient()
         
-    async def _get_pl_report(self, **kwargs) -> str:
+    async def _get_pl_report(self, **kwargs) -> tuple[str, dict | list | None]:
         """Get P/L report with profit and loss information"""
         try:
             schema = GetPLReportSchema(**kwargs)
@@ -63,13 +63,13 @@ class PLReportToolkit:
             try:
                 pl_first_date = datetime.strptime(schema.pl_first_date, "%Y-%m-%d").date()
             except ValueError:
-                return f"Error: Invalid pl_first_date format. Please use YYYY-MM-DD format (e.g., '2024-01-01')"
+                return f"Error: Invalid pl_first_date format. Please use YYYY-MM-DD format (e.g., '2024-01-01')", None
             
             if schema.report_date:
                 try:
                     report_date = datetime.strptime(schema.report_date, "%Y-%m-%d").date()
                 except ValueError:
-                    return f"Error: Invalid report_date format. Please use YYYY-MM-DD format (e.g., '2024-12-31')"
+                    return f"Error: Invalid report_date format. Please use YYYY-MM-DD format (e.g., '2024-12-31')", None
             else:
                 report_date = datetime.now().date()
             
@@ -105,6 +105,8 @@ class PLReportToolkit:
             
             # Make the API call
             result: PLReportItems = await self.client.pl_report.create_pl_report(request_data)
+            
+            result_artifact = json.loads(result.model_dump_json())
 
             report_currency = result.report_currency
 
@@ -116,7 +118,7 @@ class PLReportToolkit:
                 try:
                     items = json.loads(items)
                 except:
-                    return f"Error: Could not parse items from response"
+                    return f"Error: Could not parse items from response", None
             
             # Extract portfolio information
             output = f"The FULL request to get P/L Report was: {input_str}\n\n\n"
@@ -126,7 +128,7 @@ class PLReportToolkit:
             
             if not items:
                 output += "No positions found in this portfolio for the specified period.\n"
-                return output
+                return output, result_artifact
             
             output += "Profit & Loss Analysis:\n"
             output += "=" * 100 + "\n\n"
@@ -371,12 +373,12 @@ class PLReportToolkit:
                 worst_performer = min(losing_positions, key=lambda x: x['return_percentage'])
                 output += f"- Worst Performer: {worst_performer['name']} ({worst_performer['return_percentage']:.2f}%)\n"
             
-            return output
+            return output, result_artifact
             
         except Exception as e:
             exc = traceback.format_exc()
             logger.error(exc)
-            return f"Error getting P/L report for portfolio {kwargs.get('portfolio_code')}: {str(e)}"
+            return f"Error getting P/L report for portfolio {kwargs.get('portfolio_code')}: {str(e)}", None
 
 
 def build_pl_report_tools() -> List[BaseTool]:
@@ -431,7 +433,7 @@ def build_pl_report_tools() -> List[BaseTool]:
                 "- return_percentage: (principle / |amount_invested|) × 100"
             ),
             args_schema=GetPLReportSchema,
-            response_format="content",
+            response_format="content_and_artifact",
         ),
     ]
     
