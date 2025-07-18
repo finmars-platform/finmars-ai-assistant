@@ -3,27 +3,13 @@ import json
 import traceback
 from typing import List, Dict, Any, Optional
 from datetime import datetime, date
-from enum import Enum
 from pydantic import BaseModel, Field
 from langchain_core.tools import StructuredTool, BaseTool
 
 from libs.client.finmars_client import FinmarsPortfolioClient
 from libs.logger.logger import logger
 from libs.schema.via_data_model_codegen.report_schema import BackendBalanceReportItems, DateField
-
-
-class ReportCurrency(str, Enum):
-    """Supported report currencies"""
-    USD = "USD"
-    EUR = "EUR"
-
-
-class SortBy(str, Enum):
-    """Sorting options for the balance report"""
-    SHARES = "shares"
-    MARKET_VALUE = "market_value"
-    EXPOSURE = "exposure"
-    NAME = "name"
+from .shared_models import ReportCurrency, BalanceReportSortBy as SortBy
 
 
 class GetBalanceReportSchema(BaseModel):
