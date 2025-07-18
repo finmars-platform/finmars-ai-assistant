@@ -164,35 +164,35 @@ class ReportInstrumentType(BaseModel):
 
 class ReportCountry(BaseModel):
     id: Optional[int] = Field(None, title='ID')
-    country_code: Optional[constr(min_length=1)] = Field(None, title='Country code')
-    name: Optional[constr(min_length=1)] = Field(None, title='Name')
-    region: Optional[constr(min_length=1)] = Field(None, title='Region')
-    region_code: Optional[constr(min_length=1)] = Field(None, title='Region code')
-    sub_region: Optional[constr(min_length=1)] = Field(None, title='Sub region')
-    sub_region_code: Optional[constr(min_length=1)] = Field(
+    country_code: Optional[constr(min_length=0)] = Field(None, title='Country code')
+    name: Optional[constr(min_length=0)] = Field(None, title='Name')
+    region: Optional[constr(min_length=0)] = Field(None, title='Region')
+    region_code: Optional[constr(min_length=0)] = Field(None, title='Region code')
+    sub_region: Optional[constr(min_length=0)] = Field(None, title='Sub region')
+    sub_region_code: Optional[constr(min_length=0)] = Field(
         None, title='Sub region code'
     )
-    user_code: Optional[constr(min_length=1)] = Field(None, title='User code')
-    short_name: Optional[constr(min_length=1)] = Field(None, title='Short name')
+    user_code: Optional[constr(min_length=0)] = Field(None, title='User code')
+    short_name: Optional[constr(min_length=0)] = Field(None, title='Short name')
 
 
 class ReportCurrency(BaseModel):
     id: Optional[int] = Field(None, title='ID')
     user_code: Optional[constr(max_length=255)] = Field(None, title='User code')
-    name: Optional[constr(min_length=1)] = Field(
+    name: Optional[constr(min_length=0)] = Field(
         None, description='Human Readable Name of the object', title='Name'
     )
-    short_name: Optional[constr(min_length=1)] = Field(
+    short_name: Optional[constr(min_length=0)] = Field(
         None,
         description='Short Name of the object. Used in dropdown menus',
         title='Short name',
     )
-    notes: Optional[constr(min_length=1)] = Field(
+    notes: Optional[constr(min_length=0)] = Field(
         None,
         description='Notes, any useful information about the object',
         title='Notes',
     )
-    reference_for_pricing: Optional[constr(min_length=1)] = Field(
+    reference_for_pricing: Optional[constr(min_length=0)] = Field(
         None, title='Reference for pricing'
     )
     default_fx_rate: Optional[float] = Field(None, title='Default fx rate')
@@ -2050,7 +2050,6 @@ class PLReport(BaseModel):
     strategies3: Optional[List[str]] = None
     date_field: Optional[DateField6] = Field(None, title='Date field')
     custom_fields_object: Optional[List[BalanceReportCustomField]] = None
-    item_instruments: Optional[str] = Field(None, title='Item instruments')
     item_instrument_types: Optional[List[ReportInstrumentType]] = None
     item_countries: Optional[List[ReportCountry]] = None
     item_currencies: Optional[List[ReportCurrency]] = None
@@ -2069,6 +2068,11 @@ class PLReport(BaseModel):
     created_at: Optional[datetime] = Field(None, title='Created at')
     items: Optional[str] = Field(None, title='Items')
     period_type: Optional[PeriodType] = Field(None, title='Period type')
+
+
+class PLReportItems(PLReport):
+    items: Optional[list[dict]] = Field(None, title='Items')
+    item_instruments: Optional[list[dict]] = Field(None, title='Item instruments')
 
 
 class PLReportCustomField(BaseModel):

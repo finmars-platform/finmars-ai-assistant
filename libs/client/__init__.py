@@ -4,6 +4,8 @@ from .portfolio_type import PortfolioTypeClient
 from .portfolio_register import PortfolioRegisterClient
 from .portfolio_history import PortfolioHistoryClient
 from .portfolio_reconcile import PortfolioReconcileClient
+from .balance_report import BalanceReportClient
+from .pl_report import PLReportClient
 from .finmars_client import FinmarsPortfolioClient
 
 __all__ = [
@@ -13,5 +15,7 @@ __all__ = [
     "PortfolioRegisterClient",
     "PortfolioHistoryClient",
     "PortfolioReconcileClient",
+    "BalanceReportClient",
+    "PLReportClient",
     "FinmarsPortfolioClient",
 ]
