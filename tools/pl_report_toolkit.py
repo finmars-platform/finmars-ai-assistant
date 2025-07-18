@@ -226,51 +226,111 @@ class PLReportToolkit:
             
             # Format output for each position
             for pos in positions:
-                output += f"Instrument: {pos['name']} ({pos['code']})\n"
+                # Parse instrument name to extract bond characteristics
+                instrument_name = pos['name']
+                instrument_code = pos['code']
+                
+                # Extract bond features if present in name
+                bond_features = []
+                if '<' in instrument_name and '>' in instrument_name:
+                    features_start = instrument_name.find('<')
+                    features_end = instrument_name.find('>')
+                    features_str = instrument_name[features_start+1:features_end]
+                    bond_features = [f.strip() for f in features_str.split(',')]
+                    clean_name = instrument_name[:features_start].strip()
+                else:
+                    clean_name = instrument_name
+                
+                output += f"Instrument: {clean_name}\n"
+                output += f"  - Security Code: {instrument_code}\n"
+                
+                # Explain bond features if present
+                if bond_features:
+                    output += "  - Bond Features:\n"
+                    for feature in bond_features:
+                        if feature.lower() == 'unsec':
+                            output += "    • Unsecured (unsec): No collateral backing the bond\n"
+                        elif feature.lower() == 'sink':
+                            output += "    • Sinking Fund (sink): Issuer periodically retires portions of the bond\n"
+                        elif feature.lower() == 'step-up':
+                            output += "    • Step-Up Coupon (step-up): Interest rate increases over time\n"
+                        elif 'step cpn' in feature.lower():
+                            output += "    • Step Coupon (step cpn): Variable interest rate structure\n"
+                        elif feature.lower() == 'restruct':
+                            output += "    • Restructured (restruct): Bond terms have been modified\n"
+                        else:
+                            output += f"    • {feature}\n"
                 
                 # Position details
                 if isinstance(pos['position_size'], (int, float)):
-                    output += f"  - Position Size: {pos['position_size']:,.2f} shares/units\n"
-                    if pos['position_size'] < 0:
-                        output += "    (Short Position)\n"
+                    if pos['position_size'] == 0:
+                        output += f"  - Position Status: CLOSED (0 shares/units held)\n"
+                    else:
+                        output += f"  - Position Size: {pos['position_size']:,.2f} shares/units"
+                        if pos['position_size'] < 0:
+                            output += " (SHORT POSITION)\n"
+                        else:
+                            output += " (LONG POSITION)\n"
                 
                 # Cost basis
                 if isinstance(pos['net_cost_price'], (int, float)) and pos['net_cost_price'] != 0:
-                    output += f"  - Average Cost Price: ${pos['net_cost_price']:,.2f}\n"
+                    output += f"  - Average Cost Price: ${pos['net_cost_price']:,.2f}"
+                    output += " (price per unit when purchased)\n"
                 
                 if isinstance(pos['current_price'], (int, float)) and pos['current_price'] != 0:
-                    output += f"  - Current Price: ${pos['current_price']:,.2f}\n"
+                    output += f"  - Current Market Price: ${pos['current_price']:,.2f}"
+                    output += " (latest market price per unit)\n"
                 
                 # Investment amount
                 if isinstance(pos['amount_invested'], (int, float)):
-                    output += f"  - Amount Invested: ${pos['amount_invested']:,.2f}\n"
-                    if pos['amount_invested'] < 0:
-                        output += "    (Long position - negative indicates money paid out)\n"
-                    elif pos['amount_invested'] > 0:
-                        output += "    (Short position - positive indicates money received)\n"
+                    if pos['amount_invested'] == 0 and pos['position_size'] == 0:
+                        output += "  - Amount Invested: $0.00 (position closed)\n"
+                    else:
+                        output += f"  - Total Amount Invested: ${pos['amount_invested']:,.2f}"
+                        if pos['amount_invested'] < 0:
+                            output += "\n    (Negative = money paid out for long position)\n"
+                        elif pos['amount_invested'] > 0:
+                            output += "\n    (Positive = money received for short position)\n"
+                        else:
+                            output += "\n"
                 
                 # Current value
                 if isinstance(pos['market_value'], (int, float)):
-                    output += f"  - Current Market Value: ${pos['market_value']:,.2f}\n"
+                    output += f"  - Current Market Value: ${pos['market_value']:,.2f}"
+                    if pos['position_size'] != 0:
+                        output += " (position_size × current_price)\n"
+                    else:
+                        output += " (position closed)\n"
                 
                 # P/L information
                 if isinstance(pos['principle'], (int, float)):
-                    output += f"  - Total P/L: ${pos['principle']:,.2f}"
+                    output += f"  - Total Profit/Loss: ${pos['principle']:,.2f}"
                     if pos['principle'] > 0:
-                        output += " (PROFIT)\n"
+                        output += " ✓ PROFIT"
                     elif pos['principle'] < 0:
-                        output += " (LOSS)\n"
+                        output += " ✗ LOSS"
                     else:
-                        output += " (BREAK EVEN)\n"
+                        output += " = BREAK EVEN"
+                    
+                    if pos['position_size'] == 0 and pos['principle'] == 0:
+                        output += " (closed position, no P/L during period)\n"
+                    else:
+                        output += "\n    (Calculated as: market_value - amount_invested)\n"
                 
                 # Return percentage
-                output += f"  - Return: {pos['return_percentage']:.2f}%\n"
+                output += f"  - Return Percentage: {pos['return_percentage']:.2f}%"
+                if pos['amount_invested'] != 0:
+                    output += " (profit/loss ÷ |amount_invested| × 100)\n"
+                else:
+                    output += " (no investment base for calculation)\n"
                 
                 # Realized vs Unrealized
                 if isinstance(pos['realized_pl'], (int, float)) and pos['realized_pl'] != 0:
-                    output += f"  - Realized P/L: ${pos['realized_pl']:,.2f}\n"
+                    output += f"  - Realized P/L: ${pos['realized_pl']:,.2f}"
+                    output += " (gains/losses from completed transactions)\n"
                 if isinstance(pos['unrealized_pl'], (int, float)) and pos['unrealized_pl'] != 0:
-                    output += f"  - Unrealized P/L: ${pos['unrealized_pl']:,.2f}\n"
+                    output += f"  - Unrealized P/L: ${pos['unrealized_pl']:,.2f}"
+                    output += " (paper gains/losses on current holdings)\n"
                 
                 output += "\n"
             
