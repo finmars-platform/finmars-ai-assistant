@@ -11,7 +11,7 @@ from langchain_core.messages import HumanMessage, SystemMessage
 def test_query(query: str):
     # Initialize the ChatOpenAI client with custom base URL
     chat = ChatOpenAI(
-        base_url="http://localhost:9299/v1",
+        base_url="http://localhost:9199/v1",
         api_key="test",
         model="finmars-ai-assistant",
         temperature=0.0,
@@ -58,8 +58,9 @@ def test_query(query: str):
 
 
 if __name__ == "__main__":
-    # Test Query 6.20
-    query = "Sort portfolio 1_12_ holdings by market value when some values are missing"
+    import sys
+    # Test Query 7.1
+    query = sys.argv[1] if len(sys.argv) > 1 else "Show me the P/L report for portfolio CH-EQ-75648329 since 2024-01-01"
     print(f"Testing query: {query}")
     print("=" * 50)
     result = test_query(query)
