@@ -9,7 +9,7 @@ from langchain_core.tools import StructuredTool, BaseTool
 from libs.client.finmars_client import FinmarsPortfolioClient
 from libs.logger.logger import logger
 from libs.schema.via_data_model_codegen.report_schema import PLReportItems
-from .shared_models import ReportCurrency, PLReportSortBy as SortBy
+from .shared_models import ReportCurrency, PLReportSortBy as SortBy, drop_empty_fields
 
 
 class GetPLReportSchema(BaseModel):
@@ -106,7 +106,16 @@ class PLReportToolkit:
             # Make the API call
             result: PLReportItems = await self.client.pl_report.create_pl_report(request_data)
             
-            result_artifact = json.loads(result.model_dump_json())
+            # Create artifacts
+            request_dict = json.loads(request_data.model_dump_json())
+            cleaned_request = drop_empty_fields(request_dict)
+            response_dict = json.loads(result.model_dump_json())
+            
+            # Create the artifact in the required format
+            artifact = {
+                "request_data": cleaned_request,
+                "response_data": response_dict
+            }
 
             report_currency = result.report_currency
 
@@ -128,7 +137,7 @@ class PLReportToolkit:
             
             if not items:
                 output += "No positions found in this portfolio for the specified period.\n"
-                return output, result_artifact
+                return output, artifact
             
             output += "Profit & Loss Analysis:\n"
             output += "=" * 100 + "\n\n"
@@ -373,7 +382,7 @@ class PLReportToolkit:
                 worst_performer = min(losing_positions, key=lambda x: x['return_percentage'])
                 output += f"- Worst Performer: {worst_performer['name']} ({worst_performer['return_percentage']:.2f}%)\n"
             
-            return output, result_artifact
+            return output, artifact
             
         except Exception as e:
             exc = traceback.format_exc()

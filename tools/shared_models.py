@@ -5,7 +5,7 @@ This module contains common models that are used across multiple toolkit files
 to avoid duplication and ensure consistency.
 """
 from enum import Enum
-from typing import Optional
+from typing import Optional, Any, Dict, List, Union
 from pydantic import BaseModel, Field
 
 
@@ -75,3 +75,33 @@ class DateRangeFields(BaseModel):
         default=None,
         description="End date in YYYY-MM-DD format (e.g., '2024-12-31'). If not provided, today's date will be used."
     )
+
+
+def drop_empty_fields(data: Union[Dict[str, Any], List, Any]) -> Union[Dict[str, Any], List, Any]:
+    """
+    Recursively drop empty fields from a dictionary or list.
+    
+    Empty fields are:
+    - None values
+    - Empty lists []
+    - Empty strings ""
+    - Empty dicts {}
+    
+    Note: The value 0 (zero) is NOT considered empty and will be kept.
+    
+    Args:
+        data: The data structure to clean
+        
+    Returns:
+        The cleaned data structure with empty fields removed
+    """
+    if isinstance(data, dict):
+        return {
+            k: drop_empty_fields(v)
+            for k, v in data.items()
+            if v is not None and v != [] and v != "" and v != {}
+        }
+    elif isinstance(data, list):
+        return [drop_empty_fields(item) for item in data]
+    else:
+        return data

@@ -9,7 +9,7 @@ from langchain_core.tools import StructuredTool, BaseTool
 from libs.client.finmars_client import FinmarsPortfolioClient
 from libs.logger.logger import logger
 from libs.schema.via_data_model_codegen.report_schema import BackendBalanceReportItems, DateField
-from .shared_models import ReportCurrency, BalanceReportSortBy as SortBy
+from .shared_models import ReportCurrency, BalanceReportSortBy as SortBy, drop_empty_fields
 
 
 class GetBalanceReportSchema(BaseModel):
@@ -102,7 +102,16 @@ class BalanceReportToolkit:
             # Make the API call
             result: BackendBalanceReportItems = await self.client.balance_report.get_balance_report_items(request_data)
 
-            result_artifact = json.loads(result.model_dump_json())
+            # Create artifacts
+            request_dict = json.loads(request_data.model_dump_json())
+            cleaned_request = drop_empty_fields(request_dict)
+            response_dict = json.loads(result.model_dump_json())
+            
+            # Create the artifact in the required format
+            artifact = {
+                "request_data": cleaned_request,
+                "response_data": response_dict
+            }
 
             report_currency = result.report_currency
 
@@ -124,7 +133,7 @@ class BalanceReportToolkit:
             
             if not items:
                 output += "No holdings found in this portfolio.\n"
-                return output, result_artifact
+                return output, artifact
             
             output += "Portfolio Holdings:\n"
             output += "=" * 80 + "\n\n"
@@ -254,7 +263,7 @@ class BalanceReportToolkit:
             output += f"Total Portfolio Value: ${total_value:,.2f}\n"
             output += f"Total Portfolio Exposure: ${total_exposure:,.2f}\n"
             output += f"Number of Holdings: {len(holdings)}\n"
-            return output, result_artifact
+            return output, artifact
             
         except Exception as e:
             exc = traceback.format_exc()

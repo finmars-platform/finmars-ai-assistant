@@ -5,6 +5,7 @@ from pydantic import BaseModel, Field
 from langchain_core.tools import StructuredTool, BaseTool
 
 from libs.client.finmars_client import FinmarsPortfolioClient
+from .shared_models import drop_empty_fields
 
 
 class ListPortfolioHistorySchema(BaseModel):
@@ -41,8 +42,23 @@ class PortfolioHistoryToolkit:
             result = await self.client.portfolio_history.list_portfolio_history(
                 ordering=schema.ordering, page=schema.page, page_size=schema.page_size
             )
-            result_json = json.loads(result.model_dump_json())
-            return result.model_dump_json(), result_json
+            
+            # Create artifacts
+            request_data = {
+                "ordering": schema.ordering,
+                "page": schema.page,
+                "page_size": schema.page_size
+            }
+            cleaned_request = drop_empty_fields(request_data)
+            response_dict = json.loads(result.model_dump_json())
+            
+            # Create the artifact in the required format
+            artifact = {
+                "request_data": cleaned_request,
+                "response_data": response_dict
+            }
+            
+            return result.model_dump_json(), artifact
 
             # output = f"Found {result.count} total portfolio history records.\n"
             # if result.results:
@@ -76,8 +92,21 @@ class PortfolioHistoryToolkit:
             history = await self.client.portfolio_history.get_portfolio_history(
                 schema.history_id
             )
-            history_json = json.loads(history.model_dump_json())
-            return history.model_dump_json(), history_json
+            
+            # Create artifacts
+            request_data = {
+                "history_id": schema.history_id
+            }
+            cleaned_request = drop_empty_fields(request_data)
+            response_dict = json.loads(history.model_dump_json())
+            
+            # Create the artifact in the required format
+            artifact = {
+                "request_data": cleaned_request,
+                "response_data": response_dict
+            }
+            
+            return history.model_dump_json(), artifact
 
             # output = f"Portfolio History Record Details:\n"
             # output += f"ID: {history.id}\n"

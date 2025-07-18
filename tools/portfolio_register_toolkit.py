@@ -5,6 +5,7 @@ from pydantic import BaseModel, Field
 from langchain_core.tools import StructuredTool, BaseTool
 
 from libs.client.finmars_client import FinmarsPortfolioClient
+from .shared_models import drop_empty_fields
 
 
 class ListPortfolioRegistersSchema(BaseModel):
@@ -82,11 +83,27 @@ class PortfolioRegisterToolkit:
         """List all portfolio registers with pagination and filtering"""
         try:
             schema = ListPortfolioRegistersSchema(**kwargs)
+            
+            # Extract request parameters
+            request_data = {
+                "ordering": schema.ordering,
+                "page": schema.page,
+                "page_size": schema.page_size
+            }
+            cleaned_request = drop_empty_fields(request_data)
+            
             result = await self.client.portfolio_registers.list_portfolio_registers(
                 ordering=schema.ordering, page=schema.page, page_size=schema.page_size
             )
             result_json = json.loads(result.model_dump_json())
-            return result.model_dump_json(), result_json
+            
+            # Create artifact
+            artifact = {
+                "request_data": cleaned_request,
+                "response_data": result_json
+            }
+            
+            return result.model_dump_json(), artifact
 
             # output = f"Found {result.count} total portfolio registers.\n"
             # if result.results:
@@ -115,11 +132,25 @@ class PortfolioRegisterToolkit:
         """Get a specific portfolio register by ID"""
         try:
             schema = GetPortfolioRegisterSchema(**kwargs)
+            
+            # Extract request parameters
+            request_data = {
+                "register_id": schema.register_id
+            }
+            cleaned_request = drop_empty_fields(request_data)
+            
             register = await self.client.portfolio_registers.get_portfolio_register(
                 schema.register_id
             )
             register_json = json.loads(register.model_dump_json())
-            return register.model_dump_json(), register_json
+            
+            # Create artifact
+            artifact = {
+                "request_data": cleaned_request,
+                "response_data": register_json
+            }
+            
+            return register.model_dump_json(), artifact
 
             # output = f"Portfolio Register Details:\n"
             # output += f"ID: {register.id}\n"
@@ -139,6 +170,15 @@ class PortfolioRegisterToolkit:
         """List all portfolio register records"""
         try:
             schema = ListPortfolioRegisterRecordsSchema(**kwargs)
+            
+            # Extract request parameters
+            request_data = {
+                "ordering": schema.ordering,
+                "page": schema.page,
+                "page_size": schema.page_size
+            }
+            cleaned_request = drop_empty_fields(request_data)
+            
             result = (
                 await self.client.portfolio_registers.list_portfolio_register_records(
                     ordering=schema.ordering,
@@ -147,7 +187,14 @@ class PortfolioRegisterToolkit:
                 )
             )
             result_json = json.loads(result.model_dump_json())
-            return result.model_dump_json(), result_json
+            
+            # Create artifact
+            artifact = {
+                "request_data": cleaned_request,
+                "response_data": result_json
+            }
+            
+            return result.model_dump_json(), artifact
 
             # output = f"Found {result.count} total portfolio register records.\n"
             # if result.results:
@@ -177,13 +224,27 @@ class PortfolioRegisterToolkit:
         """Get a specific portfolio register record by ID"""
         try:
             schema = GetPortfolioRegisterRecordSchema(**kwargs)
+            
+            # Extract request parameters
+            request_data = {
+                "record_id": schema.record_id
+            }
+            cleaned_request = drop_empty_fields(request_data)
+            
             record = (
                 await self.client.portfolio_registers.get_portfolio_register_record(
                     schema.record_id
                 )
             )
             record_json = json.loads(record.model_dump_json())
-            return record.model_dump_json(), record_json
+            
+            # Create artifact
+            artifact = {
+                "request_data": cleaned_request,
+                "response_data": record_json
+            }
+            
+            return record.model_dump_json(), artifact
 
             # output = f"Portfolio Register Record Details:\n"
             # output += f"ID: {record.id}\n"
@@ -202,11 +263,27 @@ class PortfolioRegisterToolkit:
         """List portfolio register attribute types"""
         try:
             schema = ListPortfolioRegisterAttributeTypesSchema(**kwargs)
+            
+            # Extract request parameters
+            request_data = {
+                "ordering": schema.ordering,
+                "page": schema.page,
+                "page_size": schema.page_size
+            }
+            cleaned_request = drop_empty_fields(request_data)
+            
             result = await self.client.portfolio_registers.list_portfolio_register_attribute_types(
                 ordering=schema.ordering, page=schema.page, page_size=schema.page_size
             )
             result_json = json.loads(result.model_dump_json())
-            return result.model_dump_json(), result_json
+            
+            # Create artifact
+            artifact = {
+                "request_data": cleaned_request,
+                "response_data": result_json
+            }
+            
+            return result.model_dump_json(), artifact
 
             # output = f"Found {result.count} total portfolio register attribute types.\n"
             # if result.results:
@@ -228,11 +305,25 @@ class PortfolioRegisterToolkit:
         """Get a specific portfolio register attribute type by ID"""
         try:
             schema = GetPortfolioRegisterAttributeTypeSchema(**kwargs)
+            
+            # Extract request parameters
+            request_data = {
+                "attribute_type_id": schema.attribute_type_id
+            }
+            cleaned_request = drop_empty_fields(request_data)
+            
             attr_type = await self.client.portfolio_registers.get_portfolio_register_attribute_type(
                 schema.attribute_type_id
             )
             attr_type_json = json.loads(attr_type.model_dump_json())
-            return attr_type.model_dump_json(), attr_type_json
+            
+            # Create artifact
+            artifact = {
+                "request_data": cleaned_request,
+                "response_data": attr_type_json
+            }
+            
+            return attr_type.model_dump_json(), artifact
 
             # output = f"Portfolio Register Attribute Type Details:\n"
             # output += f"ID: {attr_type.id}\n"
@@ -248,11 +339,25 @@ class PortfolioRegisterToolkit:
         """Get objects to recalculate for a portfolio register attribute type"""
         try:
             schema = GetRegisterObjectsToRecalculateSchema(**kwargs)
+            
+            # Extract request parameters
+            request_data = {
+                "attribute_type_id": schema.attribute_type_id
+            }
+            cleaned_request = drop_empty_fields(request_data)
+            
             result = await self.client.portfolio_registers.get_portfolio_register_attribute_type_objects_to_recalculate(
                 schema.attribute_type_id
             )
             result_json = json.loads(result.model_dump_json())
-            return result.model_dump_json(), result_json
+            
+            # Create artifact
+            artifact = {
+                "request_data": cleaned_request,
+                "response_data": result_json
+            }
+            
+            return result.model_dump_json(), artifact
 
             # output = f"Objects to recalculate for register attribute type {schema.attribute_type_id}:\n"
             # if hasattr(result, "portfolios") and result.portfolios:
