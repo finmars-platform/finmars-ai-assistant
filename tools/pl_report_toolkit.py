@@ -146,7 +146,7 @@ class PLReportToolkit:
             total_market_value = 0.0
             total_principle = 0.0
             positions = []
-            
+
             # Process each item to extract P/L information
             for item in items:
                 if isinstance(item, dict):
@@ -159,7 +159,7 @@ class PLReportToolkit:
                     # Extract P/L fields according to the instructions
                     position_size = item.get("position_size", 0)  # number of shares/bonds
                     net_cost_price = item.get("net_cost_price", 0)  # price at which we bought
-                    amount_invested = item.get("amount_invested", 0)  # total amount invested (negative for long)
+                    amount_invested = item.get("amount_invested_fixed", 0)  # total amount invested (negative for long)
                     market_value = item.get("market_value", 0)  # current position value
                     principle = item.get("principle", 0)  # profit/loss (market_value - amount_invested)
                     
