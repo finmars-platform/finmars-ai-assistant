@@ -159,43 +159,42 @@ class PLReportToolkit:
             total_principle = 0.0
             positions = []
 
+            # Group items by item_group_code
+            grouped_items = {"OPENED": [], "CLOSED": [], "FX_VARIATIONS": []}
+
             # Process each item to extract P/L information
             for item in items:
                 if isinstance(item, dict):
+                    # Get item group
+                    item_group_code = item.get("item_group_code", "UNKNOWN")
+
                     # Extract instrument information
                     instrument_code = item.get("instrument.user_code")
                     if instrument_code is None:
                         continue
                     instrument_name = item.get("instrument.name", "Unknown")
+                    portfolio_code = item.get(
+                        "portfolio.user_code", schema.portfolio_code
+                    )
 
-                    # Extract P/L fields according to the instructions
-                    position_size = item.get(
-                        "position_size", 0
-                    )  # number of shares/bonds
-                    net_cost_price = item.get(
-                        "net_cost_price", 0
-                    )  # price at which we bought
-                    amount_invested = item.get(
-                        "amount_invested_fixed", 0
-                    )  # total amount invested (negative for long)
-                    market_value = item.get("market_value", 0)  # current position value
-                    principle = item.get(
-                        "principle", 0
-                    )  # profit/loss (market_value - amount_invested)
+                    # Extract P/L fields for the table format
+                    principal = item.get("principal") or 0  # Principal P&L
+                    carry = item.get("carry") or 0  # Carry P&L
+                    overheads = item.get("overheads") or 0  # Overheads
+                    total = item.get("total") or 0  # Total P&L
+                    market_value = item.get("market_value") or 0  # Market value
 
-                    # Additional useful fields
-                    realized_pl = item.get("realized_pl", 0)
-                    unrealized_pl = item.get("unrealized_pl", 0)
-                    total_pl = item.get(
-                        "total", principle
-                    )  # sometimes labeled as 'total'
-                    current_price = item.get("current_price", 0)
+                    # Additional position details
+                    position_size = item.get("position_size") or 0
+                    net_cost_price = item.get("net_cost_price") or 0
+                    amount_invested = item.get("amount_invested_fixed") or 0
+                    current_price = item.get("instrument_principal_price") or 0
 
-                    # Calculate return percentage
+                    # Calculate return percentage based on total P&L
                     return_percentage = 0.0
                     if amount_invested != 0:
                         # Note: amount_invested is negative for long positions
-                        return_percentage = (principle / abs(amount_invested)) * 100
+                        return_percentage = (total / abs(amount_invested)) * 100
 
                     # Apply filters if specified
                     if (
@@ -209,29 +208,36 @@ class PLReportToolkit:
                     ):
                         continue
 
-                    positions.append(
-                        {
-                            "code": instrument_code,
-                            "name": instrument_name,
-                            "position_size": position_size,
-                            "net_cost_price": net_cost_price,
-                            "current_price": current_price,
-                            "amount_invested": amount_invested,
-                            "market_value": market_value,
-                            "principle": principle,
-                            "realized_pl": realized_pl,
-                            "unrealized_pl": unrealized_pl,
-                            "return_percentage": return_percentage,
-                        }
-                    )
+                    position_data = {
+                        "portfolio_code": portfolio_code,
+                        "code": instrument_code,
+                        "name": instrument_name,
+                        "item_group_code": item_group_code,
+                        "position_size": position_size,
+                        "net_cost_price": net_cost_price,
+                        "current_price": current_price,
+                        "amount_invested": amount_invested,
+                        "market_value": market_value,
+                        "principal": principal,
+                        "carry": carry,
+                        "overheads": overheads,
+                        "total": total,
+                        "return_percentage": return_percentage,
+                    }
+
+                    # Add to appropriate group
+                    if item_group_code in grouped_items:
+                        grouped_items[item_group_code].append(position_data)
+
+                    positions.append(position_data)
 
                     # Accumulate totals
                     if isinstance(amount_invested, (int, float)):
                         total_invested += amount_invested
                     if isinstance(market_value, (int, float)):
                         total_market_value += market_value
-                    if isinstance(principle, (int, float)):
-                        total_principle += principle
+                    if isinstance(total, (int, float)):
+                        total_principle += total
 
             # Sort positions if requested
             if schema.sort_by:
@@ -295,6 +301,65 @@ class PLReportToolkit:
                         output += f"max={schema.max_return_percentage}%"
                     output += "\n"
                 output += "=" * 100 + "\n\n"
+
+            # Format output as a table similar to the image
+            output += "\nP&L Report Table:\n"
+            output += "=" * 120 + "\n"
+            output += f"{'Portfolio':<15} {'PL Type':<12} {'Asset Type':<30} {'Total P&L':>15} {'Principal':>15} {'Carry P&L':>15} {'Overheads':>15} {'Market Value':>15}\n"
+            output += "=" * 120 + "\n"
+
+            # Display grouped positions
+            for group_code in ["OPENED", "CLOSED", "FX_VARIATIONS"]:
+                if grouped_items[group_code]:
+                    # Group header
+                    output += f"\n{group_code}:\n"
+                    output += "-" * 120 + "\n"
+
+                    group_total = 0
+                    group_principal = 0
+                    group_carry = 0
+                    group_overheads = 0
+                    group_market_value = 0
+
+                    for pos in grouped_items[group_code]:
+                        if group_code == "FX_VARIATIONS":
+                            asset_type = "FX Variations"
+                        else:
+                            asset_type = (
+                                "Debt"
+                                if "bond" in pos["name"].lower()
+                                or "bill" in pos["name"].lower()
+                                or "note" in pos["name"].lower()
+                                else "Equity"
+                            )
+
+                        output += f"{pos['portfolio_code']:<15} {group_code:<12} {asset_type:<30} "
+                        output += f"{pos['total']:>15,.2f} {pos['principal']:>15,.2f} "
+                        output += f"{pos['carry']:>15,.2f} {pos['overheads']:>15,.2f} "
+                        output += f"{pos['market_value']:>15,.2f}\n"
+
+                        if pos["code"]:
+                            output += f"{'':>15} {'':>12} {pos['code']:<30}\n"
+
+                        # Accumulate group totals
+                        group_total += pos["total"]
+                        group_principal += pos["principal"]
+                        group_carry += pos["carry"]
+                        group_overheads += pos["overheads"]
+                        group_market_value += pos["market_value"]
+
+                    # Group subtotal
+                    output += "-" * 120 + "\n"
+                    output += f"{'Subtotal':<15} {'':<12} {'':<30} "
+                    output += f"{group_total:>15,.2f} {group_principal:>15,.2f} "
+                    output += f"{group_carry:>15,.2f} {group_overheads:>15,.2f} "
+                    output += f"{group_market_value:>15,.2f}\n"
+
+            output += "\n" + "=" * 120 + "\n\n"
+
+            # Detailed breakdown for each position
+            output += "\nDetailed Position Analysis:\n"
+            output += "=" * 100 + "\n\n"
 
             # Format output for each position
             for pos in positions:
@@ -387,21 +452,23 @@ class PLReportToolkit:
                         output += " (position closed)\n"
 
                 # P/L information
-                if isinstance(pos["principle"], (int, float)):
-                    output += f"  - Total Profit/Loss: ${pos['principle']:,.2f}"
-                    if pos["principle"] > 0:
+                output += f"  - P/L Breakdown:\n"
+                if isinstance(pos["total"], (int, float)):
+                    output += f"    • Total P&L: ${pos['total']:,.2f}"
+                    if pos["total"] > 0:
                         output += " ✓ PROFIT"
-                    elif pos["principle"] < 0:
+                    elif pos["total"] < 0:
                         output += " ✗ LOSS"
                     else:
                         output += " = BREAK EVEN"
+                    output += "\n"
 
-                    if pos["position_size"] == 0 and pos["principle"] == 0:
-                        output += " (closed position, no P/L during period)\n"
-                    else:
-                        output += (
-                            "\n    (Calculated as: market_value - amount_invested)\n"
-                        )
+                if isinstance(pos["principal"], (int, float)) and pos["principal"] != 0:
+                    output += f"    • Principal: ${pos['principal']:,.2f}\n"
+                if isinstance(pos["carry"], (int, float)) and pos["carry"] != 0:
+                    output += f"    • Carry P&L: ${pos['carry']:,.2f}\n"
+                if isinstance(pos["overheads"], (int, float)) and pos["overheads"] != 0:
+                    output += f"    • Overheads: ${pos['overheads']:,.2f}\n"
 
                 # Return percentage
                 output += f"  - Return Percentage: {pos['return_percentage']:.2f}%"
@@ -409,20 +476,6 @@ class PLReportToolkit:
                     output += " (profit/loss ÷ |amount_invested| × 100)\n"
                 else:
                     output += " (no investment base for calculation)\n"
-
-                # Realized vs Unrealized
-                if (
-                    isinstance(pos["realized_pl"], (int, float))
-                    and pos["realized_pl"] != 0
-                ):
-                    output += f"  - Realized P/L: ${pos['realized_pl']:,.2f}"
-                    output += " (gains/losses from completed transactions)\n"
-                if (
-                    isinstance(pos["unrealized_pl"], (int, float))
-                    and pos["unrealized_pl"] != 0
-                ):
-                    output += f"  - Unrealized P/L: ${pos['unrealized_pl']:,.2f}"
-                    output += " (paper gains/losses on current holdings)\n"
 
                 output += "\n"
 
@@ -447,8 +500,8 @@ class PLReportToolkit:
             output += f"Number of Positions: {len(positions)}\n"
 
             # Performance summary
-            profitable_positions = [p for p in positions if p["principle"] > 0]
-            losing_positions = [p for p in positions if p["principle"] < 0]
+            profitable_positions = [p for p in positions if p["total"] > 0]
+            losing_positions = [p for p in positions if p["total"] < 0]
 
             output += f"\nPerformance Summary:\n"
             output += f"- Profitable Positions: {len(profitable_positions)}\n"

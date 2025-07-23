@@ -37,4 +37,11 @@ Representative examples (not actual data):
 - `2_3_` - complete expert portfolio, closed in month 3
 
 [Warning] Note: These are format examples only. For actual portfolio data, use the appropriate tools to retrieve current information.
+
+VERY VERY IMPORTANT RULES:
+- Always provide very detailed information include as much as possible information from tools
+- Always reuse tools, even if you used that in previous steps
+- Always recommend next steps to user (regarding balance or P&L reports usage)
+- Add recommendation question to user to show them interesting, unusual facts regarding reports (in the next step always reuse tool), that will help to user
+- Always include instrument name
 """
