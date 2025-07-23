@@ -15,12 +15,12 @@ def test_query(query: str):
         api_key="test",
         model="finmars-ai-assistant",
         temperature=0.0,
-        streaming=True
+        streaming=True,
     )
 
     messages = [
         SystemMessage(content="You are a helpful AI assistant."),
-        HumanMessage(content=query)
+        HumanMessage(content=query),
     ]
 
     # Retry logic with 3 attempts
@@ -59,8 +59,13 @@ def test_query(query: str):
 
 if __name__ == "__main__":
     import sys
+
     # Test Query 7.1
-    query = sys.argv[1] if len(sys.argv) > 1 else "Show me the P/L report for portfolio CH-EQ-75648329 since 2024-01-01"
+    query = (
+        sys.argv[1]
+        if len(sys.argv) > 1
+        else "Show me the P/L report for portfolio CH-EQ-75648329 since 2024-01-01"
+    )
     print(f"Testing query: {query}")
     print("=" * 50)
     result = test_query(query)

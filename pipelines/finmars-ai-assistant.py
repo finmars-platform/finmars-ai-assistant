@@ -22,7 +22,7 @@ class Pipeline:
         self.debug = False
         self.version = "0.0.1"
         self.author = "Dmitrii Koriakov"
-        
+
         # Configure prompt source from environment variable
         # Options: "code" or "langfuse" (default: "langfuse")
         # prompt_source_env = os.getenv("PROMPT_SOURCE", PromptSource.LANGFUSE.value)
@@ -84,9 +84,7 @@ class Pipeline:
         messages_lc: list[BaseMessage] = convert_to_lc_messages(messages=messages)
 
         for chunk in sync_generator_from_async(
-            arun_agent_stream, 
-            messages=messages_lc,
-            prompt_source=self.prompt_source
+            arun_agent_stream, messages=messages_lc, prompt_source=self.prompt_source
         ):
             yield chunk
 

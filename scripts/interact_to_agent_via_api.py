@@ -15,7 +15,7 @@ def main():
         api_key="test",
         model="finmars-ai-assistant",
         temperature=0.0,
-        streaming=True  # Enable streaming for real-time responses
+        streaming=True,  # Enable streaming for real-time responses
     )
 
     print("Agent Chat Interface")
@@ -34,7 +34,7 @@ def main():
         # Get user input
         user_input = input("\nYou: ").strip()
 
-        if user_input.lower() == 'exit':
+        if user_input.lower() == "exit":
             print("Goodbye!")
             break
 
@@ -89,13 +89,11 @@ def simple_example():
         base_url="http://localhost:9199/v1",
         api_key="test",
         model="finmars-ai-assistant",
-        temperature=0.0
+        temperature=0.0,
     )
 
     # Single request example
-    messages = [
-        HumanMessage(content="What can you help me with?")
-    ]
+    messages = [HumanMessage(content="What can you help me with?")]
 
     # Retry logic with 3 attempts
     max_retries = 3

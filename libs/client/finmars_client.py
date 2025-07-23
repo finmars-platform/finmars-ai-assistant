@@ -83,7 +83,7 @@ class FinmarsPortfolioClient:
             api_key=api_key,
             timeout=timeout,
         )
-        
+
         self.balance_report = BalanceReportClient(
             base_url=base_url,
             realm=realm,
@@ -91,7 +91,7 @@ class FinmarsPortfolioClient:
             api_key=api_key,
             timeout=timeout,
         )
-        
+
         self.pl_report = PLReportClient(
             base_url=base_url,
             realm=realm,

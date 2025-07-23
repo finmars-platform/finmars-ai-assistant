@@ -42,22 +42,19 @@ class PortfolioHistoryToolkit:
             result = await self.client.portfolio_history.list_portfolio_history(
                 ordering=schema.ordering, page=schema.page, page_size=schema.page_size
             )
-            
+
             # Create artifacts
             request_data = {
                 "ordering": schema.ordering,
                 "page": schema.page,
-                "page_size": schema.page_size
+                "page_size": schema.page_size,
             }
             cleaned_request = drop_empty_fields(request_data)
             response_dict = json.loads(result.model_dump_json())
-            
+
             # Create the artifact in the required format
-            artifact = {
-                "request_data": cleaned_request,
-                "response_data": response_dict
-            }
-            
+            artifact = {"request_data": cleaned_request, "response_data": response_dict}
+
             return result.model_dump_json(), artifact
 
             # output = f"Found {result.count} total portfolio history records.\n"
@@ -92,20 +89,15 @@ class PortfolioHistoryToolkit:
             history = await self.client.portfolio_history.get_portfolio_history(
                 schema.history_id
             )
-            
+
             # Create artifacts
-            request_data = {
-                "history_id": schema.history_id
-            }
+            request_data = {"history_id": schema.history_id}
             cleaned_request = drop_empty_fields(request_data)
             response_dict = json.loads(history.model_dump_json())
-            
+
             # Create the artifact in the required format
-            artifact = {
-                "request_data": cleaned_request,
-                "response_data": response_dict
-            }
-            
+            artifact = {"request_data": cleaned_request, "response_data": response_dict}
+
             return history.model_dump_json(), artifact
 
             # output = f"Portfolio History Record Details:\n"
@@ -131,7 +123,10 @@ class PortfolioHistoryToolkit:
             #
             # return output
         except Exception as e:
-            return f"Error getting portfolio history record {kwargs.get('history_id')}: {str(e)}", None
+            return (
+                f"Error getting portfolio history record {kwargs.get('history_id')}: {str(e)}",
+                None,
+            )
 
 
 def build_portfolio_history_tools() -> List[BaseTool]:

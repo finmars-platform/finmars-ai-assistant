@@ -9,15 +9,14 @@ class BalanceReportClient(BaseHTTPClient):
     """Client for balance report operations."""
 
     async def get_balance_report_items(
-        self,
-        request_data: BackendBalanceReportItems
+        self, request_data: BackendBalanceReportItems
     ) -> BackendBalanceReportItems:
         """
         Get balance report items.
-        
+
         Args:
             request_data: BackendBalanceReportItems model with all report parameters
-            
+
         Returns:
             BackendBalanceReportItems response model
         """

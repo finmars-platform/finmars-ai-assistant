@@ -89,23 +89,23 @@ class LangFusePromptManager:
             prompt_source = PromptSource(
                 os.getenv("PROMPT_SOURCE", PromptSource.CODE.value)
             )
-        
+
         # If prompt source is CODE, load from local code
         if prompt_source == PromptSource.CODE:
             prompt_msg: BaseMessage | Tuple[str, str] = MAP_PROMPTS[name]
-            
+
             # If the prompt_msg is a tuple, convert it to langchain msg
             if isinstance(prompt_msg, tuple):
                 prompt_msg = await from_tuple_to_lc_msg(prompt_msg)
-            
+
             logger.info(
                 f"[LOADED PROMPT FROM CODE FOR {name.value}] CONTENT: {repr(prompt_msg)}"
             )
-            
+
             if return_config:
                 return prompt_msg, config
             return prompt_msg
-        
+
         # Otherwise, try to load from Langfuse
         prompt_from_langfuse_config = None
         try:

@@ -79,30 +79,29 @@ class PortfolioRegisterToolkit:
     def __init__(self):
         self.client = FinmarsPortfolioClient()
 
-    async def _list_portfolio_registers(self, **kwargs) -> tuple[str, dict | list | None]:
+    async def _list_portfolio_registers(
+        self, **kwargs
+    ) -> tuple[str, dict | list | None]:
         """List all portfolio registers with pagination and filtering"""
         try:
             schema = ListPortfolioRegistersSchema(**kwargs)
-            
+
             # Extract request parameters
             request_data = {
                 "ordering": schema.ordering,
                 "page": schema.page,
-                "page_size": schema.page_size
+                "page_size": schema.page_size,
             }
             cleaned_request = drop_empty_fields(request_data)
-            
+
             result = await self.client.portfolio_registers.list_portfolio_registers(
                 ordering=schema.ordering, page=schema.page, page_size=schema.page_size
             )
             result_json = json.loads(result.model_dump_json())
-            
+
             # Create artifact
-            artifact = {
-                "request_data": cleaned_request,
-                "response_data": result_json
-            }
-            
+            artifact = {"request_data": cleaned_request, "response_data": result_json}
+
             return result.model_dump_json(), artifact
 
             # output = f"Found {result.count} total portfolio registers.\n"
@@ -132,24 +131,19 @@ class PortfolioRegisterToolkit:
         """Get a specific portfolio register by ID"""
         try:
             schema = GetPortfolioRegisterSchema(**kwargs)
-            
+
             # Extract request parameters
-            request_data = {
-                "register_id": schema.register_id
-            }
+            request_data = {"register_id": schema.register_id}
             cleaned_request = drop_empty_fields(request_data)
-            
+
             register = await self.client.portfolio_registers.get_portfolio_register(
                 schema.register_id
             )
             register_json = json.loads(register.model_dump_json())
-            
+
             # Create artifact
-            artifact = {
-                "request_data": cleaned_request,
-                "response_data": register_json
-            }
-            
+            artifact = {"request_data": cleaned_request, "response_data": register_json}
+
             return register.model_dump_json(), artifact
 
             # output = f"Portfolio Register Details:\n"
@@ -164,21 +158,26 @@ class PortfolioRegisterToolkit:
             #
             # return output
         except Exception as e:
-            return f"Error getting portfolio register {kwargs.get('register_id')}: {str(e)}", None
+            return (
+                f"Error getting portfolio register {kwargs.get('register_id')}: {str(e)}",
+                None,
+            )
 
-    async def _list_portfolio_register_records(self, **kwargs) -> tuple[str, dict | list | None]:
+    async def _list_portfolio_register_records(
+        self, **kwargs
+    ) -> tuple[str, dict | list | None]:
         """List all portfolio register records"""
         try:
             schema = ListPortfolioRegisterRecordsSchema(**kwargs)
-            
+
             # Extract request parameters
             request_data = {
                 "ordering": schema.ordering,
                 "page": schema.page,
-                "page_size": schema.page_size
+                "page_size": schema.page_size,
             }
             cleaned_request = drop_empty_fields(request_data)
-            
+
             result = (
                 await self.client.portfolio_registers.list_portfolio_register_records(
                     ordering=schema.ordering,
@@ -187,13 +186,10 @@ class PortfolioRegisterToolkit:
                 )
             )
             result_json = json.loads(result.model_dump_json())
-            
+
             # Create artifact
-            artifact = {
-                "request_data": cleaned_request,
-                "response_data": result_json
-            }
-            
+            artifact = {"request_data": cleaned_request, "response_data": result_json}
+
             return result.model_dump_json(), artifact
 
             # output = f"Found {result.count} total portfolio register records.\n"
@@ -220,30 +216,27 @@ class PortfolioRegisterToolkit:
         except Exception as e:
             return f"Error listing portfolio register records: {str(e)}", None
 
-    async def _get_portfolio_register_record(self, **kwargs) -> tuple[str, dict | list | None]:
+    async def _get_portfolio_register_record(
+        self, **kwargs
+    ) -> tuple[str, dict | list | None]:
         """Get a specific portfolio register record by ID"""
         try:
             schema = GetPortfolioRegisterRecordSchema(**kwargs)
-            
+
             # Extract request parameters
-            request_data = {
-                "record_id": schema.record_id
-            }
+            request_data = {"record_id": schema.record_id}
             cleaned_request = drop_empty_fields(request_data)
-            
+
             record = (
                 await self.client.portfolio_registers.get_portfolio_register_record(
                     schema.record_id
                 )
             )
             record_json = json.loads(record.model_dump_json())
-            
+
             # Create artifact
-            artifact = {
-                "request_data": cleaned_request,
-                "response_data": record_json
-            }
-            
+            artifact = {"request_data": cleaned_request, "response_data": record_json}
+
             return record.model_dump_json(), artifact
 
             # output = f"Portfolio Register Record Details:\n"
@@ -257,32 +250,34 @@ class PortfolioRegisterToolkit:
             #
             # return output
         except Exception as e:
-            return f"Error getting portfolio register record {kwargs.get('record_id')}: {str(e)}", None
+            return (
+                f"Error getting portfolio register record {kwargs.get('record_id')}: {str(e)}",
+                None,
+            )
 
-    async def _list_portfolio_register_attribute_types(self, **kwargs) -> tuple[str, dict | list | None]:
+    async def _list_portfolio_register_attribute_types(
+        self, **kwargs
+    ) -> tuple[str, dict | list | None]:
         """List portfolio register attribute types"""
         try:
             schema = ListPortfolioRegisterAttributeTypesSchema(**kwargs)
-            
+
             # Extract request parameters
             request_data = {
                 "ordering": schema.ordering,
                 "page": schema.page,
-                "page_size": schema.page_size
+                "page_size": schema.page_size,
             }
             cleaned_request = drop_empty_fields(request_data)
-            
+
             result = await self.client.portfolio_registers.list_portfolio_register_attribute_types(
                 ordering=schema.ordering, page=schema.page, page_size=schema.page_size
             )
             result_json = json.loads(result.model_dump_json())
-            
+
             # Create artifact
-            artifact = {
-                "request_data": cleaned_request,
-                "response_data": result_json
-            }
-            
+            artifact = {"request_data": cleaned_request, "response_data": result_json}
+
             return result.model_dump_json(), artifact
 
             # output = f"Found {result.count} total portfolio register attribute types.\n"
@@ -301,28 +296,28 @@ class PortfolioRegisterToolkit:
         except Exception as e:
             return f"Error listing portfolio register attribute types: {str(e)}", None
 
-    async def _get_portfolio_register_attribute_type(self, **kwargs) -> tuple[str, dict | list | None]:
+    async def _get_portfolio_register_attribute_type(
+        self, **kwargs
+    ) -> tuple[str, dict | list | None]:
         """Get a specific portfolio register attribute type by ID"""
         try:
             schema = GetPortfolioRegisterAttributeTypeSchema(**kwargs)
-            
+
             # Extract request parameters
-            request_data = {
-                "attribute_type_id": schema.attribute_type_id
-            }
+            request_data = {"attribute_type_id": schema.attribute_type_id}
             cleaned_request = drop_empty_fields(request_data)
-            
+
             attr_type = await self.client.portfolio_registers.get_portfolio_register_attribute_type(
                 schema.attribute_type_id
             )
             attr_type_json = json.loads(attr_type.model_dump_json())
-            
+
             # Create artifact
             artifact = {
                 "request_data": cleaned_request,
-                "response_data": attr_type_json
+                "response_data": attr_type_json,
             }
-            
+
             return attr_type.model_dump_json(), artifact
 
             # output = f"Portfolio Register Attribute Type Details:\n"
@@ -333,30 +328,30 @@ class PortfolioRegisterToolkit:
             #
             # return output
         except Exception as e:
-            return f"Error getting portfolio register attribute type {kwargs.get('attribute_type_id')}: {str(e)}", None
+            return (
+                f"Error getting portfolio register attribute type {kwargs.get('attribute_type_id')}: {str(e)}",
+                None,
+            )
 
-    async def _get_register_objects_to_recalculate(self, **kwargs) -> tuple[str, dict | list | None]:
+    async def _get_register_objects_to_recalculate(
+        self, **kwargs
+    ) -> tuple[str, dict | list | None]:
         """Get objects to recalculate for a portfolio register attribute type"""
         try:
             schema = GetRegisterObjectsToRecalculateSchema(**kwargs)
-            
+
             # Extract request parameters
-            request_data = {
-                "attribute_type_id": schema.attribute_type_id
-            }
+            request_data = {"attribute_type_id": schema.attribute_type_id}
             cleaned_request = drop_empty_fields(request_data)
-            
+
             result = await self.client.portfolio_registers.get_portfolio_register_attribute_type_objects_to_recalculate(
                 schema.attribute_type_id
             )
             result_json = json.loads(result.model_dump_json())
-            
+
             # Create artifact
-            artifact = {
-                "request_data": cleaned_request,
-                "response_data": result_json
-            }
-            
+            artifact = {"request_data": cleaned_request, "response_data": result_json}
+
             return result.model_dump_json(), artifact
 
             # output = f"Objects to recalculate for register attribute type {schema.attribute_type_id}:\n"
@@ -367,7 +362,10 @@ class PortfolioRegisterToolkit:
             #
             # return output
         except Exception as e:
-            return f"Error getting objects to recalculate for register attribute type {kwargs.get('attribute_type_id')}: {str(e)}", None
+            return (
+                f"Error getting objects to recalculate for register attribute type {kwargs.get('attribute_type_id')}: {str(e)}",
+                None,
+            )
 
 
 def build_portfolio_register_tools() -> List[BaseTool]:

@@ -85,26 +85,23 @@ class PortfolioToolkit:
         """List all portfolios with pagination and filtering"""
         try:
             schema = ListPortfoliosSchema(**kwargs)
-            
+
             # Extract request parameters
             request_data = {
                 "ordering": schema.ordering,
                 "page": schema.page,
-                "page_size": schema.page_size
+                "page_size": schema.page_size,
             }
             cleaned_request = drop_empty_fields(request_data)
-            
+
             result = await self.client.portfolios.list_portfolios(
                 ordering=schema.ordering, page=schema.page, page_size=schema.page_size
             )
             result_json = json.loads(result.model_dump_json())
-            
+
             # Create artifact
-            artifact = {
-                "request_data": cleaned_request,
-                "response_data": result_json
-            }
-            
+            artifact = {"request_data": cleaned_request, "response_data": result_json}
+
             return result.model_dump_json(), artifact
             # output = f"Found {result.count} total portfolios.\n"
             # if result.results:
@@ -132,22 +129,20 @@ class PortfolioToolkit:
         """Get a specific portfolio by ID"""
         try:
             schema = GetPortfolioSchema(**kwargs)
-            
+
             # Extract request parameters
-            request_data = {
-                "portfolio_id": schema.portfolio_id
-            }
+            request_data = {"portfolio_id": schema.portfolio_id}
             cleaned_request = drop_empty_fields(request_data)
-            
+
             portfolio = await self.client.portfolios.get_portfolio(schema.portfolio_id)
             portfolio_json = json.loads(portfolio.model_dump_json())
-            
+
             # Create artifact
             artifact = {
                 "request_data": cleaned_request,
-                "response_data": portfolio_json
+                "response_data": portfolio_json,
             }
-            
+
             return portfolio.model_dump_json(), artifact
 
             # output = f"Portfolio Details:\n"
@@ -163,32 +158,32 @@ class PortfolioToolkit:
             #
             # return output
         except Exception as e:
-            return f"Error getting portfolio {kwargs.get('portfolio_id')}: {str(e)}", None
+            return (
+                f"Error getting portfolio {kwargs.get('portfolio_id')}: {str(e)}",
+                None,
+            )
 
     async def _list_portfolios_light(self, **kwargs) -> tuple[str, dict | list | None]:
         """List portfolios in light format (minimal data)"""
         try:
             schema = ListPortfoliosLightSchema(**kwargs)
-            
+
             # Extract request parameters
             request_data = {
                 "ordering": schema.ordering,
                 "page": schema.page,
-                "page_size": schema.page_size
+                "page_size": schema.page_size,
             }
             cleaned_request = drop_empty_fields(request_data)
-            
+
             result = await self.client.portfolios.list_portfolios_light(
                 ordering=schema.ordering, page=schema.page, page_size=schema.page_size
             )
             result_json = json.loads(result.model_dump_json())
-            
+
             # Create artifact
-            artifact = {
-                "request_data": cleaned_request,
-                "response_data": result_json
-            }
-            
+            artifact = {"request_data": cleaned_request, "response_data": result_json}
+
             return result.model_dump_json(), artifact
 
             # output = f"Found {result.count} total portfolios (light format).\n"
@@ -203,30 +198,29 @@ class PortfolioToolkit:
         except Exception as e:
             return f"Error listing portfolios (light): {str(e)}", None
 
-    async def _list_portfolio_attributes(self, **kwargs) -> tuple[str, dict | list | None]:
+    async def _list_portfolio_attributes(
+        self, **kwargs
+    ) -> tuple[str, dict | list | None]:
         """List portfolio attributes"""
         try:
             schema = ListPortfolioAttributesSchema(**kwargs)
-            
+
             # Extract request parameters
             request_data = {
                 "ordering": schema.ordering,
                 "page": schema.page,
-                "page_size": schema.page_size
+                "page_size": schema.page_size,
             }
             cleaned_request = drop_empty_fields(request_data)
-            
+
             result = await self.client.portfolios.list_portfolio_attributes(
                 ordering=schema.ordering, page=schema.page, page_size=schema.page_size
             )
             result_json = json.loads(result.model_dump_json())
-            
+
             # Create artifact
-            artifact = {
-                "request_data": cleaned_request,
-                "response_data": result_json
-            }
-            
+            artifact = {"request_data": cleaned_request, "response_data": result_json}
+
             return result.model_dump_json(), artifact
 
             # output = f"Found {result.count} total portfolio attributes.\n"
@@ -249,48 +243,48 @@ class PortfolioToolkit:
             # No request parameters for this endpoint
             request_data = {}
             cleaned_request = drop_empty_fields(request_data)
-            
+
             result = await self.client.portfolios.get_inception_date()
-            
+
             # Create artifact - handle if result is a string or object
             if isinstance(result, str):
                 response_data = {"inception_date": result}
             else:
-                response_data = json.loads(result.model_dump_json()) if hasattr(result, 'model_dump_json') else result
-            
-            artifact = {
-                "request_data": cleaned_request,
-                "response_data": response_data
-            }
-            
+                response_data = (
+                    json.loads(result.model_dump_json())
+                    if hasattr(result, "model_dump_json")
+                    else result
+                )
+
+            artifact = {"request_data": cleaned_request, "response_data": response_data}
+
             return f"Portfolio inception date information: {result}", artifact
         except Exception as e:
             return f"Error getting inception date: {str(e)}", None
 
-    async def _list_first_transaction_dates(self, **kwargs) -> tuple[str, dict | list | None]:
+    async def _list_first_transaction_dates(
+        self, **kwargs
+    ) -> tuple[str, dict | list | None]:
         """List first transaction dates for portfolios"""
         try:
             schema = ListFirstTransactionDatesSchema(**kwargs)
-            
+
             # Extract request parameters
             request_data = {
                 "ordering": schema.ordering,
                 "page": schema.page,
-                "page_size": schema.page_size
+                "page_size": schema.page_size,
             }
             cleaned_request = drop_empty_fields(request_data)
-            
+
             result = await self.client.portfolios.list_first_transaction_dates(
                 ordering=schema.ordering, page=schema.page, page_size=schema.page_size
             )
             result_json = json.loads(result.model_dump_json())
-            
+
             # Create artifact
-            artifact = {
-                "request_data": cleaned_request,
-                "response_data": result_json
-            }
-            
+            artifact = {"request_data": cleaned_request, "response_data": result_json}
+
             return result.model_dump_json(), artifact
 
             # output = f"Found {result.count} total first transaction date records.\n"
@@ -310,28 +304,25 @@ class PortfolioToolkit:
         except Exception as e:
             return f"Error listing first transaction dates: {str(e)}", None
 
-    async def _get_first_transaction_date(self, **kwargs) -> tuple[str, dict | list | None]:
+    async def _get_first_transaction_date(
+        self, **kwargs
+    ) -> tuple[str, dict | list | None]:
         """Get first transaction date for a specific portfolio"""
         try:
             schema = GetFirstTransactionDateSchema(**kwargs)
-            
+
             # Extract request parameters
-            request_data = {
-                "portfolio_id": schema.portfolio_id
-            }
+            request_data = {"portfolio_id": schema.portfolio_id}
             cleaned_request = drop_empty_fields(request_data)
-            
+
             result = await self.client.portfolios.get_first_transaction_date(
                 schema.portfolio_id
             )
             result_json = json.loads(result.model_dump_json())
-            
+
             # Create artifact
-            artifact = {
-                "request_data": cleaned_request,
-                "response_data": result_json
-            }
-            
+            artifact = {"request_data": cleaned_request, "response_data": result_json}
+
             return result.model_dump_json(), artifact
 
             # output = f"First Transaction Date for Portfolio {schema.portfolio_id}:\n"
@@ -340,7 +331,10 @@ class PortfolioToolkit:
             #
             # return output
         except Exception as e:
-            return f"Error getting first transaction date for portfolio {kwargs.get('portfolio_id')}: {str(e)}", None
+            return (
+                f"Error getting first transaction date for portfolio {kwargs.get('portfolio_id')}: {str(e)}",
+                None,
+            )
 
 
 def build_portfolio_tools() -> List[BaseTool]:

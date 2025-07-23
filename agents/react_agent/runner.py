@@ -10,10 +10,14 @@ from libs.utils.prompt_map_builder import build_map_prompts_cfg
 from libs.utils.langfuse_manager import PromptSource
 
 
-async def arun_agent_stream(messages: list[BaseMessage], prompt_source: Optional[PromptSource] = None):
+async def arun_agent_stream(
+    messages: list[BaseMessage], prompt_source: Optional[PromptSource] = None
+):
     langfuse_handler = CallbackHandler()
 
-    map_prompts_cfg = await build_map_prompts_cfg(tags=simple_react_tag, prompt_source=prompt_source)
+    map_prompts_cfg = await build_map_prompts_cfg(
+        tags=simple_react_tag, prompt_source=prompt_source
+    )
     config = RunnableConfig(
         **{
             "callbacks": [langfuse_handler],
@@ -41,7 +45,7 @@ async def arun_agent_stream(messages: list[BaseMessage], prompt_source: Optional
         if "skip" in event_graph.get("tags", []):
             continue
 
-        if event_graph.get("event") == 'on_tool_end':
+        if event_graph.get("event") == "on_tool_end":
             tool_output = event_graph.get("data", {}).get("output")
             tool_output_status = ""
             tool_output_name = ""
@@ -63,7 +67,7 @@ async def arun_agent_stream(messages: list[BaseMessage], prompt_source: Optional
             }
             prev_event_is_agent_thinking = False
 
-        elif event_graph.get("event") == 'on_tool_start':
+        elif event_graph.get("event") == "on_tool_start":
             tool_name: str = event_graph.get("name")
             tool_input_data: dict = event_graph.get("data", {}).get("input", {})
             yield {
@@ -100,9 +104,13 @@ async def arun_agent_stream(messages: list[BaseMessage], prompt_source: Optional
                 yield msg_chunk.content
 
 
-async def run_agent(messages: list[BaseMessage], prompt_source: Optional[PromptSource] = None) -> str:
+async def run_agent(
+    messages: list[BaseMessage], prompt_source: Optional[PromptSource] = None
+) -> str:
     answer = ""
-    async for chunk in arun_agent_stream(messages=messages, prompt_source=prompt_source):
+    async for chunk in arun_agent_stream(
+        messages=messages, prompt_source=prompt_source
+    ):
         answer += chunk
     return answer
 
@@ -112,7 +120,7 @@ if __name__ == "__main__":
 
     # Example 1: Use default prompt source (from environment variable or Langfuse)
     # response = asyncio.run(run_agent(messages=[HumanMessage(content="What is the inception date of the portfolio?")]))
-    
+
     # Example 2: Explicitly use prompts from code
     # response = asyncio.run(
     #     run_agent(
@@ -120,14 +128,14 @@ if __name__ == "__main__":
     #         prompt_source=PromptSource.CODE
     #     )
     # )
-    
+
     # Example 3: Explicitly use prompts from Langfuse
     response = asyncio.run(
         run_agent(
             messages=[
                 HumanMessage(content="Show for me portfolio list top 5 on 1 page")
             ],
-            prompt_source=PromptSource.LANGFUSE
+            prompt_source=PromptSource.LANGFUSE,
         )
     )
     print(f"ANSWER: {response}")

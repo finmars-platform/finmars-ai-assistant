@@ -67,19 +67,21 @@ class PortfolioReconcileToolkit:
     def __init__(self):
         self.client = FinmarsPortfolioClient()
 
-    async def _list_portfolio_reconcile_groups(self, **kwargs) -> tuple[str, dict | list | None]:
+    async def _list_portfolio_reconcile_groups(
+        self, **kwargs
+    ) -> tuple[str, dict | list | None]:
         """List all portfolio reconcile groups with pagination and filtering"""
         try:
             schema = ListPortfolioReconcileGroupsSchema(**kwargs)
-            
+
             # Extract request parameters
             request_data = {
                 "ordering": schema.ordering,
                 "page": schema.page,
-                "page_size": schema.page_size
+                "page_size": schema.page_size,
             }
             cleaned_request = drop_empty_fields(request_data)
-            
+
             result = (
                 await self.client.portfolio_reconcile.list_portfolio_reconcile_groups(
                     ordering=schema.ordering,
@@ -88,13 +90,10 @@ class PortfolioReconcileToolkit:
                 )
             )
             result_json = json.loads(result.model_dump_json())
-            
+
             # Create artifact
-            artifact = {
-                "request_data": cleaned_request,
-                "response_data": result_json
-            }
-            
+            artifact = {"request_data": cleaned_request, "response_data": result_json}
+
             return result.model_dump_json(), artifact
 
             # output = f"Found {result.count} total portfolio reconcile groups.\n"
@@ -121,28 +120,25 @@ class PortfolioReconcileToolkit:
         except Exception as e:
             return f"Error listing portfolio reconcile groups: {str(e)}", None
 
-    async def _get_portfolio_reconcile_group(self, **kwargs) -> tuple[str, dict | list | None]:
+    async def _get_portfolio_reconcile_group(
+        self, **kwargs
+    ) -> tuple[str, dict | list | None]:
         """Get a specific portfolio reconcile group by ID"""
         try:
             schema = GetPortfolioReconcileGroupSchema(**kwargs)
-            
+
             # Extract request parameters
-            request_data = {
-                "group_id": schema.group_id
-            }
+            request_data = {"group_id": schema.group_id}
             cleaned_request = drop_empty_fields(request_data)
-            
+
             group = await self.client.portfolio_reconcile.get_portfolio_reconcile_group(
                 schema.group_id
             )
             group_json = json.loads(group.model_dump_json())
-            
+
             # Create artifact
-            artifact = {
-                "request_data": cleaned_request,
-                "response_data": group_json
-            }
-            
+            artifact = {"request_data": cleaned_request, "response_data": group_json}
+
             return group.model_dump_json(), artifact
 
             # output = f"Portfolio Reconcile Group Details:\n"
@@ -160,21 +156,26 @@ class PortfolioReconcileToolkit:
             #
             # return output
         except Exception as e:
-            return f"Error getting portfolio reconcile group {kwargs.get('group_id')}: {str(e)}", None
+            return (
+                f"Error getting portfolio reconcile group {kwargs.get('group_id')}: {str(e)}",
+                None,
+            )
 
-    async def _list_portfolio_reconcile_history(self, **kwargs) -> tuple[str, dict | list | None]:
+    async def _list_portfolio_reconcile_history(
+        self, **kwargs
+    ) -> tuple[str, dict | list | None]:
         """List all portfolio reconcile history records"""
         try:
             schema = ListPortfolioReconcileHistorySchema(**kwargs)
-            
+
             # Extract request parameters
             request_data = {
                 "ordering": schema.ordering,
                 "page": schema.page,
-                "page_size": schema.page_size
+                "page_size": schema.page_size,
             }
             cleaned_request = drop_empty_fields(request_data)
-            
+
             result = (
                 await self.client.portfolio_reconcile.list_portfolio_reconcile_history(
                     ordering=schema.ordering,
@@ -183,13 +184,10 @@ class PortfolioReconcileToolkit:
                 )
             )
             result_json = json.loads(result.model_dump_json())
-            
+
             # Create artifact
-            artifact = {
-                "request_data": cleaned_request,
-                "response_data": result_json
-            }
-            
+            artifact = {"request_data": cleaned_request, "response_data": result_json}
+
             return result.model_dump_json(), artifact
 
             # output = (
@@ -221,30 +219,27 @@ class PortfolioReconcileToolkit:
         except Exception as e:
             return f"Error listing portfolio reconcile history: {str(e)}", None
 
-    async def _get_portfolio_reconcile_history(self, **kwargs) -> tuple[str, dict | list | None]:
+    async def _get_portfolio_reconcile_history(
+        self, **kwargs
+    ) -> tuple[str, dict | list | None]:
         """Get a specific portfolio reconcile history record by ID"""
         try:
             schema = GetPortfolioReconcileHistorySchema(**kwargs)
-            
+
             # Extract request parameters
-            request_data = {
-                "history_id": schema.history_id
-            }
+            request_data = {"history_id": schema.history_id}
             cleaned_request = drop_empty_fields(request_data)
-            
+
             history = (
                 await self.client.portfolio_reconcile.get_portfolio_reconcile_history(
                     schema.history_id
                 )
             )
             history_json = json.loads(history.model_dump_json())
-            
+
             # Create artifact
-            artifact = {
-                "request_data": cleaned_request,
-                "response_data": history_json
-            }
-            
+            artifact = {"request_data": cleaned_request, "response_data": history_json}
+
             return history.model_dump_json(), artifact
 
             # output = f"Portfolio Reconcile History Record Details:\n"
@@ -265,21 +260,26 @@ class PortfolioReconcileToolkit:
             #
             # return output
         except Exception as e:
-            return f"Error getting portfolio reconcile history record {kwargs.get('history_id')}: {str(e)}", None
+            return (
+                f"Error getting portfolio reconcile history record {kwargs.get('history_id')}: {str(e)}",
+                None,
+            )
 
-    async def _list_portfolio_reconcile_status(self, **kwargs) -> tuple[str, dict | list | None]:
+    async def _list_portfolio_reconcile_status(
+        self, **kwargs
+    ) -> tuple[str, dict | list | None]:
         """List portfolio reconcile status"""
         try:
             schema = ListPortfolioReconcileStatusSchema(**kwargs)
-            
+
             # Extract request parameters
             request_data = {
                 "ordering": schema.ordering,
                 "page": schema.page,
-                "page_size": schema.page_size
+                "page_size": schema.page_size,
             }
             cleaned_request = drop_empty_fields(request_data)
-            
+
             status = (
                 await self.client.portfolio_reconcile.list_portfolio_reconcile_status(
                     ordering=schema.ordering,
@@ -288,13 +288,10 @@ class PortfolioReconcileToolkit:
                 )
             )
             status_json = json.loads(status.model_dump_json())
-            
+
             # Create artifact
-            artifact = {
-                "request_data": cleaned_request,
-                "response_data": status_json
-            }
-            
+            artifact = {"request_data": cleaned_request, "response_data": status_json}
+
             return status.model_dump_json(), artifact
 
             # output = f"Portfolio Reconcile Status:\n"

@@ -8,16 +8,13 @@ from .base import BaseHTTPClient
 class PLReportClient(BaseHTTPClient):
     """Client for PL report operations."""
 
-    async def create_pl_report(
-            self,
-            request_data: PLReportItems
-    ) -> PLReportItems:
+    async def create_pl_report(self, request_data: PLReportItems) -> PLReportItems:
         """
         Create a PL report.
-        
+
         Args:
             request_data: PLReportItems model with all report parameters
-            
+
         Returns:
             PLReportItems response model
         """

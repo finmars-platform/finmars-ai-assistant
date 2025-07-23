@@ -8,81 +8,93 @@ from langchain_core.tools import StructuredTool, BaseTool
 
 from libs.client.finmars_client import FinmarsPortfolioClient
 from libs.logger.logger import logger
-from libs.schema.via_data_model_codegen.report_schema import BackendBalanceReportItems, DateField
-from .shared_models import ReportCurrency, BalanceReportSortBy as SortBy, drop_empty_fields
+from libs.schema.via_data_model_codegen.report_schema import (
+    BackendBalanceReportItems,
+    DateField,
+)
+from .shared_models import (
+    ReportCurrency,
+    BalanceReportSortBy as SortBy,
+    drop_empty_fields,
+)
 
 
 class GetBalanceReportSchema(BaseModel):
     """Input schema for getting balance report"""
-    
+
     portfolio_code: str = Field(
         description="The portfolio user code (user_code from portfolio)"
     )
     report_currency: ReportCurrency = Field(
         default=ReportCurrency.USD,
-        description="The currency for the report (USD or EUR)"
+        description="The currency for the report (USD or EUR)",
     )
     report_date: Optional[str] = Field(
         default=None,
-        description="The date for the balance report in YYYY-MM-DD format (e.g., '2024-03-15'). If not provided, today's date will be used."
+        description="The date for the balance report in YYYY-MM-DD format (e.g., '2024-03-15'). If not provided, today's date will be used.",
     )
     sort_by: Optional[SortBy] = Field(
         default=None,
-        description="Sort holdings by shares, market_value, exposure, or name. If not provided, holdings will be shown in original order."
+        description="Sort holdings by shares, market_value, exposure, or name. If not provided, holdings will be shown in original order.",
     )
     descending: bool = Field(
         default=True,
-        description="Sort in descending order (highest to lowest). Set to false for ascending order."
+        description="Sort in descending order (highest to lowest). Set to false for ascending order.",
     )
 
 
 class BalanceReportToolkit:
     """Toolkit for balance report operations using the Finmars API"""
-    
+
     def __init__(self):
         self.client = FinmarsPortfolioClient()
-        
+
     async def _get_balance_report(self, **kwargs) -> tuple[str, dict | list | None]:
         """Get balance report with portfolio holdings information"""
         try:
             schema = GetBalanceReportSchema(**kwargs)
-            
+
             # Pre-process: Build the request according to requirements
             # Parse report_date if provided, otherwise use today's date
             if schema.report_date:
                 try:
-                    report_date = datetime.strptime(schema.report_date, "%Y-%m-%d").date()
+                    report_date = datetime.strptime(
+                        schema.report_date, "%Y-%m-%d"
+                    ).date()
                 except ValueError:
-                    return f"Error: Invalid date format. Please use YYYY-MM-DD format (e.g., '2024-03-15')", None
+                    return (
+                        f"Error: Invalid date format. Please use YYYY-MM-DD format (e.g., '2024-03-15')",
+                        None,
+                    )
             else:
                 report_date = datetime.now().date()
-            
+
             request_data = BackendBalanceReportItems(
                 account_mode=1,
                 accounts=[],
                 accounts_cash=[],
                 accounts_position=[],
-                #allocation_detailing=True,
+                # allocation_detailing=True,
                 allocation_mode=0,
-                #approach_multiplier=0.5,
+                # approach_multiplier=0.5,
                 calculate_pl=True,
-                #complex_transaction_statuses_filter="booked",
+                # complex_transaction_statuses_filter="booked",
                 cost_method=1,
                 custom_fields_to_calculate="Asset Type",
                 # date_field="transaction_date",
                 date_field=DateField.transaction_date,
-                #depth_level="base_transaction",
+                # depth_level="base_transaction",
                 expression_iterations_count=1,
                 pl_first_date=None,
-                #pl_include_zero=False,
+                # pl_include_zero=False,
                 portfolio_mode=1,
                 portfolios=[schema.portfolio_code],
                 pricing_policy="com.finmars.standard-pricing:standard",
                 report_currency=schema.report_currency.value,
                 report_date=report_date,
                 report_type=1,
-                #show_balance_exposure_details=True,
-                #show_transaction_details=True,
+                # show_balance_exposure_details=True,
+                # show_transaction_details=True,
                 frontend_request_options={"groups_types": [], "groups_values": []},
                 strategies1=[],
                 strategies2=[],
@@ -90,59 +102,60 @@ class BalanceReportToolkit:
                 strategy1_mode=0,
                 strategy2_mode=0,
                 strategy3_mode=0,
-                #table_font_size="small",
-                #transaction_classes=[],
+                # table_font_size="small",
+                # transaction_classes=[],
                 page=1,
                 page_size=200,
                 report_instance_id=None,
-                #portfolios_table_data_items=[]
+                # portfolios_table_data_items=[]
             )
             input_str = request_data.model_dump_json()
-            
+
             # Make the API call
-            result: BackendBalanceReportItems = await self.client.balance_report.get_balance_report_items(request_data)
+            result: BackendBalanceReportItems = (
+                await self.client.balance_report.get_balance_report_items(request_data)
+            )
 
             # Create artifacts
             request_dict = json.loads(request_data.model_dump_json())
             cleaned_request = drop_empty_fields(request_dict)
             response_dict = json.loads(result.model_dump_json())
-            
+
             # Create the artifact in the required format
-            artifact = {
-                "request_data": cleaned_request,
-                "response_data": response_dict
-            }
+            artifact = {"request_data": cleaned_request, "response_data": response_dict}
 
             report_currency = result.report_currency
 
             # Post-process: Extract the required information
-            items = result.items if hasattr(result, 'items') else []
-            
+            items = result.items if hasattr(result, "items") else []
+
             # If items is a string (JSON), parse it
             if isinstance(items, str):
                 try:
                     items = json.loads(items)
                 except:
                     return f"Error: Could not parse items from response", None
-            
+
             # Extract portfolio information
             output = f"The FULL request to get Balance Report was: {input_str}\n\n\n"
-            output += f"RESPONSE:\nBalance Report for Portfolio: {schema.portfolio_code}\n"
+            output += (
+                f"RESPONSE:\nBalance Report for Portfolio: {schema.portfolio_code}\n"
+            )
             output += f"Report Date: {report_date}\n"
             output += f"Currency: {report_currency}\n\n"
-            
+
             if not items:
                 output += "No holdings found in this portfolio.\n"
                 return output, artifact
-            
+
             output += "Portfolio Holdings:\n"
             output += "=" * 80 + "\n\n"
-            
+
             total_shares = 0.0
             total_value = 0.0
             total_exposure = 0.0
             holdings = []
-            
+
             # Process each item to extract instrument info
             for item in items:
                 if isinstance(item, dict):
@@ -151,26 +164,32 @@ class BalanceReportToolkit:
                     if instrument_code is None:
                         continue
                     instrument_name = item.get("instrument.name", "Unknown")
-                    
+
                     # Extract shares and value information from actual API response
-                    shares = item.get("position_size") # Count of акций
+                    shares = item.get("position_size")  # Count of акций
 
                     # Выдавать
-                    market_value = item.get("market_value") # market_value, why sometimes is empty?? `position_size * price`
-                    exposure = item.get("exposure") # exposure, why sometimes is empty??
+                    market_value = item.get(
+                        "market_value"
+                    )  # market_value, why sometimes is empty?? `position_size * price`
+                    exposure = item.get(
+                        "exposure"
+                    )  # exposure, why sometimes is empty??
 
                     # Если вдруг чего-то нет, агент должен предложить другую дату и тп
                     # Данные предыдущие, шаг назад, где данные есть
                     # Какие именно шаги нужны, чтобы это получить
                     # `item` <- позиции долларов портфеля
 
-                    holdings.append({
-                        "code": instrument_code,
-                        "name": instrument_name,
-                        "shares": shares,
-                        "value": market_value,
-                        "exposure": exposure
-                    })
+                    holdings.append(
+                        {
+                            "code": instrument_code,
+                            "name": instrument_name,
+                            "shares": shares,
+                            "value": market_value,
+                            "exposure": exposure,
+                        }
+                    )
                     if isinstance(shares, (int, float)) and shares > 0:
                         total_shares += shares
 
@@ -187,22 +206,42 @@ class BalanceReportToolkit:
 
             # Sort holdings if requested
             if schema.sort_by:
+
                 def sort_key(holding):
                     if schema.sort_by == SortBy.SHARES:
-                        val = holding['shares']
-                        return val if isinstance(val, (int, float)) else (-float('inf') if schema.descending else float('inf'))
+                        val = holding["shares"]
+                        return (
+                            val
+                            if isinstance(val, (int, float))
+                            else (-float("inf") if schema.descending else float("inf"))
+                        )
                     elif schema.sort_by == SortBy.MARKET_VALUE:
-                        val = holding['value']
-                        return val if isinstance(val, (int, float)) else (-float('inf') if schema.descending else float('inf'))
+                        val = holding["value"]
+                        return (
+                            val
+                            if isinstance(val, (int, float))
+                            else (-float("inf") if schema.descending else float("inf"))
+                        )
                     elif schema.sort_by == SortBy.EXPOSURE:
-                        val = holding['exposure']
-                        return val if isinstance(val, (int, float)) else (-float('inf') if schema.descending else float('inf'))
+                        val = holding["exposure"]
+                        return (
+                            val
+                            if isinstance(val, (int, float))
+                            else (-float("inf") if schema.descending else float("inf"))
+                        )
                     elif schema.sort_by == SortBy.NAME:
-                        return holding['name'].lower()
+                        return holding["name"].lower()
                     return 0
-                
-                holdings.sort(key=sort_key, reverse=schema.descending if schema.sort_by != SortBy.NAME else not schema.descending)
-                
+
+                holdings.sort(
+                    key=sort_key,
+                    reverse=(
+                        schema.descending
+                        if schema.sort_by != SortBy.NAME
+                        else not schema.descending
+                    ),
+                )
+
                 # Add sorting info to output
                 output += f"Sorted by: {schema.sort_by.value} ({'descending' if schema.descending else 'ascending'})\n"
                 output += "=" * 80 + "\n\n"
@@ -213,68 +252,71 @@ class BalanceReportToolkit:
             exposure_pct_total = []
             for holding in holdings:
                 output += f"Instrument: {holding['name']} ({holding['code']})\n"
-                
+
                 # Shares with percentage
-                if isinstance(holding['shares'], (int, float)):
+                if isinstance(holding["shares"], (int, float)):
                     output += f"  - Shares (Position Size): {holding['shares']:,.2f}"
-                    if holding['shares'] < 0:
+                    if holding["shares"] < 0:
                         output += " (Short Position)\n"
-                    elif total_shares > 0 and holding['shares'] > 0:
-                        shares_pct = (holding['shares'] / total_shares * 100)
+                    elif total_shares > 0 and holding["shares"] > 0:
+                        shares_pct = holding["shares"] / total_shares * 100
                         shares_pct_total.append(shares_pct)
                         output += f" ({shares_pct:.2f}%)\n"
                     else:
                         output += "\n"
                 else:
                     output += "  - Shares: N/A\n"
-                
+
                 # Market Value with percentage
-                if isinstance(holding['value'], (int, float)):
+                if isinstance(holding["value"], (int, float)):
                     output += f"  - Market Value: ${holding['value']:,.2f}"
-                    if holding['value'] < 0:
+                    if holding["value"] < 0:
                         output += " (Short Position)\n"
-                    elif total_value > 0 and holding['value'] > 0:
-                        market_value_pct = (holding['value'] / total_value * 100)
+                    elif total_value > 0 and holding["value"] > 0:
+                        market_value_pct = holding["value"] / total_value * 100
                         market_value_pct_total.append(market_value_pct)
                         output += f" ({market_value_pct:.2f}%)\n"
                     else:
                         output += "\n"
                 else:
                     output += "  - Market Value: N/A\n"
-                
+
                 # Exposure with percentage
-                if isinstance(holding['exposure'], (int, float)):
+                if isinstance(holding["exposure"], (int, float)):
                     output += f"  - Exposure: ${holding['exposure']:,.2f}"
-                    if holding['exposure'] < 0:
+                    if holding["exposure"] < 0:
                         output += " (Short Position)\n"
-                    elif total_exposure > 0 and holding['exposure'] > 0:
-                        exposure_pct = (holding['exposure'] / total_exposure * 100)
+                    elif total_exposure > 0 and holding["exposure"] > 0:
+                        exposure_pct = holding["exposure"] / total_exposure * 100
                         exposure_pct_total.append(exposure_pct)
                         output += f" ({exposure_pct:.2f}%)\n"
                     else:
                         output += "\n"
                 else:
                     output += "  - Exposure: N/A\n"
-                
+
                 output += "\n"
-            
+
             output += "-" * 80 + "\n"
             output += f"Total Portfolio Position Size (Shares): {total_shares:,.2f}\n"
             output += f"Total Portfolio Value: ${total_value:,.2f}\n"
             output += f"Total Portfolio Exposure: ${total_exposure:,.2f}\n"
             output += f"Number of Holdings: {len(holdings)}\n"
             return output, artifact
-            
+
         except Exception as e:
             exc = traceback.format_exc()
             logger.error(exc)
-            return f"Error getting balance report for portfolio {kwargs.get('portfolio_code')}: {str(e)}", None
+            return (
+                f"Error getting balance report for portfolio {kwargs.get('portfolio_code')}: {str(e)}",
+                None,
+            )
 
 
 def build_balance_report_tools() -> List[BaseTool]:
     """Build and return balance report tools"""
     toolkit = BalanceReportToolkit()
-    
+
     tools = [
         StructuredTool.from_function(
             name="get_balance_report",
@@ -312,5 +354,5 @@ def build_balance_report_tools() -> List[BaseTool]:
             response_format="content_and_artifact",
         ),
     ]
-    
+
     return tools
