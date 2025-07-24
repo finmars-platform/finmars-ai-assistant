@@ -8,6 +8,7 @@ from .portfolio_history import PortfolioHistoryClient
 from .portfolio_reconcile import PortfolioReconcileClient
 from .balance_report import BalanceReportClient
 from .pl_report import PLReportClient
+from .transaction_report import TransactionReportClient
 
 
 class FinmarsPortfolioClient:
@@ -93,6 +94,14 @@ class FinmarsPortfolioClient:
         )
 
         self.pl_report = PLReportClient(
+            base_url=base_url,
+            realm=realm,
+            space=space,
+            api_key=api_key,
+            timeout=timeout,
+        )
+
+        self.transaction_report = TransactionReportClient(
             base_url=base_url,
             realm=realm,
             space=space,

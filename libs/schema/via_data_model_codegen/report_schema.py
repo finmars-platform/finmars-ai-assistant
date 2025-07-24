@@ -2223,3 +2223,7 @@ class TransactionReport(BaseModel):
     count: Optional[conint(ge=1)] = Field(None, title="Count")
     page: Optional[conint(ge=1)] = Field(None, title="Page")
     page_size: Optional[conint(ge=1)] = Field(None, title="Page size")
+
+
+class TransactionReportItems(TransactionReport):
+    items: Optional[list[dict]] = Field(None, title="Items")
