@@ -67,7 +67,7 @@ class PLReportSortBy(str, Enum):
     AMOUNT_INVESTED = "amount_invested"
     MARKET_VALUE = "market_value"
     PRINCIPLE = "principle"
-    RETURN_PERCENTAGE = "return_percentage"
+    TOTAL_PL = "total_pl"  # Total P/L amount
 
 
 # Common date field patterns

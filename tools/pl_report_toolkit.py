@@ -31,20 +31,14 @@ class GetPLReportSchema(BaseModel):
     )
     sort_by: Optional[SortBy] = Field(
         default=None,
-        description="Sort results by instrument_name, position_size, amount_invested, market_value, principle, or return_percentage",
+        description="Sort results by instrument_name, position_size, amount_invested, market_value, principle, or total_pl",
     )
     descending: bool = Field(
         default=True,
         description="Sort in descending order (highest to lowest). Set to false for ascending order.",
     )
-    min_return_percentage: Optional[float] = Field(
-        default=None,
-        description="Filter to show only positions with return percentage above this threshold (e.g., 10.0 for 10%)",
-    )
-    max_return_percentage: Optional[float] = Field(
-        default=None,
-        description="Filter to show only positions with return percentage below this threshold (e.g., -10.0 for -10%)",
-    )
+    # Return percentage filters removed - not applicable for individual instruments
+    # Only portfolio-level return percentage is calculated
 
 
 class PLReportToolkit:
@@ -159,9 +153,9 @@ class PLReportToolkit:
             total_principle = 0.0
             positions = []
 
-            # Group items by item_group_code
-            grouped_items = {"OPENED": [], "CLOSED": [], "FX_VARIATIONS": []}
-
+            # Group items by instrument code for hierarchical display
+            instrument_positions = {}
+            
             # Process each item to extract P/L information
             for item in items:
                 if isinstance(item, dict):
@@ -173,6 +167,7 @@ class PLReportToolkit:
                     if instrument_code is None:
                         continue
                     instrument_name = item.get("instrument.name", "Unknown")
+                    instrument_country = item.get("instrument.country.name", "")
                     portfolio_code = item.get(
                         "portfolio.user_code", schema.portfolio_code
                     )
@@ -190,28 +185,11 @@ class PLReportToolkit:
                     amount_invested = item.get("amount_invested_fixed") or 0
                     current_price = item.get("instrument_principal_price") or 0
 
-                    # Calculate return percentage based on total P&L
-                    return_percentage = 0.0
-                    if amount_invested != 0:
-                        # Note: amount_invested is negative for long positions
-                        return_percentage = (total / abs(amount_invested)) * 100
-
-                    # Apply filters if specified
-                    if (
-                        schema.min_return_percentage is not None
-                        and return_percentage < schema.min_return_percentage
-                    ):
-                        continue
-                    if (
-                        schema.max_return_percentage is not None
-                        and return_percentage > schema.max_return_percentage
-                    ):
-                        continue
-
                     position_data = {
                         "portfolio_code": portfolio_code,
                         "code": instrument_code,
                         "name": instrument_name,
+                        "country": instrument_country,
                         "item_group_code": item_group_code,
                         "position_size": position_size,
                         "net_cost_price": net_cost_price,
@@ -222,14 +200,19 @@ class PLReportToolkit:
                         "carry": carry,
                         "overheads": overheads,
                         "total": total,
-                        "return_percentage": return_percentage,
                     }
 
-                    # Add to appropriate group
-                    if item_group_code in grouped_items:
-                        grouped_items[item_group_code].append(position_data)
-
                     positions.append(position_data)
+                    
+                    # Group positions by instrument (without aggregation)
+                    if instrument_code not in instrument_positions:
+                        instrument_positions[instrument_code] = {
+                            "name": instrument_name,
+                            "country": instrument_country,
+                            "positions": []
+                        }
+                    
+                    instrument_positions[instrument_code]["positions"].append(position_data)
 
                     # Accumulate totals
                     if isinstance(amount_invested, (int, float)):
@@ -269,10 +252,10 @@ class PLReportToolkit:
                             if isinstance(pos["principle"], (int, float))
                             else -float("inf")
                         )
-                    elif schema.sort_by == SortBy.RETURN_PERCENTAGE:
+                    elif schema.sort_by == SortBy.TOTAL_PL:
                         return (
-                            pos["return_percentage"]
-                            if isinstance(pos["return_percentage"], (int, float))
+                            pos["total"]
+                            if isinstance(pos["total"], (int, float))
                             else -float("inf")
                         )
                     return 0
@@ -288,86 +271,23 @@ class PLReportToolkit:
 
                 # Add sorting info to output
                 output += f"Sorted by: {schema.sort_by.value} ({'descending' if schema.descending else 'ascending'})\n"
-                if (
-                    schema.min_return_percentage is not None
-                    or schema.max_return_percentage is not None
-                ):
-                    output += f"Filtered by return percentage: "
-                    if schema.min_return_percentage is not None:
-                        output += f"min={schema.min_return_percentage}%"
-                    if schema.max_return_percentage is not None:
-                        if schema.min_return_percentage is not None:
-                            output += ", "
-                        output += f"max={schema.max_return_percentage}%"
-                    output += "\n"
                 output += "=" * 100 + "\n\n"
 
-            # Format output as a table similar to the image
-            output += "\nP&L Report Table:\n"
-            output += "=" * 120 + "\n"
-            output += f"{'Portfolio':<15} {'PL Type':<12} {'Asset Type':<30} {'Total P&L':>15} {'Principal':>15} {'Carry P&L':>15} {'Overheads':>15} {'Market Value':>15}\n"
-            output += "=" * 120 + "\n"
-
-            # Display grouped positions
-            for group_code in ["OPENED", "CLOSED", "FX_VARIATIONS"]:
-                if grouped_items[group_code]:
-                    # Group header
-                    output += f"\n{group_code}:\n"
-                    output += "-" * 120 + "\n"
-
-                    group_total = 0
-                    group_principal = 0
-                    group_carry = 0
-                    group_overheads = 0
-                    group_market_value = 0
-
-                    for pos in grouped_items[group_code]:
-                        if group_code == "FX_VARIATIONS":
-                            asset_type = "FX Variations"
-                        else:
-                            asset_type = (
-                                "Debt"
-                                if "bond" in pos["name"].lower()
-                                or "bill" in pos["name"].lower()
-                                or "note" in pos["name"].lower()
-                                else "Equity"
-                            )
-
-                        output += f"{pos['portfolio_code']:<15} {group_code:<12} {asset_type:<30} "
-                        output += f"{pos['total']:>15,.2f} {pos['principal']:>15,.2f} "
-                        output += f"{pos['carry']:>15,.2f} {pos['overheads']:>15,.2f} "
-                        output += f"{pos['market_value']:>15,.2f}\n"
-
-                        if pos["code"]:
-                            output += f"{'':>15} {'':>12} {pos['code']:<30}\n"
-
-                        # Accumulate group totals
-                        group_total += pos["total"]
-                        group_principal += pos["principal"]
-                        group_carry += pos["carry"]
-                        group_overheads += pos["overheads"]
-                        group_market_value += pos["market_value"]
-
-                    # Group subtotal
-                    output += "-" * 120 + "\n"
-                    output += f"{'Subtotal':<15} {'':<12} {'':<30} "
-                    output += f"{group_total:>15,.2f} {group_principal:>15,.2f} "
-                    output += f"{group_carry:>15,.2f} {group_overheads:>15,.2f} "
-                    output += f"{group_market_value:>15,.2f}\n"
-
-            output += "\n" + "=" * 120 + "\n\n"
-
-            # Detailed breakdown for each position
-            output += "\nDetailed Position Analysis:\n"
-            output += "=" * 100 + "\n\n"
-
-            # Format output for each position
-            for pos in positions:
-                # Parse instrument name to extract bond characteristics
-                instrument_name = pos["name"]
-                instrument_code = pos["code"]
-
-                # Extract bond features if present in name
+            # Create consolidated P&L report matching the table format
+            output += "\nCONSOLIDATED P&L REPORT\n"
+            output += "=" * 100 + "\n"
+            output += "Hierarchical view by Portfolio > Instrument > Status (OPENED/CLOSED)\n\n"
+            
+            # Display portfolio header
+            output += f"PORTFOLIO: {schema.portfolio_code}\n"
+            output += "-" * 80 + "\n\n"
+            
+            # Display each instrument with its positions
+            for inst_code, inst_data in instrument_positions.items():
+                instrument_name = inst_data["name"]
+                instrument_country = inst_data["country"]
+                
+                # Extract clean name without bond features
                 bond_features = []
                 if "<" in instrument_name and ">" in instrument_name:
                     features_start = instrument_name.find("<")
@@ -377,107 +297,84 @@ class PLReportToolkit:
                     clean_name = instrument_name[:features_start].strip()
                 else:
                     clean_name = instrument_name
-
-                output += f"Instrument: {clean_name}\n"
-                output += f"  - Security Code: {instrument_code}\n"
-
-                # Explain bond features if present
+                
+                output += f"INSTRUMENT: {inst_code} - {clean_name}\n"
+                if instrument_country:
+                    output += f"Country: {instrument_country}\n"
                 if bond_features:
-                    output += "  - Bond Features:\n"
-                    for feature in bond_features:
-                        if feature.lower() == "unsec":
-                            output += "    • Unsecured (unsec): No collateral backing the bond\n"
-                        elif feature.lower() == "sink":
-                            output += "    • Sinking Fund (sink): Issuer periodically retires portions of the bond\n"
-                        elif feature.lower() == "step-up":
-                            output += "    • Step-Up Coupon (step-up): Interest rate increases over time\n"
-                        elif "step cpn" in feature.lower():
-                            output += "    • Step Coupon (step cpn): Variable interest rate structure\n"
-                        elif feature.lower() == "restruct":
-                            output += "    • Restructured (restruct): Bond terms have been modified\n"
-                        else:
-                            output += f"    • {feature}\n"
-
-                # Position details
-                if isinstance(pos["position_size"], (int, float)):
-                    if pos["position_size"] == 0:
-                        output += f"  - Position Status: CLOSED (0 shares/units held)\n"
-                    else:
-                        output += f"  - Position Size: {pos['position_size']:,.2f} shares/units"
-                        if pos["position_size"] < 0:
-                            output += " (SHORT POSITION)\n"
-                        else:
-                            output += " (LONG POSITION)\n"
-
-                # Cost basis
-                if (
-                    isinstance(pos["net_cost_price"], (int, float))
-                    and pos["net_cost_price"] != 0
-                ):
-                    output += f"  - Average Cost Price: ${pos['net_cost_price']:,.2f}"
-                    output += " (price per unit when purchased)\n"
-
-                if (
-                    isinstance(pos["current_price"], (int, float))
-                    and pos["current_price"] != 0
-                ):
-                    output += f"  - Current Market Price: ${pos['current_price']:,.2f}"
-                    output += " (latest market price per unit)\n"
-
-                # Investment amount
-                if isinstance(pos["amount_invested"], (int, float)):
-                    if pos["amount_invested"] == 0 and pos["position_size"] == 0:
-                        output += "  - Amount Invested: $0.00 (position closed)\n"
-                    else:
-                        output += (
-                            f"  - Total Amount Invested: ${pos['amount_invested']:,.2f}"
-                        )
-                        if pos["amount_invested"] < 0:
-                            output += (
-                                "\n    (Negative = money paid out for long position)\n"
-                            )
-                        elif pos["amount_invested"] > 0:
-                            output += (
-                                "\n    (Positive = money received for short position)\n"
-                            )
-                        else:
-                            output += "\n"
-
-                # Current value
-                if isinstance(pos["market_value"], (int, float)):
-                    output += f"  - Current Market Value: ${pos['market_value']:,.2f}"
-                    if pos["position_size"] != 0:
-                        output += " (position_size × current_price)\n"
-                    else:
-                        output += " (position closed)\n"
-
-                # P/L information
-                output += f"  - P/L Breakdown:\n"
-                if isinstance(pos["total"], (int, float)):
-                    output += f"    • Total P&L: ${pos['total']:,.2f}"
-                    if pos["total"] > 0:
-                        output += " ✓ PROFIT"
-                    elif pos["total"] < 0:
-                        output += " ✗ LOSS"
-                    else:
-                        output += " = BREAK EVEN"
-                    output += "\n"
-
-                if isinstance(pos["principal"], (int, float)) and pos["principal"] != 0:
-                    output += f"    • Principal: ${pos['principal']:,.2f}\n"
-                if isinstance(pos["carry"], (int, float)) and pos["carry"] != 0:
-                    output += f"    • Carry P&L: ${pos['carry']:,.2f}\n"
-                if isinstance(pos["overheads"], (int, float)) and pos["overheads"] != 0:
-                    output += f"    • Overheads: ${pos['overheads']:,.2f}\n"
-
-                # Return percentage
-                output += f"  - Return Percentage: {pos['return_percentage']:.2f}%"
-                if pos["amount_invested"] != 0:
-                    output += " (profit/loss ÷ |amount_invested| × 100)\n"
-                else:
-                    output += " (no investment base for calculation)\n"
-
+                    output += f"Features: {', '.join(bond_features)}\n"
                 output += "\n"
+                
+                # Group positions by status
+                opened_positions = [p for p in inst_data["positions"] if p["item_group_code"] == "OPENED"]
+                closed_positions = [p for p in inst_data["positions"] if p["item_group_code"] == "CLOSED"]
+                fx_positions = [p for p in inst_data["positions"] if p["item_group_code"] == "FX_VARIATIONS"]
+                
+                # Display OPENED positions
+                if opened_positions:
+                    output += "  └── OPENED\n"
+                    for pos in opened_positions:
+                        # Determine asset type
+                        asset_type = (
+                            "Debt"
+                            if "bond" in pos["name"].lower()
+                            or "bill" in pos["name"].lower()
+                            or "note" in pos["name"].lower()
+                            else "Equity"
+                        )
+                        
+                        output += f"        └── {asset_type}\n"
+                        output += f"            Portfolio: {pos['portfolio_code']}\n"
+                        output += f"            PL Type: OPENED\n"
+                        output += f"            Total P&L: ${pos['total']:,.2f}\n"
+                        output += f"            Principal: ${pos['principal']:,.2f}\n"
+                        output += f"            Carry P&L: ${pos['carry']:,.2f}\n"
+                        output += f"            Overheads: ${pos['overheads']:,.2f}\n"
+                        output += f"            Market Value: ${pos['market_value']:,.2f}\n"
+                        if pos["position_size"] != 0:
+                            output += f"            Position Size: {pos['position_size']:,.2f} units\n"
+                            output += f"            Current Price: ${pos['current_price']:,.2f}\n"
+                            if pos["net_cost_price"] != 0:
+                                output += f"            Average Cost: ${pos['net_cost_price']:,.2f}\n"
+                        output += "\n"
+                
+                # Display CLOSED positions  
+                if closed_positions:
+                    output += "  └── CLOSED\n"
+                    for pos in closed_positions:
+                        # Determine asset type
+                        asset_type = (
+                            "Debt"
+                            if "bond" in pos["name"].lower()
+                            or "bill" in pos["name"].lower()
+                            or "note" in pos["name"].lower()
+                            else "Equity"
+                        )
+                        
+                        output += f"        └── {asset_type}\n"
+                        output += f"            Portfolio: {pos['portfolio_code']}\n"
+                        output += f"            PL Type: CLOSED\n"
+                        output += f"            Total P&L: ${pos['total']:,.2f}\n"
+                        output += f"            Principal: ${pos['principal']:,.2f}\n"
+                        output += f"            Carry P&L: ${pos['carry']:,.2f}\n"
+                        output += f"            Overheads: ${pos['overheads']:,.2f}\n"
+                        output += f"            Market Value: ${pos['market_value']:,.2f}\n"
+                        output += "\n"
+                
+                # Display FX_VARIATIONS if any
+                if fx_positions:
+                    output += "  └── FX_VARIATIONS\n"
+                    for pos in fx_positions:
+                        output += f"        Portfolio: {pos['portfolio_code']}\n"
+                        output += f"        PL Type: FX_VARIATIONS\n"
+                        output += f"        Total P&L: ${pos['total']:,.2f}\n"
+                        output += f"        Principal: ${pos['principal']:,.2f}\n"
+                        output += f"        Carry P&L: ${pos['carry']:,.2f}\n"
+                        output += f"        Overheads: ${pos['overheads']:,.2f}\n"
+                        output += f"        Market Value: ${pos['market_value']:,.2f}\n"
+                        output += "\n"
+                
+                output += "-" * 60 + "\n\n"
 
             # Portfolio summary
             output += "-" * 100 + "\n"
@@ -492,10 +389,11 @@ class PLReportToolkit:
             else:
                 output += " (BREAK EVEN)\n"
 
-            # Calculate overall return
+            # Calculate overall portfolio return percentage
             if total_invested != 0:
                 overall_return = (total_principle / abs(total_invested)) * 100
-                output += f"Overall Return: {overall_return:.2f}%\n"
+                output += f"Overall Portfolio Return: {overall_return:.2f}%\n"
+                output += "Note: Return % is calculated at portfolio level only, not for individual instruments\n"
 
             output += f"Number of Positions: {len(positions)}\n"
 
@@ -510,15 +408,15 @@ class PLReportToolkit:
 
             if profitable_positions:
                 best_performer = max(
-                    profitable_positions, key=lambda x: x["return_percentage"]
+                    profitable_positions, key=lambda x: x["total"]
                 )
-                output += f"- Best Performer: {best_performer['name']} ({best_performer['return_percentage']:.2f}%)\n"
+                output += f"- Best Performer by P/L: {best_performer['name']} (${best_performer['total']:,.2f})\n"
 
             if losing_positions:
                 worst_performer = min(
-                    losing_positions, key=lambda x: x["return_percentage"]
+                    losing_positions, key=lambda x: x["total"]
                 )
-                output += f"- Worst Performer: {worst_performer['name']} ({worst_performer['return_percentage']:.2f}%)\n"
+                output += f"- Worst Performer by P/L: {worst_performer['name']} (${worst_performer['total']:,.2f})\n"
 
             return output, artifact
 
@@ -549,7 +447,6 @@ def build_pl_report_tools() -> List[BaseTool]:
                 "- Track realized and unrealized gains/losses\n"
                 "- Identify best and worst performing investments\n"
                 "- Calculate overall portfolio return percentage\n"
-                "- Filter positions by return percentage thresholds\n"
                 "\n"
                 "The report includes:\n"
                 "- Position details (shares held, cost basis, current value)\n"
@@ -565,8 +462,7 @@ def build_pl_report_tools() -> List[BaseTool]:
                 "Optional parameters:\n"
                 "- report_date: End date (defaults to today)\n"
                 "- report_currency: USD or EUR (default: USD)\n"
-                "- sort_by: Sort results by various metrics\n"
-                "- min_return_percentage/max_return_percentage: Filter by returns\n"
+                "- sort_by: Sort results by various metrics (instrument_name, position_size, amount_invested, market_value, principle, total_pl)\n"
                 "\n"
                 "Example questions this tool can answer:\n"
                 "- What is my profit/loss for portfolio X since January 1st?\n"
@@ -579,8 +475,8 @@ def build_pl_report_tools() -> List[BaseTool]:
                 "Key P/L calculations explained:\n"
                 "- amount_invested: Total USD invested (negative for long positions)\n"
                 "- market_value: Current position value (position_size × current_price)\n"
-                "- principle: Total P/L (market_value - amount_invested), positive = profit\n"
-                "- return_percentage: (principle / |amount_invested|) × 100"
+                "- total: Total P/L for the position (sum of principal + carry + overheads)\n"
+                "- Note: Return percentage is calculated only at portfolio level, not for individual instruments"
             ),
             args_schema=GetPLReportSchema,
             response_format="content_and_artifact",
