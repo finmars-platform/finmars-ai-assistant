@@ -70,6 +70,16 @@ class PLReportSortBy(str, Enum):
     TOTAL_PL = "total_pl"  # Total P/L amount
 
 
+class TransactionReportSortBy(str, Enum):
+    """Sorting options for the transaction report"""
+
+    TRANSACTION_DATE = "transaction_date"
+    INSTRUMENT_NAME = "instrument_name"
+    POSITION_SIZE = "position_size"
+    PRINCIPAL = "principal"
+    TRADE_PRICE = "trade_price"
+
+
 # Common date field patterns
 class DateRangeFields(BaseModel):
     """Common date range fields for reports"""
