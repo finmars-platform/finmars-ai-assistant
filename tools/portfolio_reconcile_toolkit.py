@@ -118,7 +118,9 @@ class PortfolioReconcileToolkit:
             #
             # return output
         except Exception as e:
-            return f"Error listing portfolio reconcile groups: {str(e)}", None
+            error_msg = f"Error listing portfolio reconcile groups: {str(e)}"
+            error_msg += f"\n\nRequest parameters: ordering={kwargs.get('ordering')}, page={kwargs.get('page', 1)}, page_size={kwargs.get('page_size', 10)}"
+            return error_msg, None
 
     async def _get_portfolio_reconcile_group(
         self, **kwargs
@@ -156,10 +158,9 @@ class PortfolioReconcileToolkit:
             #
             # return output
         except Exception as e:
-            return (
-                f"Error getting portfolio reconcile group {kwargs.get('group_id')}: {str(e)}",
-                None,
-            )
+            error_msg = f"Error getting portfolio reconcile group {kwargs.get('group_id')}: {str(e)}"
+            error_msg += f"\n\nRequest parameters: group_id={kwargs.get('group_id')}"
+            return (error_msg, None)
 
     async def _list_portfolio_reconcile_history(
         self, **kwargs
@@ -217,7 +218,9 @@ class PortfolioReconcileToolkit:
             #
             # return output
         except Exception as e:
-            return f"Error listing portfolio reconcile history: {str(e)}", None
+            error_msg = f"Error listing portfolio reconcile history: {str(e)}"
+            error_msg += f"\n\nRequest parameters: ordering={kwargs.get('ordering')}, page={kwargs.get('page', 1)}, page_size={kwargs.get('page_size', 10)}"
+            return error_msg, None
 
     async def _get_portfolio_reconcile_history(
         self, **kwargs
@@ -260,10 +263,9 @@ class PortfolioReconcileToolkit:
             #
             # return output
         except Exception as e:
-            return (
-                f"Error getting portfolio reconcile history record {kwargs.get('history_id')}: {str(e)}",
-                None,
-            )
+            error_msg = f"Error getting portfolio reconcile history record {kwargs.get('history_id')}: {str(e)}"
+            error_msg += f"\n\nRequest parameters: history_id={kwargs.get('history_id')}"
+            return (error_msg, None)
 
     async def _list_portfolio_reconcile_status(
         self, **kwargs
@@ -322,7 +324,9 @@ class PortfolioReconcileToolkit:
             #
             # return output
         except Exception as e:
-            return f"Error getting portfolio reconcile status: {str(e)}", None
+            error_msg = f"Error getting portfolio reconcile status: {str(e)}"
+            error_msg += f"\n\nRequest parameters: ordering={kwargs.get('ordering')}, page={kwargs.get('page', 1)}, page_size={kwargs.get('page_size', 10)}"
+            return error_msg, None
 
 
 def build_portfolio_reconcile_tools() -> List[BaseTool]:

@@ -142,7 +142,9 @@ class PortfolioTypeToolkit:
             #
             # return output
         except Exception as e:
-            return f"Error listing portfolio types: {str(e)}", None
+            error_msg = f"Error listing portfolio types: {str(e)}"
+            error_msg += f"\n\nRequest parameters: ordering={kwargs.get('ordering')}, page={kwargs.get('page', 1)}, page_size={kwargs.get('page_size', 10)}"
+            return error_msg, None
 
     async def _get_portfolio_type(self, **kwargs) -> tuple[str, dict | list | None]:
         """Get a specific portfolio type by ID"""
@@ -174,10 +176,9 @@ class PortfolioTypeToolkit:
             #
             # return output
         except Exception as e:
-            return (
-                f"Error getting portfolio type {kwargs.get('portfolio_type_id')}: {str(e)}",
-                None,
-            )
+            error_msg = f"Error getting portfolio type {kwargs.get('portfolio_type_id')}: {str(e)}"
+            error_msg += f"\n\nRequest parameters: portfolio_type_id={kwargs.get('portfolio_type_id')}"
+            return (error_msg, None)
 
     async def _list_portfolio_types_light(
         self, **kwargs
@@ -214,7 +215,9 @@ class PortfolioTypeToolkit:
             #
             # return output
         except Exception as e:
-            return f"Error listing portfolio types (light): {str(e)}", None
+            error_msg = f"Error listing portfolio types (light): {str(e)}"
+            error_msg += f"\n\nRequest parameters: ordering={kwargs.get('ordering')}, page={kwargs.get('page', 1)}, page_size={kwargs.get('page_size', 10)}"
+            return error_msg, None
 
     async def _get_portfolio_type_attributes(
         self, **kwargs
@@ -249,7 +252,9 @@ class PortfolioTypeToolkit:
             #
             # return output
         except Exception as e:
-            return f"Error getting portfolio type attributes: {str(e)}", None
+            error_msg = f"Error getting portfolio type attributes: {str(e)}"
+            error_msg += f"\n\nRequest parameters: None"
+            return error_msg, None
 
     async def _list_portfolio_attribute_types(
         self, **kwargs
@@ -290,7 +295,9 @@ class PortfolioTypeToolkit:
             #
             # return output
         except Exception as e:
-            return f"Error listing portfolio attribute types: {str(e)}", None
+            error_msg = f"Error listing portfolio attribute types: {str(e)}"
+            error_msg += f"\n\nRequest parameters: ordering={kwargs.get('ordering')}, page={kwargs.get('page', 1)}, page_size={kwargs.get('page_size', 10)}"
+            return error_msg, None
 
     async def _get_portfolio_attribute_type(
         self, **kwargs
@@ -324,10 +331,9 @@ class PortfolioTypeToolkit:
             #
             # return output
         except Exception as e:
-            return (
-                f"Error getting portfolio attribute type {kwargs.get('attribute_type_id')}: {str(e)}",
-                None,
-            )
+            error_msg = f"Error getting portfolio attribute type {kwargs.get('attribute_type_id')}: {str(e)}"
+            error_msg += f"\n\nRequest parameters: attribute_type_id={kwargs.get('attribute_type_id')}"
+            return (error_msg, None)
 
     async def _get_objects_to_recalculate(
         self, **kwargs
@@ -358,10 +364,9 @@ class PortfolioTypeToolkit:
             #
             # return output
         except Exception as e:
-            return (
-                f"Error getting objects to recalculate for attribute type {kwargs.get('attribute_type_id')}: {str(e)}",
-                None,
-            )
+            error_msg = f"Error getting objects to recalculate for attribute type {kwargs.get('attribute_type_id')}: {str(e)}"
+            error_msg += f"\n\nRequest parameters: attribute_type_id={kwargs.get('attribute_type_id')}"
+            return (error_msg, None)
 
     async def _list_portfolio_type_attribute_types(
         self, **kwargs
@@ -406,7 +411,9 @@ class PortfolioTypeToolkit:
             #
             # return output
         except Exception as e:
-            return f"Error listing portfolio type attribute types: {str(e)}", None
+            error_msg = f"Error listing portfolio type attribute types: {str(e)}"
+            error_msg += f"\n\nRequest parameters: ordering={kwargs.get('ordering')}, page={kwargs.get('page', 1)}, page_size={kwargs.get('page_size', 10)}"
+            return error_msg, None
 
     async def _get_portfolio_type_attribute_type(
         self, **kwargs
@@ -442,10 +449,9 @@ class PortfolioTypeToolkit:
             #
             # return output
         except Exception as e:
-            return (
-                f"Error getting portfolio type attribute type {kwargs.get('attribute_type_id')}: {str(e)}",
-                None,
-            )
+            error_msg = f"Error getting portfolio type attribute type {kwargs.get('attribute_type_id')}: {str(e)}"
+            error_msg += f"\n\nRequest parameters: attribute_type_id={kwargs.get('attribute_type_id')}"
+            return (error_msg, None)
 
     async def _get_portfolio_type_objects_to_recalculate(
         self, **kwargs
@@ -476,10 +482,9 @@ class PortfolioTypeToolkit:
             #
             # return output
         except Exception as e:
-            return (
-                f"Error getting objects to recalculate for portfolio type attribute type {kwargs.get('attribute_type_id')}: {str(e)}",
-                None,
-            )
+            error_msg = f"Error getting objects to recalculate for portfolio type attribute type {kwargs.get('attribute_type_id')}: {str(e)}"
+            error_msg += f"\n\nRequest parameters: attribute_type_id={kwargs.get('attribute_type_id')}"
+            return (error_msg, None)
 
 
 def build_portfolio_type_tools() -> List[BaseTool]:

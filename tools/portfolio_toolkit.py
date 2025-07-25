@@ -123,7 +123,9 @@ class PortfolioToolkit:
             #     )
             # return output
         except Exception as e:
-            return f"Error listing portfolios: {str(e)}", None
+            error_msg = f"Error listing portfolios: {str(e)}"
+            error_msg += f"\n\nRequest parameters: ordering={kwargs.get('ordering')}, page={kwargs.get('page', 1)}, page_size={kwargs.get('page_size', 10)}"
+            return error_msg, None
 
     async def _get_portfolio(self, **kwargs) -> tuple[str, dict | list | None]:
         """Get a specific portfolio by ID"""
@@ -158,10 +160,9 @@ class PortfolioToolkit:
             #
             # return output
         except Exception as e:
-            return (
-                f"Error getting portfolio {kwargs.get('portfolio_id')}: {str(e)}",
-                None,
-            )
+            error_msg = f"Error getting portfolio {kwargs.get('portfolio_id')}: {str(e)}"
+            error_msg += f"\n\nRequest parameters: portfolio_id={kwargs.get('portfolio_id')}"
+            return (error_msg, None)
 
     async def _list_portfolios_light(self, **kwargs) -> tuple[str, dict | list | None]:
         """List portfolios in light format (minimal data)"""
@@ -196,7 +197,9 @@ class PortfolioToolkit:
             #
             # return output
         except Exception as e:
-            return f"Error listing portfolios (light): {str(e)}", None
+            error_msg = f"Error listing portfolios (light): {str(e)}"
+            error_msg += f"\n\nRequest parameters: ordering={kwargs.get('ordering')}, page={kwargs.get('page', 1)}, page_size={kwargs.get('page_size', 10)}"
+            return error_msg, None
 
     async def _list_portfolio_attributes(
         self, **kwargs
@@ -235,7 +238,9 @@ class PortfolioToolkit:
             #
             # return output
         except Exception as e:
-            return f"Error listing portfolio attributes: {str(e)}", None
+            error_msg = f"Error listing portfolio attributes: {str(e)}"
+            error_msg += f"\n\nRequest parameters: ordering={kwargs.get('ordering')}, page={kwargs.get('page', 1)}, page_size={kwargs.get('page_size', 10)}"
+            return error_msg, None
 
     async def _get_inception_date(self, **kwargs) -> tuple[str, dict | list | None]:
         """Get portfolio inception date information"""
@@ -260,7 +265,9 @@ class PortfolioToolkit:
 
             return f"Portfolio inception date information: {result}", artifact
         except Exception as e:
-            return f"Error getting inception date: {str(e)}", None
+            error_msg = f"Error getting inception date: {str(e)}"
+            error_msg += f"\n\nRequest parameters: None"
+            return error_msg, None
 
     async def _list_first_transaction_dates(
         self, **kwargs
@@ -302,7 +309,9 @@ class PortfolioToolkit:
             #     output += "No first transaction date records found.\n"
             # return output
         except Exception as e:
-            return f"Error listing first transaction dates: {str(e)}", None
+            error_msg = f"Error listing first transaction dates: {str(e)}"
+            error_msg += f"\n\nRequest parameters: ordering={kwargs.get('ordering')}, page={kwargs.get('page', 1)}, page_size={kwargs.get('page_size', 10)}"
+            return error_msg, None
 
     async def _get_first_transaction_date(
         self, **kwargs
@@ -331,10 +340,9 @@ class PortfolioToolkit:
             #
             # return output
         except Exception as e:
-            return (
-                f"Error getting first transaction date for portfolio {kwargs.get('portfolio_id')}: {str(e)}",
-                None,
-            )
+            error_msg = f"Error getting first transaction date for portfolio {kwargs.get('portfolio_id')}: {str(e)}"
+            error_msg += f"\n\nRequest parameters: portfolio_id={kwargs.get('portfolio_id')}"
+            return (error_msg, None)
 
 
 def build_portfolio_tools() -> List[BaseTool]:

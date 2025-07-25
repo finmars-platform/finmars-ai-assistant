@@ -80,7 +80,9 @@ class PortfolioHistoryToolkit:
             #
             # return output
         except Exception as e:
-            return f"Error listing portfolio history: {str(e)}", None
+            error_msg = f"Error listing portfolio history: {str(e)}"
+            error_msg += f"\n\nRequest parameters: ordering={kwargs.get('ordering')}, page={kwargs.get('page', 1)}, page_size={kwargs.get('page_size', 10)}"
+            return error_msg, None
 
     async def _get_portfolio_history(self, **kwargs) -> tuple[str, dict | list | None]:
         """Get a specific portfolio history record by ID"""
@@ -123,10 +125,9 @@ class PortfolioHistoryToolkit:
             #
             # return output
         except Exception as e:
-            return (
-                f"Error getting portfolio history record {kwargs.get('history_id')}: {str(e)}",
-                None,
-            )
+            error_msg = f"Error getting portfolio history record {kwargs.get('history_id')}: {str(e)}"
+            error_msg += f"\n\nRequest parameters: history_id={kwargs.get('history_id')}"
+            return (error_msg, None)
 
 
 def build_portfolio_history_tools() -> List[BaseTool]:
