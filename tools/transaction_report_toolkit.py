@@ -21,12 +21,11 @@ class GetTransactionReportSchema(BaseModel):
     portfolio_code: str = Field(
         description="The portfolio user code (user_code from portfolio)"
     )
-    begin_date: Optional[str] = Field(
-        default=None,
-        description="The start date for transactions in YYYY-MM-DD format (e.g., '2024-01-01'). If not provided, all transactions from the beginning will be included.",
+    begin_date: str = Field(
+        description="Mandatory field. The start date for transactions in YYYY-MM-DD format (e.g., '2024-01-01'). If not provided, all transactions from the beginning will be included.",
     )
     end_date: str = Field(
-        description="The end date for transactions in YYYY-MM-DD format (e.g., '2024-12-31')"
+        description="Mandatory field. The end date for transactions in YYYY-MM-DD format (e.g., '2024-12-31')"
     )
     sort_by: Optional[SortBy] = Field(
         default=None,
