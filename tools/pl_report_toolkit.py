@@ -137,7 +137,8 @@ class PLReportToolkit:
             output = f"The FULL request to get P/L Report was: {input_str}\n\n\n"
             output += f"RESPONSE:\nProfit & Loss Report for Portfolio: {schema.portfolio_code}\n"
             output += f"Period: {pl_first_date} to {report_date}\n"
-            output += f"Currency: {report_currency}\n\n"
+            output += f"Currency: {report_currency}\n"
+            output += f"Pricing Policy: {request_data.pricing_policy}\n\n"
 
             if not items:
                 output += (
@@ -332,7 +333,11 @@ class PLReportToolkit:
                         output += f"            Overheads: ${pos['overheads']:,.2f}\n"
                         output += f"            Market Value: ${pos['market_value']:,.2f}\n"
                         if pos["position_size"] != 0:
-                            output += f"            Position Size: {pos['position_size']:,.2f} units\n"
+                            # Format position size with decimals only if needed
+                            if pos["position_size"] == int(pos["position_size"]):
+                                output += f"            Position Size: {int(pos['position_size']):,} units\n"
+                            else:
+                                output += f"            Position Size: {pos['position_size']:,.6f} units".rstrip('0').rstrip('.') + "\n"
                             output += f"            Current Price: ${pos['current_price']:,.2f}\n"
                             if pos["net_cost_price"] != 0:
                                 output += f"            Average Cost: ${pos['net_cost_price']:,.2f}\n"
@@ -449,7 +454,7 @@ def build_pl_report_tools() -> List[BaseTool]:
                 "- Calculate overall portfolio return percentage\n"
                 "\n"
                 "The report includes:\n"
-                "- Position details (shares held, cost basis, current value)\n"
+                "- Position details (position size, cost basis, current value)\n"
                 "- Individual P/L calculations for each holding\n"
                 "- Return percentages for each position\n"
                 "- Portfolio-wide performance summary\n"
@@ -466,7 +471,7 @@ def build_pl_report_tools() -> List[BaseTool]:
                 "\n"
                 "Example questions this tool can answer:\n"
                 "- What is my profit/loss for portfolio X since January 1st?\n"
-                "- Show me all positions with returns above 20%\n"
+                "- Show me all positions with positive returns\n"
                 "- Which investments lost money this year?\n"
                 "- What's my overall portfolio return for 2024?\n"
                 "- List my worst performing stocks\n"

@@ -53,7 +53,7 @@ class ListingSchema(OrderingField, PaginationFields):
 class BalanceReportSortBy(str, Enum):
     """Sorting options for the balance report"""
 
-    SHARES = "shares"
+    POSITION_SIZE = "position_size"
     MARKET_VALUE = "market_value"
     EXPOSURE = "exposure"
     NAME = "name"

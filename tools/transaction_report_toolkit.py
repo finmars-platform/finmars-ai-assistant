@@ -252,7 +252,11 @@ class TransactionReportToolkit:
 
                 # Transaction details
                 if trans["position_size"] != 0:
-                    output += f"Position Size: {trans['position_size']:,.2f} units"
+                    # Format position size with decimals only if needed
+                    if trans["position_size"] == int(trans["position_size"]):
+                        output += f"Position Size: {int(trans['position_size']):,} units"
+                    else:
+                        output += f"Position Size: {trans['position_size']:,.6f} units".rstrip('0').rstrip('.')
                     if trans["position_size"] > 0:
                         output += " (Buy/Long)\n"
                     else:
@@ -331,13 +335,13 @@ def build_transaction_report_tools() -> List[BaseTool]:
                 "The report includes:\n"
                 "- Transaction dates and types\n"
                 "- Instrument details (name, code, currency)\n"
-                "- Position sizes (number of shares/bonds)\n"
+                "- Position sizes (number of shares/bonds/units)\n"
                 "- Trade prices and principal values\n"
                 "- Account information\n"
                 "- Complex transaction descriptions\n"
                 "\n"
                 "Key fields explained:\n"
-                "- position_size_with_sign: Number of shares/bonds (positive or negative based on transaction direction)\n"
+                "- position_size_with_sign: Number of shares/bonds/units (positive or negative based on transaction direction)\n"
                 "- principal_with_sign: Transaction value\n"
                 "- trade_price: Price per unit at transaction time\n"
                 "- transaction_date: Date when the transaction occurred\n"

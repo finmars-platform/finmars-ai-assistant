@@ -35,7 +35,7 @@ class GetBalanceReportSchema(BaseModel):
     )
     sort_by: Optional[SortBy] = Field(
         default=None,
-        description="Sort holdings by shares, market_value, exposure, or name. If not provided, holdings will be shown in original order.",
+        description="Sort holdings by position_size, market_value, exposure, or name. If not provided, holdings will be shown in original order.",
     )
     descending: bool = Field(
         default=True,
@@ -142,7 +142,8 @@ class BalanceReportToolkit:
                 f"RESPONSE:\nBalance Report for Portfolio: {schema.portfolio_code}\n"
             )
             output += f"Report Date: {report_date}\n"
-            output += f"Currency: {report_currency}\n\n"
+            output += f"Currency: {report_currency}\n"
+            output += f"Pricing Policy: {request_data.pricing_policy}\n\n"
 
             if not items:
                 output += "No holdings found in this portfolio.\n"
@@ -151,7 +152,6 @@ class BalanceReportToolkit:
             output += "Portfolio Holdings:\n"
             output += "=" * 80 + "\n\n"
 
-            total_shares = 0.0
             total_value = 0.0
             total_exposure = 0.0
             holdings = []
@@ -165,8 +165,8 @@ class BalanceReportToolkit:
                         continue
                     instrument_name = item.get("instrument.name", "Unknown")
 
-                    # Extract shares and value information from actual API response
-                    shares = item.get("position_size")  # Count of акций
+                    # Extract position size and value information from actual API response
+                    position_size = item.get("position_size")
 
                     # Выдавать
                     market_value = item.get(
@@ -185,13 +185,11 @@ class BalanceReportToolkit:
                         {
                             "code": instrument_code,
                             "name": instrument_name,
-                            "shares": shares,
+                            "position_size": position_size,
                             "value": market_value,
                             "exposure": exposure,
                         }
                     )
-                    if isinstance(shares, (int, float)) and shares > 0:
-                        total_shares += shares
 
                     if isinstance(market_value, (int, float)) and market_value > 0:
                         total_value += market_value
@@ -208,8 +206,8 @@ class BalanceReportToolkit:
             if schema.sort_by:
 
                 def sort_key(holding):
-                    if schema.sort_by == SortBy.SHARES:
-                        val = holding["shares"]
+                    if schema.sort_by == SortBy.POSITION_SIZE:
+                        val = holding["position_size"]
                         return (
                             val
                             if isinstance(val, (int, float))
@@ -247,25 +245,24 @@ class BalanceReportToolkit:
                 output += "=" * 80 + "\n\n"
 
             # Calculate allocations and format output
-            shares_pct_total = []
             market_value_pct_total = []
             exposure_pct_total = []
             for holding in holdings:
                 output += f"Instrument: {holding['name']} ({holding['code']})\n"
 
-                # Shares with percentage
-                if isinstance(holding["shares"], (int, float)):
-                    output += f"  - Shares (Position Size): {holding['shares']:,.2f}"
-                    if holding["shares"] < 0:
+                # Position Size
+                if isinstance(holding["position_size"], (int, float)):
+                    # Format with decimals only if needed
+                    if holding["position_size"] == int(holding["position_size"]):
+                        output += f"  - Position Size: {int(holding['position_size']):,}"
+                    else:
+                        output += f"  - Position Size: {holding['position_size']:,.6f}".rstrip('0').rstrip('.')
+                    if holding["position_size"] < 0:
                         output += " (Short Position)\n"
-                    elif total_shares > 0 and holding["shares"] > 0:
-                        shares_pct = holding["shares"] / total_shares * 100
-                        shares_pct_total.append(shares_pct)
-                        output += f" ({shares_pct:.2f}%)\n"
                     else:
                         output += "\n"
                 else:
-                    output += "  - Shares: N/A\n"
+                    output += "  - Position Size: N/A\n"
 
                 # Market Value with percentage
                 if isinstance(holding["value"], (int, float)):
@@ -298,8 +295,7 @@ class BalanceReportToolkit:
                 output += "\n"
 
             output += "-" * 80 + "\n"
-            output += f"Total Portfolio Position Size (Shares): {total_shares:,.2f}\n"
-            output += f"Total Portfolio Value: ${total_value:,.2f}\n"
+            output += f"Total Portfolio Value (Market Value): ${total_value:,.2f}\n"
             output += f"Total Portfolio Exposure: ${total_exposure:,.2f}\n"
             output += f"Number of Holdings: {len(holdings)}\n"
             return output, artifact
@@ -332,11 +328,11 @@ def build_balance_report_tools() -> List[BaseTool]:
                 "- Check for short positions (negative shares/values)\n"
                 "- View total portfolio value and exposure\n"
                 "- Get historical reports by specifying a date\n"
-                "- Sort holdings by shares (the same as `position_size`), market value, exposure, or name\n"
+                "- Sort holdings by position size, market value, exposure, or name\n"
                 "\n"
                 "The report includes:\n"
                 "- Complete list of holdings with names and codes\n"
-                "- Share quantities and percentages\n"
+                "- Position sizes (number of shares/bonds/units)\n"
                 "- Market values with allocation percentages\n"
                 "- Exposure amounts and percentages\n"
                 "- Total portfolio metrics\n"

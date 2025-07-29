@@ -15,6 +15,12 @@ to complete each subtask.
 
 - Portfolio id (user_code) always must be provided to User
 - Show always detailed information that could be helpful for next steps of exploration
+- ALWAYS show the request parameters used in your answer to the user:
+  - For Balance Report: report date (That was specified in request), currency, pricing policy and etc
+  - For P&L Report: period (start and end dates), currency, pricing policy and etc
+  - For Transaction Report: period (start and end dates), pricing policy and etc
+- IMPORTANT: Use "Position Size" terminology instead of "shares" for all instruments (stocks, bonds, etc.)
+- Format position sizes smartly: show integers without decimals, if decimals (not .00) exists then show decimals
 
 ## 2. Portfolio Identification Format
 
