@@ -16,7 +16,6 @@ services:
     environment:
       - TZ=${TZ:-Europe/Luxembourg}
       - PIPELINES_API_KEY=${PIPELINES_API_KEY}
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
     volumes:
       - open-webui:/app/backend/data
     restart: always
