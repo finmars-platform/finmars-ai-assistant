@@ -164,6 +164,7 @@ class BalanceReportToolkit:
                     if instrument_code is None:
                         continue
                     instrument_name = item.get("instrument.name", "Unknown")
+                    instrument_country = item.get("instrument.country.name", "")
 
                     # Extract position size and value information from actual API response
                     position_size = item.get("position_size")
@@ -185,6 +186,7 @@ class BalanceReportToolkit:
                         {
                             "code": instrument_code,
                             "name": instrument_name,
+                            "country": instrument_country,
                             "position_size": position_size,
                             "value": market_value,
                             "exposure": exposure,
@@ -249,6 +251,8 @@ class BalanceReportToolkit:
             exposure_pct_total = []
             for holding in holdings:
                 output += f"Instrument: {holding['name']} ({holding['code']})\n"
+                if holding['country']:
+                    output += f"  - Country: {holding['country']}\n"
 
                 # Position Size
                 if isinstance(holding["position_size"], (int, float)):

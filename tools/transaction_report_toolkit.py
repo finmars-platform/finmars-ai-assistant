@@ -150,6 +150,7 @@ class TransactionReportToolkit:
                     instrument_name = item.get("instrument.name") or item.get(
                         "transaction_item_name"
                     )
+                    instrument_country = item.get("instrument.country.name", "")
                     instrument_currency = None
                     if "instrument.pricing_currency.user_code" in item:
                         instrument_currency = item.get(
@@ -180,6 +181,7 @@ class TransactionReportToolkit:
                         "date": transaction_date,
                         "instrument_code": instrument_code,
                         "instrument_name": instrument_name,
+                        "instrument_country": instrument_country,
                         "instrument_currency": instrument_currency,
                         "position_size": position_size,
                         "principal": principal,
@@ -247,6 +249,8 @@ class TransactionReportToolkit:
                     output += f"Instrument: {trans['instrument_name']}\n"
                     if trans["instrument_code"]:
                         output += f"Instrument Code: {trans['instrument_code']}\n"
+                    if trans["instrument_country"]:
+                        output += f"Instrument Country: {trans['instrument_country']}\n"
                     if trans["instrument_currency"]:
                         output += f"Instrument Currency: {trans['instrument_currency']}\n"
 
