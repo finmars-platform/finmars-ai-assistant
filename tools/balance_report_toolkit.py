@@ -253,6 +253,8 @@ class BalanceReportToolkit:
                 output += f"Instrument: {holding['name']} ({holding['code']})\n"
                 if holding['country']:
                     output += f"  - Country: {holding['country']}\n"
+                else:
+                    output += f"  - Country: N/A\n"
 
                 # Position Size
                 if isinstance(holding["position_size"], (int, float)):

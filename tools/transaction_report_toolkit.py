@@ -251,6 +251,8 @@ class TransactionReportToolkit:
                         output += f"Instrument Code: {trans['instrument_code']}\n"
                     if trans["instrument_country"]:
                         output += f"Instrument Country: {trans['instrument_country']}\n"
+                    else:
+                        output += f"Instrument Country: N/A\n"
                     if trans["instrument_currency"]:
                         output += f"Instrument Currency: {trans['instrument_currency']}\n"
 
