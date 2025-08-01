@@ -318,12 +318,14 @@ class BalanceReportToolkit:
                     # Yield to Maturity at current price
                     if isinstance(holding["ytm"], (int, float)) and holding["ytm"] != 0:
                         output += f"  - Yield to Maturity (YTM): {holding['ytm']:.2f}%\n"
-                    elif isinstance(holding["ytm"], (int, float)):
+                    else:
                         output += "  - Yield to Maturity (YTM): N/A (price may be 0)\n"
                     
                     # YTM at acquisition cost
                     if isinstance(holding["ytm_at_cost"], (int, float)) and holding["ytm_at_cost"] != 0:
                         output += f"  - YTM at Acquisition: {holding['ytm_at_cost']:.2f}%\n"
+                    else:
+                        output += "  - YTM at Acquisition: N/A\n"
                     
                     # Modified Duration
                     if isinstance(holding["modified_duration"], (int, float)) and holding["modified_duration"] != 0:
@@ -331,6 +333,8 @@ class BalanceReportToolkit:
                         # Add note about floating coupon bonds
                         if holding["modified_duration"] < 1:
                             output += "    (Note: Low duration may indicate floating rate bond)\n"
+                    else:
+                        output += "  - Duration: N/A\n"
 
                 output += "\n"
 
