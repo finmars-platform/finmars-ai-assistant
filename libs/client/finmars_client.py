@@ -9,6 +9,7 @@ from .portfolio_reconcile import PortfolioReconcileClient
 from .balance_report import BalanceReportClient
 from .pl_report import PLReportClient
 from .transaction_report import TransactionReportClient
+from .price_history_check import PriceHistoryCheckClient
 
 
 class FinmarsPortfolioClient:
@@ -102,6 +103,14 @@ class FinmarsPortfolioClient:
         )
 
         self.transaction_report = TransactionReportClient(
+            base_url=base_url,
+            realm=realm,
+            space=space,
+            api_key=api_key,
+            timeout=timeout,
+        )
+
+        self.price_history_check = PriceHistoryCheckClient(
             base_url=base_url,
             realm=realm,
             space=space,

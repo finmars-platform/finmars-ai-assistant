@@ -2135,6 +2135,10 @@ class PriceHistoryCheck(BaseModel):
     items: Optional[str] = Field(None, title="Items")
 
 
+class PriceHistoryCheckItems(PriceHistoryCheck):
+    items: Optional[list[dict]] = Field(None, title="Items")
+
+
 class Summary(BaseModel):
     date_from: Optional[date_aliased] = Field(
         None, description="Date from", title="Date from"
