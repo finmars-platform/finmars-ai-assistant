@@ -8,7 +8,7 @@ from langchain_core.tools import StructuredTool, BaseTool
 
 from libs.client.finmars_client import FinmarsPortfolioClient
 from libs.logger.logger import logger
-from libs.schema.via_data_model_codegen.report_schema import PLReportItems
+from libs.schema.via_data_model_codegen.report_schema import PLReportItems, PriceHistoryCheckItems
 from .shared_models import ReportCurrency, PLReportSortBy as SortBy, drop_empty_fields
 
 
@@ -423,6 +423,89 @@ class PLReportToolkit:
                 )
                 output += f"- Worst Performer by P/L: {worst_performer['name']} (${worst_performer['total']:,.2f})\n"
 
+            # Check if we have any items with None or zero market values
+            missing_market_values = []
+            for item in items:
+                if isinstance(item, dict):
+                    instrument_code = item.get("instrument.user_code")
+                    market_value = item.get("market_value")
+                    if instrument_code and (market_value is None or market_value == 0):
+                        missing_market_values.append({
+                            "code": instrument_code,
+                            "name": item.get("instrument.name", "Unknown"),
+                            "position_size": item.get("position_size", 0),
+                            "item_group": item.get("item_group_code", "UNKNOWN")
+                        })
+            
+            # If we have missing market values, call price history check
+            if missing_market_values:
+                output += "\n\n" + "=" * 100 + "\n"
+                output += "IMPORTANT: Missing pricing data detected!\n"
+                output += "=" * 100 + "\n\n"
+                
+                output += "The following instruments have missing or zero market values:\n"
+                for inst in missing_market_values:
+                    output += f"- {inst['name']} ({inst['code']}) - Position: {inst['position_size']} - Group: {inst['item_group']}\n"
+                
+                output += "\nChecking price history availability...\n\n"
+                
+                try:
+                    # Create price history check request with actual P/L dates
+                    price_check_request = PriceHistoryCheckItems(
+                        pl_first_date=pl_first_date,
+                        report_date=report_date,
+                        report_currency=schema.report_currency.value,
+                        pricing_policy=request_data.pricing_policy
+                    )
+                    
+                    # Call price history check
+                    price_check_result = await self.client.price_history_check.check_price_history(
+                        price_check_request
+                    )
+                    
+                    if price_check_result.items:
+                        output += "Price History Check Results:\n"
+                        output += "-" * 40 + "\n"
+                        
+                        # Display all items without filtering by type
+                        for item in price_check_result.items:
+                            item_type = item.get("type", "unknown")
+                            output += f"\nType: {item_type}\n"
+                            
+                            # Display common fields
+                            if item.get("name"):
+                                output += f"  Name: {item.get('name')}\n"
+                            if item.get("user_code"):
+                                output += f"  Code: {item.get('user_code')}\n"
+                            if item.get("id"):
+                                output += f"  ID: {item.get('id')}\n"
+                            if item.get("position_size") is not None:
+                                output += f"  Position Size: {item.get('position_size')}\n"
+                            
+                            # Display type-specific fields
+                            if item.get("accounting_date"):
+                                output += f"  Accounting Date: {item.get('accounting_date')}\n"
+                            if item.get("transaction_currency_name"):
+                                output += f"  Currency: {item.get('transaction_currency_name')} ({item.get('transaction_currency_user_code')})\n"
+                            if item.get("transaction_currency_id"):
+                                output += f"  Currency ID: {item.get('transaction_currency_id')}\n"
+                        
+                        output += "\nRECOMMENDATION:\n"
+                        output += "The missing market values are due to unavailable pricing data.\n"
+                        output += "To resolve this, you need to:\n"
+                        output += "1. Try using a different report date where pricing data might be available\n"
+                        output += "2. For P/L reports, ensure pricing data exists for both start and end dates\n"
+                    else:
+                        output += "Price history check completed - no specific issues found.\n"
+                        output += "The missing values may be due to other configuration issues.\n"
+                    
+                except Exception as e:
+                    output += f"Could not perform price history check: {str(e)}\n"
+                
+                output += "\n" + "=" * 100 + "\n"
+                output += f"\nNote: {len(missing_market_values)} instruments have missing or zero market values.\n"
+                output += "The P/L calculations above may be incomplete for these instruments.\n"
+
             return output, artifact
 
         except Exception as e:
@@ -431,7 +514,7 @@ class PLReportToolkit:
             error_msg = f"Error getting P/L report for portfolio {kwargs.get('portfolio_code')}: {str(e)}"
             if 'input_str' in locals():
                 error_msg += f"\n\nFull request sent:\n{input_str}"
-            return (error_msg, None)
+            return error_msg, None
 
 
 def build_pl_report_tools() -> List[BaseTool]:
