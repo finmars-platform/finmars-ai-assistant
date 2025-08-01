@@ -23,7 +23,14 @@ to complete each subtask.
 - Format position sizes smartly: show integers without decimals, if decimals (not .00) exists then show decimals
 - ALWAYS inform the user when fields are empty, N/A, or missing data (e.g., "Market Value: N/A", "Exposure: Data not available")
 
-## 2. Portfolio Identification Format
+## 2. Portfolio Information Requirements
+
+CRITICAL RULE: Before creating ANY report that is based on `portfolio/user_code`, YOU MUST CALL THE `list_portfolios` TOOL TO GET MORE INFORMATION ABOUT THE PORTFOLIO (AND PORTFOLIOS IN GENERAL). THIS IS THE ONLY WAY TO UNDERSTAND:
+- The portfolio type (usually found in the `notes` field)
+- Portfolio status and other important metadata
+- Verify the portfolio exists and is accessible
+
+## 3. Portfolio Identification Format
 
 The portfolio identification uses the following format for `user_code` and `portfolio_id`:
 

@@ -182,6 +182,11 @@ class BalanceReportToolkit:
                     # Какие именно шаги нужны, чтобы это получить
                     # `item` <- позиции долларов портфеля
 
+                    # Extract YTM and Duration for bonds
+                    ytm = item.get("ytm", 0)  # Yield to Maturity at current price
+                    ytm_at_cost = item.get("ytm_at_cost", 0)  # YTM at acquisition price
+                    modified_duration = item.get("modified_duration", 0)  # Duration in years
+
                     holdings.append(
                         {
                             "code": instrument_code,
@@ -190,6 +195,9 @@ class BalanceReportToolkit:
                             "position_size": position_size,
                             "value": market_value,
                             "exposure": exposure,
+                            "ytm": ytm,
+                            "ytm_at_cost": ytm_at_cost,
+                            "modified_duration": modified_duration,
                         }
                     )
 
@@ -298,6 +306,32 @@ class BalanceReportToolkit:
                 else:
                     output += "  - Exposure: N/A\n"
 
+                # YTM and Duration fields (only show for bonds - when values are non-zero)
+                # Check if this is a bond by looking at YTM or Duration values
+                is_bond = (
+                    (isinstance(holding["ytm"], (int, float)) and holding["ytm"] != 0) or
+                    (isinstance(holding["ytm_at_cost"], (int, float)) and holding["ytm_at_cost"] != 0) or
+                    (isinstance(holding["modified_duration"], (int, float)) and holding["modified_duration"] != 0)
+                )
+                
+                if is_bond:
+                    # Yield to Maturity at current price
+                    if isinstance(holding["ytm"], (int, float)) and holding["ytm"] != 0:
+                        output += f"  - Yield to Maturity (YTM): {holding['ytm']:.2f}%\n"
+                    elif isinstance(holding["ytm"], (int, float)):
+                        output += "  - Yield to Maturity (YTM): N/A (price may be 0)\n"
+                    
+                    # YTM at acquisition cost
+                    if isinstance(holding["ytm_at_cost"], (int, float)) and holding["ytm_at_cost"] != 0:
+                        output += f"  - YTM at Acquisition: {holding['ytm_at_cost']:.2f}%\n"
+                    
+                    # Modified Duration
+                    if isinstance(holding["modified_duration"], (int, float)) and holding["modified_duration"] != 0:
+                        output += f"  - Duration: {holding['modified_duration']:.2f} years\n"
+                        # Add note about floating coupon bonds
+                        if holding["modified_duration"] < 1:
+                            output += "    (Note: Low duration may indicate floating rate bond)\n"
+
                 output += "\n"
 
             output += "-" * 80 + "\n"
@@ -335,13 +369,22 @@ def build_balance_report_tools() -> List[BaseTool]:
                 "- View total portfolio value and exposure\n"
                 "- Get historical reports by specifying a date\n"
                 "- Sort holdings by position size, market value, exposure, or name\n"
+                "- View bond-specific metrics (YTM, Duration) for fixed income holdings\n"
                 "\n"
                 "The report includes:\n"
                 "- Complete list of holdings with names and codes\n"
                 "- Position sizes (number of shares/bonds/units)\n"
                 "- Market values with allocation percentages\n"
                 "- Exposure amounts and percentages\n"
+                "- For bonds: Yield to Maturity (YTM), YTM at cost, and Duration\n"
                 "- Total portfolio metrics\n"
+                "\n"
+                "Bond-specific fields:\n"
+                "- YTM: Yield to Maturity at current bond price\n"
+                "- YTM at Cost: Yield to Maturity at acquisition price\n"
+                "- Duration: Modified duration (time to maturity in years considering coupons)\n"
+                "  Note: For floating rate bonds, duration shows time to next coupon\n"
+                "  Note: If price is 0, YTM will be undefined/zero\n"
                 "\n"
                 "Example questions this tool can answer:\n"
                 "- What companies are in portfolio X?\n"
@@ -350,7 +393,8 @@ def build_balance_report_tools() -> List[BaseTool]:
                 "- What is the portfolio allocation breakdown?\n"
                 "- Show me the top holdings in portfolio Z\n"
                 "- Is the portfolio diversified or concentrated?\n"
-                "- Are there any short positions?"
+                "- Are there any short positions?\n"
+                "- What are the YTM and Duration of bonds in the portfolio?"
             ),
             args_schema=GetBalanceReportSchema,
             response_format="content_and_artifact",
