@@ -22,6 +22,11 @@ to complete each subtask.
 - IMPORTANT: Use "Position Size" terminology instead of "shares" for all instruments (stocks, bonds, etc.)
 - Format position sizes smartly: show integers without decimals, if decimals (not .00) exists then show decimals
 - ALWAYS inform the user when fields are empty, N/A, or missing data (e.g., "Market Value: N/A", "Exposure: Data not available")
+- For Balance Reports with Bond portfolios, IN GENERAL show bond-specific fields:
+  - Yield to Maturity (YTM) - yield at current bond price
+  - YTM at Acquisition - yield at acquisition price
+  - Duration - modified duration of the instrument (time to maturity in years considering coupons)
+  Note: These fields are shown automatically for bonds.
 
 ## 2. Portfolio Information Requirements
 
