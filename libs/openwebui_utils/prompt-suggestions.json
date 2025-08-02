@@ -15,10 +15,10 @@
   },
   {
     "title": [
-      "Generate P&L report of bond portfolio",
+      "Show me performance of bond portfolio",
       "for this year"
     ],
-    "content": "Generate P&L report of bond portfolio for this year (except `_POS` portfolio)"
+    "content": "Show me performance of bond portfolio for this year (except `_POS` portfolio). Check P/L report"
   },
   {
     "title": [
