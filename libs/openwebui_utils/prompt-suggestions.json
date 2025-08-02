@@ -1,44 +1,44 @@
 [
   {
     "title": [
-      "Show available portfolios",
-      "that I can access"
+      "Show me portfolios",
+      "available to access"
     ],
-    "content": "List all available portfolios with their names and types"
+    "content": "Show me a detailed list of all available portfolios (except `_POS` portfolio)"
   },
   {
     "title": [
-      "Analyze bond positions",
-      "in South America"
+      "Show me the bond portfolio positions",
+      "as of August 1, 2024"
     ],
-    "content": "Show me all bond positions in South American countries across my portfolios"
+    "content": "Show me the bond portfolio positions as of August 1, 2024 (except `_POS` portfolio)"
   },
   {
     "title": [
-      "Calculate portfolio P&L",
+      "Generate P&L report of bond portfolio",
       "for this year"
     ],
-    "content": "What's the profit and loss for my portfolio year-to-date?"
+    "content": "Generate P&L report of bond portfolio for this year (except `_POS` portfolio)"
   },
   {
     "title": [
       "Check recent transactions",
-      "in my portfolio"
+      "in bond portfolio"
     ],
-    "content": "Show me the most recent transactions in my portfolio with details"
+    "content": "Show me the most recent transactions in bond portfolio with details (except `_POS` portfolio)"
   },
   {
     "title": [
-      "Find top holdings",
-      "by allocation percentage"
+      "Find top positions",
+      "in bond portfolio by allocation percentage in 01-08-2024"
     ],
-    "content": "What are the largest positions in my portfolio by allocation percentage?"
+    "content": "What are the largest (top) positions in bond portfolio by allocation percentage with 01-08-2024 date? (except `_POS` portfolio)"
   },
   {
     "title": [
-      "Review portfolio balance",
-      "with market values"
+      "Show me holdings of equity portfolio",
+      "in the end of 2024"
     ],
-    "content": "Show me my current portfolio balance report with holdings and market values"
+    "content": "Show me holdings of equity portfolio in the end of 2024 (except `_POS` portfolio)"
   }
 ]
