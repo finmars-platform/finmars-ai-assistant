@@ -2,25 +2,26 @@ import json
 from typing import Optional
 from langchain_core.messages import HumanMessage, BaseMessage
 from langchain_core.runnables import RunnableConfig
-from langfuse.langchain import CallbackHandler
 
 from agents.react_agent import simple_react_tag
 from agents.react_agent.agent_react_builder import create_finmars_agent_react
 from libs.utils.prompt_map_builder import build_map_prompts_cfg
 from libs.utils.langfuse_manager import PromptSource
+from libs.utils.langfuse_callback import get_langfuse_callbacks
 
 
 async def arun_agent_stream(
     messages: list[BaseMessage], prompt_source: Optional[PromptSource] = None
 ):
-    langfuse_handler = CallbackHandler()
+    # Get Langfuse callbacks based on environment variables
+    callbacks = get_langfuse_callbacks()
 
     map_prompts_cfg = await build_map_prompts_cfg(
         tags=simple_react_tag, prompt_source=prompt_source
     )
     config = RunnableConfig(
         **{
-            "callbacks": [langfuse_handler],
+            "callbacks": callbacks,
             "metadata": {
                 "langfuse_user_id": "random-user",
                 "langfuse_session_id": "random-session",

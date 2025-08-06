@@ -1,0 +1,54 @@
+# Make sure to update the credential placeholders with your own secrets.
+# We mark them with # CHANGEME in the file below.
+# In addition, we recommend to restrict inbound traffic on the host to langfuse-web (port 3000) and minio (port 9090) only.
+# All other components are bound to localhost (127.0.0.1) to only accept connections from the local machine.
+# External connections from other machines will not be able to reach these services directly.
+services:
+  open-webui:
+    image: backplane/open-webui:0.6.15
+    container_name: open-webui-finmars
+    ports:
+      - "8881:8080"
+    networks:
+      - arch-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      - TZ=${TZ:-Europe/Luxembourg}
+      - PIPELINES_API_KEY=${PIPELINES_API_KEY}
+      - ENABLE_FOLLOW_UP_GENERATION=true
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    volumes:
+      - open-webui:/app/backend/data
+    restart: always
+
+  agent-pipelines:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: agent-pipelines
+    ports:
+      - "9299:9099"
+    networks:
+      - arch-network
+    depends_on:
+      - open-webui
+    environment:
+      - TZ=${TZ:-Europe/Luxembourg}
+      - PIPELINES_API_KEY=${PIPELINES_API_KEY:-test}
+      - PIPELINE_NAME=${PIPELINE_NAME:-Finmars AI Assistant Docker}
+      - PROMPT_SOURCE=${PROMPT_SOURCE:-code}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - FINMARS_EXPERT_TOKEN=${FINMARS_EXPERT_TOKEN}
+      - FINMARS_BASE_URL=${FINMARS_BASE_URL}
+      - FINMARS_REALM=${FINMARS_REALM}
+      - FINMARS_SPACE=${FINMARS_SPACE}
+    restart: always
+
+volumes:
+  open-webui:
+    driver: local
+
+networks:
+  arch-network:
+    driver: bridge
