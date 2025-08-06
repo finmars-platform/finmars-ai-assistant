@@ -240,15 +240,18 @@ python agents/react_agent/runner.py
 - **Trace Tracking** enabled for all agent executions
 - **Callback Handlers** integrated into the ReAct agent
 
-### 🚧 Phase 4: Pipeline Integration (In Progress)
-- Wrap agent logic into Open WebUI Pipelines module
-- Configure pipeline endpoints and parameters
-- Test integration points
+### ✅ Phase 4: Pipeline Integration (Completed)
+- **Agent Pipelines Service** deployed as FastAPI application with OpenAI-compatible API
+- **Pipeline endpoints** configured at `/v1/chat/completions`
+- **Swagger documentation** available at http://localhost:9299/docs
+- **Integration with Langfuse** for observability and tracing
+- **Full compatibility** with OpenAI SDK and LangChain
 
-### ⏳ Phase 5: UI Deployment (Planned)
-- Deploy Open WebUI instance
-- Connect pipeline module to the interface
-- Enable chat-based interactions with the agent
+### ✅ Phase 5: UI Deployment (Completed)
+- **Open WebUI** deployed with Docker Compose on port 8881
+- **Agent Pipelines** connected to chat interface
+- **Chat-based interactions** fully functional with streaming support
+- **Prompt suggestions** system implemented for user guidance
 
 ## Tools Implementation
 
@@ -459,7 +462,34 @@ finmars-ai-assistant/
 │   ├── portfolio_register_toolkit.py # Portfolio register tools
 │   ├── portfolio_history_toolkit.py # Portfolio history tools
 │   └── portfolio_reconcile_toolkit.py # Portfolio reconciliation tools
-└── pipelines/                       # Open WebUI pipeline modules (planned)
+├── pipelines/                       # Open WebUI pipeline modules
+│   └── finmars-ai-assistant.py     # Main pipeline implementation
+├── utils/                           # Utility modules
+│   ├── __init__.py                  # Utils exports  
+│   ├── agent_utils/                 # Agent utility functions
+│   │   ├── __init__.py              # Agent utils exports
+│   │   ├── async_loop_to_sync.py   # Async to sync converter
+│   │   └── lc_converter.py         # LangChain converter utilities
+│   └── pipelines/                   # Pipeline utility modules
+│       ├── __init__.py              # Pipeline utils exports
+│       ├── auth.py                  # Authentication utilities
+│       ├── main.py                  # Main pipeline utilities
+│       └── misc.py                  # Miscellaneous utilities
+├── scripts/                         # Utility scripts and examples
+│   ├── __init__.py                  # Scripts exports
+│   ├── interact_to_agent_via_api.py # Interactive API client
+│   ├── test_single_query.py        # Single query testing
+│   ├── GENERATE_QUERIE.md          # Query generation guide
+│   ├── TO_UPDATE_AGENT_QUERIES_AND_RESULTS.md # Update guide
+│   ├── helper_agent_task_prompt.md # Agent task prompts
+│   └── examples_of_queries/        # Query examples
+│       ├── AGENT_QUERIES_AND_RESULTS.md # Agent query examples
+│       └── PL_TOOLKIT_QUERIES.md   # P&L toolkit queries
+└── docs/                            # Documentation assets
+    ├── img.png                      # Architecture diagrams
+    ├── img_1.png                    # UI screenshots
+    ├── img_2.png                    # Pipeline screenshots
+    └── img_3.png                    # Additional visuals
 ```
 
 ## Finmars API Client Library
