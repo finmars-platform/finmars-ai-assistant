@@ -185,6 +185,19 @@ The project integrates Langfuse at multiple levels:
 
 The project supports flexible prompt management with the ability to load prompts from either local code or Langfuse:
 
+#### Prompt Suggestions System
+
+The project includes a pre-configured prompt suggestions system (`libs/openwebui_utils/prompt-suggestions.json`) that enhances the user experience in Open WebUI with intelligent query recommendations:
+
+**Example Prompts**:
+- "What companies are in portfolio XYZ?"
+- "Show me the P&L for portfolio ABC"
+- "List all transactions in the last month"
+- "What's the current allocation of portfolio DEF?"
+- "Check if there are any short positions"
+
+These prompts are automatically suggested to users in the Open WebUI interface, making it easier to discover agent capabilities.
+
 #### Configuration Options
 
 1. **Environment Variable** (Recommended):
@@ -226,7 +239,7 @@ The project supports flexible prompt management with the ability to load prompts
 ### ✅ Phase 2: Agent Implementation (Completed)
 - **ReAct Agent** implemented using LangGraph with full reasoning and tool-calling capabilities
 - **Langfuse Integration** for prompt management and observability
-- **5 Comprehensive Toolkits** for portfolio operations
+- **8 Comprehensive Toolkits** for portfolio operations and reporting
 - **Async Runner** with metadata support for tracing
 
 ```bash
@@ -251,11 +264,12 @@ python agents/react_agent/runner.py
 - **Open WebUI** deployed with Docker Compose on port 8881
 - **Agent Pipelines** connected to chat interface
 - **Chat-based interactions** fully functional with streaming support
-- **Prompt suggestions** system implemented for user guidance
+- **Prompt Suggestions System** with pre-configured queries for common tasks
+- **Enhanced user experience** with intelligent prompt recommendations
 
 ## Tools Implementation
 
-The project includes 5 comprehensive toolkits that provide the ReAct agent with full access to Finmars Portfolio API capabilities:
+The project includes 8 comprehensive toolkits that provide the ReAct agent with full access to Finmars Portfolio API and reporting capabilities:
 
 ### 1. Portfolio Toolkit (`tools/portfolio_toolkit.py`)
 - **list_portfolios**: Search and filter portfolios with pagination
@@ -287,6 +301,27 @@ The project includes 5 comprehensive toolkits that provide the ReAct agent with 
 - **get_portfolio_reconcile_group**: Access group configurations
 - **list_portfolio_reconcile_history**: Query reconciliation history
 - **list_portfolio_reconcile_status**: Check current reconciliation status
+
+### 6. Balance Report Toolkit (`tools/balance_report_toolkit.py`)
+- **get_balance_report**: Retrieve portfolio holdings and positions
+- **analyze_allocations**: Get asset allocation and exposure analysis
+- **get_market_values**: Calculate current market values and weights
+- **get_bond_metrics**: Access YTM, duration, and other bond analytics
+- **check_short_positions**: Identify and analyze short positions
+
+### 7. P&L Report Toolkit (`tools/pl_report_toolkit.py`)
+- **get_pl_report**: Comprehensive profit & loss analysis
+- **analyze_performance**: Calculate returns and performance metrics
+- **get_realized_gains**: Track realized gains and losses
+- **get_unrealized_gains**: Monitor unrealized P&L positions
+- **calculate_carry_pl**: Analyze carry and overhead components
+
+### 8. Transaction Report Toolkit (`tools/transaction_report_toolkit.py`)
+- **list_transactions**: Query transaction history with filters
+- **get_transaction_details**: Retrieve specific transaction information
+- **export_transactions**: Export transaction data for analysis
+- **analyze_trading_activity**: Summary of buy/sell activities
+- **get_recent_transactions**: Quick access to latest transactions
 
 ### Tool Architecture
 Each toolkit follows a consistent implementation pattern:
@@ -376,6 +411,8 @@ docker-compose down
 
 ### Quick Start
 
+For detailed development setup instructions, see [SETUP_DEVELOPMENT.md](SETUP_DEVELOPMENT.md).
+
 1. **Set up environment**:
    ```bash
    cp .env.example .env
@@ -419,15 +456,23 @@ finmars-ai-assistant/
 │   │   ├── portfolio_register.py    # Portfolio register operations client
 │   │   ├── portfolio_history.py     # Portfolio history operations client
 │   │   ├── portfolio_reconcile.py   # Portfolio reconciliation client
+│   │   ├── balance_report.py        # Balance report client
+│   │   ├── pl_report.py             # P&L report client
+│   │   ├── transaction_report.py    # Transaction report client
+│   │   ├── price_history_check.py   # Price history validation client
 │   │   └── tests/                   # Test suite for client library
 │   │       ├── test_base.py         # Base client tests
 │   │       ├── test_finmars_client.py # Main client tests
 │   │       ├── test_portfolio.py    # Portfolio client tests
 │   │       └── test_portfolio_type.py # Portfolio type tests
 │   ├── openapi/
-│   │   └── portfolio/
-│   │       ├── openapi.json         # Local API specification
-│   │       └── openapi_remote.json  # Remote API specification
+│   │   ├── portfolio/
+│   │   │   ├── openapi.json         # Local portfolio API specification
+│   │   │   └── openapi_remote.json  # Remote portfolio API specification
+│   │   └── report/
+│   │       └── openapi_v3.json      # Report API specification
+│   ├── openwebui_utils/             # Open WebUI integration utilities
+│   │   └── prompt-suggestions.json  # Pre-configured prompt suggestions
 │   ├── schema/                      # Pydantic models for API payloads
 │   │   ├── __init__.py              # Schema exports
 │   │   ├── base.py                  # Base enums and common types
@@ -435,7 +480,8 @@ finmars-ai-assistant/
 │   │   ├── README.md                # Schema generation documentation
 │   │   └── via_data_model_codegen/  # Auto-generated models
 │   │       ├── __init__.py          # Generated schema exports
-│   │       └── portfolio_schema.py    # Complete API models
+│   │       ├── portfolio_schema.py  # Complete portfolio API models
+│   │       └── report_schema.py     # Complete report API models
 │   ├── basic/                       # Basic utilities
 │   │   └── base_enum.py             # Base enum with string representation
 │   ├── logger/                      # Logging configuration
@@ -461,7 +507,10 @@ finmars-ai-assistant/
 │   ├── portfolio_type_toolkit.py    # Portfolio type tools
 │   ├── portfolio_register_toolkit.py # Portfolio register tools
 │   ├── portfolio_history_toolkit.py # Portfolio history tools
-│   └── portfolio_reconcile_toolkit.py # Portfolio reconciliation tools
+│   ├── portfolio_reconcile_toolkit.py # Portfolio reconciliation tools
+│   ├── balance_report_toolkit.py   # Balance and holdings report tools
+│   ├── pl_report_toolkit.py        # P&L analysis and performance tools
+│   └── transaction_report_toolkit.py # Transaction history tools
 ├── pipelines/                       # Open WebUI pipeline modules
 │   └── finmars-ai-assistant.py     # Main pipeline implementation
 ├── utils/                           # Utility modules
@@ -485,11 +534,12 @@ finmars-ai-assistant/
 │   └── examples_of_queries/        # Query examples
 │       ├── AGENT_QUERIES_AND_RESULTS.md # Agent query examples
 │       └── PL_TOOLKIT_QUERIES.md   # P&L toolkit queries
-└── docs/                            # Documentation assets
-    ├── img.png                      # Architecture diagrams
-    ├── img_1.png                    # UI screenshots
-    ├── img_2.png                    # Pipeline screenshots
-    └── img_3.png                    # Additional visuals
+├── docs/                            # Documentation assets
+│   ├── img.png                      # Architecture diagrams
+│   ├── img_1.png                    # UI screenshots
+│   ├── img_2.png                    # Pipeline screenshots
+│   └── img_3.png                    # Additional visuals
+└── SETUP_DEVELOPMENT.md             # Development environment setup guide
 ```
 
 ## Finmars API Client Library
@@ -576,6 +626,28 @@ The main `FinmarsPortfolioClient` aggregates the following sub-clients:
    - `get_portfolio_reconcile_group()` - Get specific group
    - `list_portfolio_reconcile_history()` - List reconcile history
    - `list_portfolio_reconcile_status()` - Get reconciliation status
+
+6. **balance_report** (`BalanceReportClient`) - Portfolio balance and holdings reports
+   - `get_balance_report()` - Retrieve detailed portfolio holdings
+   - `get_allocations()` - Asset allocation breakdowns
+   - `get_exposures()` - Market exposure analysis
+   - `get_bond_analytics()` - Bond-specific metrics (YTM, duration)
+
+7. **pl_report** (`PLReportClient`) - Profit & loss performance reports
+   - `get_pl_report()` - Comprehensive P&L analysis
+   - `get_performance_metrics()` - Return calculations and attribution
+   - `get_realized_pl()` - Realized gains and losses
+   - `get_unrealized_pl()` - Mark-to-market valuations
+
+8. **transaction_report** (`TransactionReportClient`) - Transaction history and details
+   - `list_transactions()` - Query transaction history
+   - `get_transaction_summary()` - Aggregated transaction statistics
+   - `export_transactions()` - Export functionality
+
+9. **price_history_check** (`PriceHistoryCheckClient`) - Price data validation
+   - `check_price_availability()` - Validate price data completeness
+   - `get_missing_prices()` - Identify gaps in price history
+   - `get_price_diagnostics()` - Price quality and consistency checks
 
 ### Schema Models
 
@@ -723,8 +795,19 @@ See [CLI README](cli/README.md) for complete documentation.
 
 ## Schema Generation
 
-The project uses `datamodel-codegen` to automatically generate Pydantic models from the OpenAPI specification:
+The project uses `datamodel-codegen` to automatically generate Pydantic models from the OpenAPI specifications:
 
+### Portfolio Schema Generation
+```bash
+datamodel-codegen \
+  --input ./libs/openapi/portfolio/openapi.json \
+  --input-file-type openapi \
+  --output ./libs/schema/via_data_model_codegen/portfolio_schema.py \
+  --target-python-version 3.12 \
+  --output-model-type pydantic_v2.BaseModel
+```
+
+### Report Schema Generation
 ```bash
 datamodel-codegen \
   --input ./libs/openapi/report/openapi_v3.json \
@@ -734,7 +817,10 @@ datamodel-codegen \
   --output-model-type pydantic_v2.BaseModel
 ```
 
-This ensures type safety and automatic updates when the API specification changes.
+This ensures type safety and automatic updates when the API specification changes. The generated schemas include:
+- **Portfolio Models**: `Portfolio`, `PortfolioType`, `PortfolioHistory`, `GenericAttribute`
+- **Report Models**: `PLReportItems`, `BalanceReportItems`, `TransactionReportItems`, `PriceHistoryCheckItems`
+- **Entities**: `ReportInstrument`, `ReportPortfolio`, `ReportAccount`, `ReportTransaction`
 
 ## Contributing
 Please read our contributing guidelines before submitting pull requests.
