@@ -132,17 +132,19 @@ This separation allows for:
 #### 4.3 Future Extensions
 - MCP Server implementation for comprehensive tool sharing capabilities
 
-### 5. Observability - Langfuse
-[Langfuse](https://github.com/langfuse/langfuse) provides comprehensive observability:
+### 5. Observability - Langfuse (Optional)
+[Langfuse](https://github.com/langfuse/langfuse) provides comprehensive observability when configured:
 - **Trace Tracking**: Monitor all agent execution steps
 - **Prompt Management**: Version control and collaborative iteration on prompts
 - **Evaluations**: LLM-as-a-judge and custom evaluation pipelines
 - **Datasets**: Test sets and benchmarks for continuous improvement
 - **LLM Playground**: Testing and iteration environment
 
-#### Langfuse Integration Details
+**Note**: Langfuse integration is now optional. The system will automatically detect if Langfuse environment variables are configured and enable observability features accordingly
 
-The project integrates Langfuse at multiple levels:
+#### Langfuse Integration Details (When Configured)
+
+The project integrates Langfuse at multiple levels when the required environment variables are set:
 
 1. **Prompt Management (`libs/utils/langfuse_manager.py`)**:
    - Automatic prompt versioning with labels
@@ -150,36 +152,36 @@ The project integrates Langfuse at multiple levels:
    - Message format mapping between LangChain and Langfuse
    - Centralized prompt retrieval for consistency
 
-2. **Agent Tracing**:
+2. **Agent Tracing** (when Langfuse is configured):
    - All agent executions are automatically traced
    - Metadata support (user_id, session_id, tags)
    - Tool call tracking and performance monitoring
    - Error tracking and debugging capabilities
+   - Automatically disabled if Langfuse environment variables are not set
 
-3. **Docker Compose Deployment**:
-   - Full Langfuse stack included in `docker-compose.yaml`
-   - PostgreSQL for data persistence
-   - ClickHouse for analytics
-   - MinIO for object storage
-   - Redis for caching
+3. **Docker Compose Deployment Options**:
+   - **docker-compose-core.yaml**: Minimal setup with just Open WebUI and Agent Pipelines
+   - **docker-compose.yaml**: Full stack including Langfuse observability:
+     - PostgreSQL for data persistence
+     - ClickHouse for analytics
+     - MinIO for object storage
+     - Redis for caching
 
 4. **Usage in Code**:
    ```python
-   from langfuse.callback import CallbackHandler
+   from libs.utils.langfuse_callback import get_langfuse_callbacks
    
-   # Create callback handler with metadata
-   langfuse_handler = CallbackHandler(
-       user_id=\"user-123\",
-       session_id=\"session-456\",
-       tags=[\"portfolio-query\", \"production\"]
-   )
+   # Automatically detects if Langfuse is configured
+   callbacks = get_langfuse_callbacks()
    
-   # Use with agent
+   # Use with agent - callbacks will be empty list if Langfuse not configured
    response = await agent.ainvoke(
        {\"messages\": [HumanMessage(content=\"Your query\")]},
-       config={\"callbacks\": [langfuse_handler]}
+       config={\"callbacks\": callbacks}
    )
    ```
+   
+   The system automatically checks for Langfuse environment variables and only enables callbacks when properly configured
 
 ### 5.1. Prompt Management System
 
@@ -366,10 +368,11 @@ export FINMARS_SPACE='your-space'
 export OPENAI_API_KEY='your-openai-key'
 export OPENAI_BASE_URL='https://api.openai.com/v1'  # Optional, for custom endpoints
 
-# Langfuse Observability (optional but recommended)
-export LANGFUSE_PUBLIC_KEY='your-public-key'
-export LANGFUSE_SECRET_KEY='your-secret-key'
-export LANGFUSE_HOST='http://localhost:3000'  # Or your Langfuse URL
+# Langfuse Observability (optional)
+# If these variables are not set, the system will run without Langfuse integration
+export LANGFUSE_PUBLIC_KEY='your-public-key'  # Optional
+export LANGFUSE_SECRET_KEY='your-secret-key'  # Optional
+export LANGFUSE_HOST='http://localhost:3000'  # Optional, or your Langfuse URL
 
 # Prompt Source Configuration
 # Options: "code" (use local prompts) or "langfuse" (use Langfuse prompts)
@@ -382,10 +385,17 @@ export PIPELINES_API_KEY='your-pipelines-key'
 
 ### Docker Compose Setup
 
-The project includes a comprehensive Docker Compose configuration for local development:
+The project includes two Docker Compose configurations:
 
+#### Option 1: Core Services Only (without Langfuse)
 ```bash
-# Start all services (Open WebUI, Langfuse, databases)
+# Start core services only (Open WebUI, Agent Pipelines)
+docker-compose -f docker-compose-core.yaml up -d
+```
+
+#### Option 2: Full Stack with Observability (with Langfuse)
+```bash
+# Start all services including Langfuse observability stack
 docker-compose up -d
 
 # Check service status
@@ -399,10 +409,14 @@ docker-compose down
 ```
 
 #### Available Services:
+
+**Core Services (always available):**
 - **Open WebUI**: http://localhost:8881 - Chat interface for interacting with agents
 - **Agent Pipelines**: http://localhost:9299 - FastAPI service providing OpenAI-compatible API
   - Swagger docs: http://localhost:9299/docs
   - Chat completions endpoint to make requests to Finmars Agent: `/v1/chat/completions`
+
+**Observability Services (with full docker-compose.yaml only):**
 - **Langfuse**: http://localhost:3000 - Observability and prompt management
 - **PostgreSQL**: Port 5432 - Database for Langfuse
 - **ClickHouse**: Port 8123 - Analytics database for Langfuse
@@ -419,8 +433,12 @@ For detailed development setup instructions, see [SETUP_DEVELOPMENT.md](SETUP_DE
    # Edit .env with your credentials
    ```
 
-2. **Start Docker services** (optional, for UI and observability):
+2. **Start Docker services**:
    ```bash
+   # Option A: Core services only (without Langfuse)
+   docker-compose -f docker-compose-core.yaml up -d
+   
+   # Option B: Full stack with Langfuse observability
    docker-compose up -d
    ```
 
@@ -443,7 +461,8 @@ For detailed development setup instructions, see [SETUP_DEVELOPMENT.md](SETUP_DE
 ```
 finmars-ai-assistant/
 ├── README.md
-├── docker-compose.yaml              # Local development environment setup
+├── docker-compose.yaml              # Full stack with Langfuse observability
+├── docker-compose-core.yaml         # Core services only (without Langfuse)
 ├── .env.example                     # Environment variables template
 ├── requirements.txt                 # Python dependencies
 ├── libs/
@@ -489,6 +508,7 @@ finmars-ai-assistant/
 │   └── utils/                       # Utility modules
 │       ├── key_manager.py           # API key management
 │       ├── langfuse_manager.py      # Langfuse prompt management
+│       ├── langfuse_callback.py     # Optional Langfuse callback handler
 │       └── prompt_map_builder.py    # Prompt configuration builder
 ├── cli/                             # Command-line interface
 │   ├── __init__.py                  # CLI exports
