@@ -370,30 +370,43 @@ class PLReportToolkit:
                             and pos["instrument_pricing_currency"]
                         ):
                             output += f"              Total P&L (Instrument Currency): {pos['instrument_pricing_currency']} {pos['total_loc']:,.2f}\n"
+                        else:
+                            output += f"              Total P&L (Instrument Currency): N/A\n"
                         output += f"            Principal: {report_currency} {pos['principal']:,.2f}\n"
                         if (
                             isinstance(pos["principal_loc"], (int, float))
                             and pos["instrument_pricing_currency"]
                         ):
                             output += f"              Principal (Instrument Currency): {pos['instrument_pricing_currency']} {pos['principal_loc']:,.2f}\n"
+                        else:
+                            output += f"              Principal (Instrument Currency): N/A\n"
+                            
                         output += f"            Carry P&L: {report_currency} {pos['carry']:,.2f}\n"
                         if (
                             isinstance(pos["carry_loc"], (int, float))
                             and pos["instrument_pricing_currency"]
                         ):
                             output += f"              Carry P&L (Instrument Currency): {pos['instrument_pricing_currency']} {pos['carry_loc']:,.2f}\n"
+                        else:
+                            output += f"              Carry P&L (Instrument Currency): N/A\n"
+                            
                         output += f"            Overheads: {report_currency} {pos['overheads']:,.2f}\n"
                         if (
                             isinstance(pos["overheads_loc"], (int, float))
                             and pos["instrument_pricing_currency"]
                         ):
                             output += f"              Overheads (Instrument Currency): {pos['instrument_pricing_currency']} {pos['overheads_loc']:,.2f}\n"
+                        else:
+                            output += f"              Overheads (Instrument Currency): N/A\n"
+                            
                         output += f"            Market Value: {report_currency} {pos['market_value']:,.2f}\n"
                         if (
                             isinstance(pos["market_value_loc"], (int, float))
                             and pos["instrument_pricing_currency"]
                         ):
                             output += f"              Market Value (Instrument Currency): {pos['instrument_pricing_currency']} {pos['market_value_loc']:,.2f}\n"
+                        else:
+                            output += f"              Market Value (Instrument Currency): N/A\n"
                         if pos["position_size"] != 0:
                             # Format position size with decimals only if needed
                             if pos["position_size"] == int(pos["position_size"]):
@@ -434,30 +447,43 @@ class PLReportToolkit:
                             and pos["instrument_pricing_currency"]
                         ):
                             output += f"              Total P&L (Instrument Currency): {pos['instrument_pricing_currency']} {pos['total_loc']:,.2f}\n"
+                        else:
+                            output += f"              Total P&L (Instrument Currency): N/A\n"
                         output += f"            Principal: {report_currency} {pos['principal']:,.2f}\n"
                         if (
                             isinstance(pos["principal_loc"], (int, float))
                             and pos["instrument_pricing_currency"]
                         ):
                             output += f"              Principal (Instrument Currency): {pos['instrument_pricing_currency']} {pos['principal_loc']:,.2f}\n"
+                        else:
+                            output += f"              Principal (Instrument Currency): N/A\n"
+                            
                         output += f"            Carry P&L: {report_currency} {pos['carry']:,.2f}\n"
                         if (
                             isinstance(pos["carry_loc"], (int, float))
                             and pos["instrument_pricing_currency"]
                         ):
                             output += f"              Carry P&L (Instrument Currency): {pos['instrument_pricing_currency']} {pos['carry_loc']:,.2f}\n"
+                        else:
+                            output += f"              Carry P&L (Instrument Currency): N/A\n"
+                            
                         output += f"            Overheads: {report_currency} {pos['overheads']:,.2f}\n"
                         if (
                             isinstance(pos["overheads_loc"], (int, float))
                             and pos["instrument_pricing_currency"]
                         ):
                             output += f"              Overheads (Instrument Currency): {pos['instrument_pricing_currency']} {pos['overheads_loc']:,.2f}\n"
+                        else:
+                            output += f"              Overheads (Instrument Currency): N/A\n"
+                            
                         output += f"            Market Value: {report_currency} {pos['market_value']:,.2f}\n"
                         if (
                             isinstance(pos["market_value_loc"], (int, float))
                             and pos["instrument_pricing_currency"]
                         ):
                             output += f"              Market Value (Instrument Currency): {pos['instrument_pricing_currency']} {pos['market_value_loc']:,.2f}\n"
+                        else:
+                            output += f"              Market Value (Instrument Currency): N/A\n"
                         output += "\n"
 
                 # Display FX_VARIATIONS if any
@@ -472,30 +498,44 @@ class PLReportToolkit:
                             and pos["instrument_pricing_currency"]
                         ):
                             output += f"          Total P&L (Instrument Currency): {pos['instrument_pricing_currency']} {pos['total_loc']:,.2f}\n"
+                        else:
+                            output += f"          Total P&L (Instrument Currency): N/A\n"
+                            
                         output += f"        Principal: {report_currency} {pos['principal']:,.2f}\n"
                         if (
                             isinstance(pos["principal_loc"], (int, float))
                             and pos["instrument_pricing_currency"]
                         ):
                             output += f"          Principal (Instrument Currency): {pos['instrument_pricing_currency']} {pos['principal_loc']:,.2f}\n"
+                        else:
+                            output += f"          Principal (Instrument Currency): N/A\n"
+                            
                         output += f"        Carry P&L: {report_currency} {pos['carry']:,.2f}\n"
                         if (
                             isinstance(pos["carry_loc"], (int, float))
                             and pos["instrument_pricing_currency"]
                         ):
                             output += f"          Carry P&L (Instrument Currency): {pos['instrument_pricing_currency']} {pos['carry_loc']:,.2f}\n"
+                        else:
+                            output += f"          Carry P&L (Instrument Currency): N/A\n"
+                            
                         output += f"        Overheads: {report_currency} {pos['overheads']:,.2f}\n"
                         if (
                             isinstance(pos["overheads_loc"], (int, float))
                             and pos["instrument_pricing_currency"]
                         ):
                             output += f"          Overheads (Instrument Currency): {pos['instrument_pricing_currency']} {pos['overheads_loc']:,.2f}\n"
+                        else:
+                            output += f"          Overheads (Instrument Currency): N/A\n"
+                            
                         output += f"        Market Value: {report_currency} {pos['market_value']:,.2f}\n"
                         if (
                             isinstance(pos["market_value_loc"], (int, float))
                             and pos["instrument_pricing_currency"]
                         ):
                             output += f"          Market Value (Instrument Currency): {pos['instrument_pricing_currency']} {pos['market_value_loc']:,.2f}\n"
+                        else:
+                            output += f"          Market Value (Instrument Currency): N/A\n"
                         output += "\n"
 
                 output += "-" * 60 + "\n\n"

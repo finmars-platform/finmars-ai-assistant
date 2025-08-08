@@ -197,6 +197,12 @@ class BalanceReportToolkit:
                     # Какие именно шаги нужны, чтобы это получить
                     # `item` <- позиции долларов портфеля
 
+                    # Extract cost price fields
+                    net_cost_price = item.get("net_cost_price")
+                    net_cost_price_loc = item.get("net_cost_price_loc")
+                    gross_cost_price = item.get("gross_cost_price")
+                    gross_cost_price_loc = item.get("gross_cost_price_loc")
+
                     # Extract YTM and Duration for bonds
                     ytm = item.get("ytm", 0)  # Yield to Maturity at current price
                     ytm_at_cost = item.get("ytm_at_cost", 0)  # YTM at acquisition price
@@ -218,6 +224,10 @@ class BalanceReportToolkit:
                             "exposure_currency_code": exposure_currency_code,
                             "market_value_percent": market_value_percent,
                             "exposure_percent": exposure_percent,
+                            "net_cost_price": net_cost_price,
+                            "net_cost_price_loc": net_cost_price_loc,
+                            "gross_cost_price": gross_cost_price,
+                            "gross_cost_price_loc": gross_cost_price_loc,
                             "ytm": ytm,
                             "ytm_at_cost": ytm_at_cost,
                             "modified_duration": modified_duration,
@@ -318,17 +328,16 @@ class BalanceReportToolkit:
                         market_value_pct_total.append(position["market_value_percent"])
                         output += f" ({position['market_value_percent']:.2f}%)"
                     output += "\n"
-
-                    # Add local currency value
-                    if (
-                        isinstance(position["market_value_loc"], (int, float))
-                        and position["instrument_pricing_currency"]
-                    ):
-                        output += f"    Market Value (Instrument Currency): {position['instrument_pricing_currency']} {position['market_value_loc']:,.2f}\n"
-                    else:
-                        output += "    Market Value (Instrument Currency): N/A\n"
                 else:
                     output += "  - Market Value: N/A\n"
+
+                # Add local currency value
+                if (
+                    isinstance(position["market_value_loc"], (int, float))
+                    and position["instrument_pricing_currency"]
+                ):
+                    output += f"    Market Value (Instrument Currency): {position['instrument_pricing_currency']} {position['market_value_loc']:,.2f}\n"
+                else:
                     output += "    Market Value (Instrument Currency): N/A\n"
 
                 # Exposure with percentage (use field from response)
@@ -342,18 +351,46 @@ class BalanceReportToolkit:
                         exposure_pct_total.append(position["exposure_percent"])
                         output += f" ({position['exposure_percent']:.2f}%)"
                     output += "\n"
-
-                    # Add local currency exposure
-                    if (
-                        isinstance(position["exposure_loc"], (int, float))
-                        and position["exposure_currency_code"]
-                    ):
-                        output += f"    Exposure (Exposure Currency): {position['exposure_currency_code']} {position['exposure_loc']:,.2f}\n"
-                    else:
-                        output += "    Exposure (Exposure Currency): N/A\n"
                 else:
                     output += "  - Exposure: N/A\n"
+
+                # Add local currency exposure
+                if (
+                    isinstance(position["exposure_loc"], (int, float))
+                    and position["exposure_currency_code"]
+                ):
+                    output += f"    Exposure (Exposure Currency): {position['exposure_currency_code']} {position['exposure_loc']:,.2f}\n"
+                else:
                     output += "    Exposure (Exposure Currency): N/A\n"
+
+                # Cost Price fields
+                # Net Cost Price
+                if isinstance(position["net_cost_price"], (int, float)):
+                    output += f"  - Net Cost Price: {report_currency} {position['net_cost_price']:,.2f}\n"
+                else:
+                    output += "  - Net Cost Price: N/A\n"
+
+                if (
+                    isinstance(position["net_cost_price_loc"], (int, float))
+                    and position["instrument_pricing_currency"]
+                ):
+                    output += f"    Net Cost Price (Instrument Currency): {position['instrument_pricing_currency']} {position['net_cost_price_loc']:,.2f}\n"
+                else:
+                    output += "    Net Cost Price (Instrument Currency): N/A\n"
+
+                # Gross Cost Price
+                if isinstance(position["gross_cost_price"], (int, float)):
+                    output += f"  - Gross Cost Price: {report_currency} {position['gross_cost_price']:,.2f}\n"
+                else:
+                    output += "  - Gross Cost Price: N/A\n"
+
+                if (
+                    isinstance(position["gross_cost_price_loc"], (int, float))
+                    and position["instrument_pricing_currency"]
+                ):
+                    output += f"    Gross Cost Price (Instrument Currency): {position['instrument_pricing_currency']} {position['gross_cost_price_loc']:,.2f}\n"
+                else:
+                    output += "    Gross Cost Price (Instrument Currency): N/A\n"
 
                 # YTM and Duration fields (only show for bonds - when values are non-zero)
                 # Check if this is a bond by looking at YTM or Duration values
