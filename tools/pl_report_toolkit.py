@@ -180,6 +180,17 @@ class PLReportToolkit:
                     total = item.get("total") or 0  # Total P&L
                     market_value = item.get("market_value") or 0  # Market value
 
+                    # Extract local currency P/L values
+                    principal_loc = item.get("principal_loc")
+                    carry_loc = item.get("carry_loc")
+                    overheads_loc = item.get("overheads_loc")
+                    total_loc = item.get("total_loc")
+                    market_value_loc = item.get("market_value_loc")
+
+                    # Extract local currencies
+                    instrument_pricing_currency = item.get("instrument.pricing_currency.user_code")
+                    exposure_currency_code = item.get("exposure_currency.user_code")
+
                     # Additional position details
                     position_size = item.get("position_size") or 0
                     net_cost_price = item.get("net_cost_price") or 0
@@ -201,6 +212,13 @@ class PLReportToolkit:
                         "carry": carry,
                         "overheads": overheads,
                         "total": total,
+                        "principal_loc": principal_loc,
+                        "carry_loc": carry_loc,
+                        "overheads_loc": overheads_loc,
+                        "total_loc": total_loc,
+                        "market_value_loc": market_value_loc,
+                        "instrument_pricing_currency": instrument_pricing_currency,
+                        "exposure_currency_code": exposure_currency_code,
                     }
 
                     positions.append(position_data)
@@ -327,20 +345,30 @@ class PLReportToolkit:
                         output += f"        └── {asset_type}\n"
                         output += f"            Portfolio: {pos['portfolio_code']}\n"
                         output += f"            PL Type: OPENED\n"
-                        output += f"            Total P&L: ${pos['total']:,.2f}\n"
-                        output += f"            Principal: ${pos['principal']:,.2f}\n"
-                        output += f"            Carry P&L: ${pos['carry']:,.2f}\n"
-                        output += f"            Overheads: ${pos['overheads']:,.2f}\n"
-                        output += f"            Market Value: ${pos['market_value']:,.2f}\n"
+                        output += f"            Total P&L: {report_currency} {pos['total']:,.2f}\n"
+                        if isinstance(pos['total_loc'], (int, float)) and pos['instrument_pricing_currency']:
+                            output += f"              Total P&L (Instrument Currency): {pos['instrument_pricing_currency']} {pos['total_loc']:,.2f}\n"
+                        output += f"            Principal: {report_currency} {pos['principal']:,.2f}\n"
+                        if isinstance(pos['principal_loc'], (int, float)) and pos['instrument_pricing_currency']:
+                            output += f"              Principal (Instrument Currency): {pos['instrument_pricing_currency']} {pos['principal_loc']:,.2f}\n"
+                        output += f"            Carry P&L: {report_currency} {pos['carry']:,.2f}\n"
+                        if isinstance(pos['carry_loc'], (int, float)) and pos['instrument_pricing_currency']:
+                            output += f"              Carry P&L (Instrument Currency): {pos['instrument_pricing_currency']} {pos['carry_loc']:,.2f}\n"
+                        output += f"            Overheads: {report_currency} {pos['overheads']:,.2f}\n"
+                        if isinstance(pos['overheads_loc'], (int, float)) and pos['instrument_pricing_currency']:
+                            output += f"              Overheads (Instrument Currency): {pos['instrument_pricing_currency']} {pos['overheads_loc']:,.2f}\n"
+                        output += f"            Market Value: {report_currency} {pos['market_value']:,.2f}\n"
+                        if isinstance(pos['market_value_loc'], (int, float)) and pos['instrument_pricing_currency']:
+                            output += f"              Market Value (Instrument Currency): {pos['instrument_pricing_currency']} {pos['market_value_loc']:,.2f}\n"
                         if pos["position_size"] != 0:
                             # Format position size with decimals only if needed
                             if pos["position_size"] == int(pos["position_size"]):
                                 output += f"            Position Size: {int(pos['position_size']):,} units\n"
                             else:
                                 output += f"            Position Size: {pos['position_size']:,.6f} units".rstrip('0').rstrip('.') + "\n"
-                            output += f"            Current Price: ${pos['current_price']:,.2f}\n"
+                            output += f"            Current Price: {report_currency} {pos['current_price']:,.2f}\n"
                             if pos["net_cost_price"] != 0:
-                                output += f"            Average Cost: ${pos['net_cost_price']:,.2f}\n"
+                                output += f"            Average Cost: {report_currency} {pos['net_cost_price']:,.2f}\n"
                         output += "\n"
                 
                 # Display CLOSED positions  
@@ -359,11 +387,21 @@ class PLReportToolkit:
                         output += f"        └── {asset_type}\n"
                         output += f"            Portfolio: {pos['portfolio_code']}\n"
                         output += f"            PL Type: CLOSED\n"
-                        output += f"            Total P&L: ${pos['total']:,.2f}\n"
-                        output += f"            Principal: ${pos['principal']:,.2f}\n"
-                        output += f"            Carry P&L: ${pos['carry']:,.2f}\n"
-                        output += f"            Overheads: ${pos['overheads']:,.2f}\n"
-                        output += f"            Market Value: ${pos['market_value']:,.2f}\n"
+                        output += f"            Total P&L: {report_currency} {pos['total']:,.2f}\n"
+                        if isinstance(pos['total_loc'], (int, float)) and pos['instrument_pricing_currency']:
+                            output += f"              Total P&L (Instrument Currency): {pos['instrument_pricing_currency']} {pos['total_loc']:,.2f}\n"
+                        output += f"            Principal: {report_currency} {pos['principal']:,.2f}\n"
+                        if isinstance(pos['principal_loc'], (int, float)) and pos['instrument_pricing_currency']:
+                            output += f"              Principal (Instrument Currency): {pos['instrument_pricing_currency']} {pos['principal_loc']:,.2f}\n"
+                        output += f"            Carry P&L: {report_currency} {pos['carry']:,.2f}\n"
+                        if isinstance(pos['carry_loc'], (int, float)) and pos['instrument_pricing_currency']:
+                            output += f"              Carry P&L (Instrument Currency): {pos['instrument_pricing_currency']} {pos['carry_loc']:,.2f}\n"
+                        output += f"            Overheads: {report_currency} {pos['overheads']:,.2f}\n"
+                        if isinstance(pos['overheads_loc'], (int, float)) and pos['instrument_pricing_currency']:
+                            output += f"              Overheads (Instrument Currency): {pos['instrument_pricing_currency']} {pos['overheads_loc']:,.2f}\n"
+                        output += f"            Market Value: {report_currency} {pos['market_value']:,.2f}\n"
+                        if isinstance(pos['market_value_loc'], (int, float)) and pos['instrument_pricing_currency']:
+                            output += f"              Market Value (Instrument Currency): {pos['instrument_pricing_currency']} {pos['market_value_loc']:,.2f}\n"
                         output += "\n"
                 
                 # Display FX_VARIATIONS if any
@@ -372,11 +410,21 @@ class PLReportToolkit:
                     for pos in fx_positions:
                         output += f"        Portfolio: {pos['portfolio_code']}\n"
                         output += f"        PL Type: FX_VARIATIONS\n"
-                        output += f"        Total P&L: ${pos['total']:,.2f}\n"
-                        output += f"        Principal: ${pos['principal']:,.2f}\n"
-                        output += f"        Carry P&L: ${pos['carry']:,.2f}\n"
-                        output += f"        Overheads: ${pos['overheads']:,.2f}\n"
-                        output += f"        Market Value: ${pos['market_value']:,.2f}\n"
+                        output += f"        Total P&L: {report_currency} {pos['total']:,.2f}\n"
+                        if isinstance(pos['total_loc'], (int, float)) and pos['instrument_pricing_currency']:
+                            output += f"          Total P&L (Instrument Currency): {pos['instrument_pricing_currency']} {pos['total_loc']:,.2f}\n"
+                        output += f"        Principal: {report_currency} {pos['principal']:,.2f}\n"
+                        if isinstance(pos['principal_loc'], (int, float)) and pos['instrument_pricing_currency']:
+                            output += f"          Principal (Instrument Currency): {pos['instrument_pricing_currency']} {pos['principal_loc']:,.2f}\n"
+                        output += f"        Carry P&L: {report_currency} {pos['carry']:,.2f}\n"
+                        if isinstance(pos['carry_loc'], (int, float)) and pos['instrument_pricing_currency']:
+                            output += f"          Carry P&L (Instrument Currency): {pos['instrument_pricing_currency']} {pos['carry_loc']:,.2f}\n"
+                        output += f"        Overheads: {report_currency} {pos['overheads']:,.2f}\n"
+                        if isinstance(pos['overheads_loc'], (int, float)) and pos['instrument_pricing_currency']:
+                            output += f"          Overheads (Instrument Currency): {pos['instrument_pricing_currency']} {pos['overheads_loc']:,.2f}\n"
+                        output += f"        Market Value: {report_currency} {pos['market_value']:,.2f}\n"
+                        if isinstance(pos['market_value_loc'], (int, float)) and pos['instrument_pricing_currency']:
+                            output += f"          Market Value (Instrument Currency): {pos['instrument_pricing_currency']} {pos['market_value_loc']:,.2f}\n"
                         output += "\n"
                 
                 output += "-" * 60 + "\n\n"
@@ -384,9 +432,9 @@ class PLReportToolkit:
             # Portfolio summary
             output += "-" * 100 + "\n"
             output += "PORTFOLIO SUMMARY:\n"
-            output += f"Total Amount Invested: ${total_invested:,.2f}\n"
-            output += f"Total Current Market Value: ${total_market_value:,.2f}\n"
-            output += f"Total P/L: ${total_principle:,.2f}"
+            output += f"Total Amount Invested: {report_currency} {total_invested:,.2f}\n"
+            output += f"Total Current Market Value: {report_currency} {total_market_value:,.2f}\n"
+            output += f"Total P/L: {report_currency} {total_principle:,.2f}"
             if total_principle > 0:
                 output += " (PROFIT)\n"
             elif total_principle < 0:
@@ -415,13 +463,13 @@ class PLReportToolkit:
                 best_performer = max(
                     profitable_positions, key=lambda x: x["total"]
                 )
-                output += f"- Best Performer by P/L: {best_performer['name']} (${best_performer['total']:,.2f})\n"
+                output += f"- Best Performer by P/L: {best_performer['name']} ({report_currency} {best_performer['total']:,.2f})\n"
 
             if losing_positions:
                 worst_performer = min(
                     losing_positions, key=lambda x: x["total"]
                 )
-                output += f"- Worst Performer by P/L: {worst_performer['name']} (${worst_performer['total']:,.2f})\n"
+                output += f"- Worst Performer by P/L: {worst_performer['name']} ({report_currency} {worst_performer['total']:,.2f})\n"
 
             # Check if we have any items with None or zero market values
             missing_market_values = []
