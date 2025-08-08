@@ -143,7 +143,7 @@ class BalanceReportToolkit:
                 f"RESPONSE:\nBalance Report for Portfolio: {schema.portfolio_code}\n"
             )
             output += f"Report Date: {report_date}\n"
-            output += f"Currency: {report_currency}\n"
+            output += f"Report Currency: {report_currency}\n"
             output += f"Pricing Policy: {request_data.pricing_policy}\n\n"
 
             if not items:
@@ -172,6 +172,16 @@ class BalanceReportToolkit:
 
                     market_value = item.get("market_value")
                     exposure = item.get("exposure")
+
+                    # Extract local currency values
+                    market_value_loc = item.get("market_value_loc")
+                    exposure_loc = item.get("exposure_loc")
+
+                    # Extract local currencies
+                    instrument_pricing_currency = item.get(
+                        "instrument.pricing_currency.user_code"
+                    )
+                    exposure_currency_code = item.get("exposure_currency.user_code")
 
                     # Extract percentage fields directly from the response
                     market_value_percent = item.get("market_value_percent")
@@ -202,6 +212,10 @@ class BalanceReportToolkit:
                             "position_size": position_size,
                             "value": market_value,
                             "exposure": exposure,
+                            "market_value_loc": market_value_loc,
+                            "exposure_loc": exposure_loc,
+                            "instrument_pricing_currency": instrument_pricing_currency,
+                            "exposure_currency_code": exposure_currency_code,
                             "market_value_percent": market_value_percent,
                             "exposure_percent": exposure_percent,
                             "ytm": ytm,
@@ -295,29 +309,51 @@ class BalanceReportToolkit:
 
                 # Market Value with percentage (use field from response)
                 if isinstance(position["value"], (int, float)):
-                    output += f"  - Market Value: ${position['value']:,.2f}"
+                    output += (
+                        f"  - Market Value: {report_currency} {position['value']:,.2f}"
+                    )
                     if position["value"] < 0:
-                        output += " (Short Position)\n"
+                        output += " (Short Position)"
                     elif position["market_value_percent"] >= 0:
                         market_value_pct_total.append(position["market_value_percent"])
-                        output += f" ({position['market_value_percent']:.2f}%)\n"
+                        output += f" ({position['market_value_percent']:.2f}%)"
+                    output += "\n"
+
+                    # Add local currency value
+                    if (
+                        isinstance(position["market_value_loc"], (int, float))
+                        and position["instrument_pricing_currency"]
+                    ):
+                        output += f"    Market Value (Instrument Currency): {position['instrument_pricing_currency']} {position['market_value_loc']:,.2f}\n"
                     else:
-                        output += "\n"
+                        output += "    Market Value (Instrument Currency): N/A\n"
                 else:
                     output += "  - Market Value: N/A\n"
+                    output += "    Market Value (Instrument Currency): N/A\n"
 
                 # Exposure with percentage (use field from response)
                 if isinstance(position["exposure"], (int, float)):
-                    output += f"  - Exposure: ${position['exposure']:,.2f}"
+                    output += (
+                        f"  - Exposure: {report_currency} {position['exposure']:,.2f}"
+                    )
                     if position["exposure"] < 0:
-                        output += " (Short Position)\n"
+                        output += " (Short Position)"
                     elif position["exposure_percent"] >= 0:
                         exposure_pct_total.append(position["exposure_percent"])
-                        output += f" ({position['exposure_percent']:.2f}%)\n"
+                        output += f" ({position['exposure_percent']:.2f}%)"
+                    output += "\n"
+
+                    # Add local currency exposure
+                    if (
+                        isinstance(position["exposure_loc"], (int, float))
+                        and position["exposure_currency_code"]
+                    ):
+                        output += f"    Exposure (Exposure Currency): {position['exposure_currency_code']} {position['exposure_loc']:,.2f}\n"
                     else:
-                        output += "\n"
+                        output += "    Exposure (Exposure Currency): N/A\n"
                 else:
                     output += "  - Exposure: N/A\n"
+                    output += "    Exposure (Exposure Currency): N/A\n"
 
                 # YTM and Duration fields (only show for bonds - when values are non-zero)
                 # Check if this is a bond by looking at YTM or Duration values
@@ -460,8 +496,10 @@ class BalanceReportToolkit:
 
                 output += "\n" + "=" * 80 + "\n\n"
 
-            output += f"Total Portfolio Value (Market Value): ${total_value:,.2f}\n"
-            output += f"Total Portfolio Exposure: ${total_exposure:,.2f}\n"
+            output += f"Total Portfolio Value (Market Value): {report_currency} {total_value:,.2f}\n"
+            output += (
+                f"Total Portfolio Exposure: {report_currency} {total_exposure:,.2f}\n"
+            )
             output += f"Number of Positions: {len(positions)}\n"
 
             if missing_market_values:

@@ -22,6 +22,10 @@ to complete each subtask.
 - IMPORTANT: Use "Position Size" terminology instead of "shares" for all instruments (stocks, bonds, etc.)
 - Format position sizes smartly: show integers without decimals, if decimals (not .00) exists then show decimals
 - ALWAYS inform the user when fields are empty, N/A, or missing data (e.g., "Market Value: N/A", "Exposure: Data not available")
+- For Balance Reports - local currency values (Market Value and Exposure):
+  - If instrument/exposure currency differs from report currency, show the local value too
+  - If instrument/exposure currency is the same as report currency, write "(same as report currency)" or similar note. Do not duplicate the value, just mention the information about the same currency
+  - This ensures transparency about whether values are converted or native
 - For Balance Reports with Bond portfolios, IN GENERAL show bond-specific fields:
   - Yield to Maturity (YTM) - yield at current bond price
   - YTM at Acquisition - yield at acquisition price
