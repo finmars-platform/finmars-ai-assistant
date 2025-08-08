@@ -36,7 +36,7 @@ class GetBalanceReportSchema(BaseModel):
     )
     sort_by: Optional[SortBy] = Field(
         default=None,
-        description="Sort holdings by position_size, market_value, exposure, or name. If not provided, holdings will be shown in original order.",
+        description="Sort positions by position_size, market_value, exposure, or name. If not provided, positions will be shown in original order.",
     )
     descending: bool = Field(
         default=True,
@@ -51,7 +51,7 @@ class BalanceReportToolkit:
         self.client = FinmarsPortfolioClient()
 
     async def _get_balance_report(self, **kwargs) -> tuple[str, dict | list | None]:
-        """Get balance report with portfolio holdings information"""
+        """Get balance report with portfolio positions information"""
         try:
             schema = GetBalanceReportSchema(**kwargs)
 
@@ -147,15 +147,15 @@ class BalanceReportToolkit:
             output += f"Pricing Policy: {request_data.pricing_policy}\n\n"
 
             if not items:
-                output += "No holdings found in this portfolio.\n"
+                output += "No positions found in this portfolio.\n"
                 return output, artifact
 
-            output += "Portfolio Holdings:\n"
+            output += "Portfolio Positions:\n"
             output += "=" * 80 + "\n\n"
 
             total_value = 0.0
             total_exposure = 0.0
-            holdings = []
+            positions = []
 
             # Process each item to extract instrument info
             for item in items:
@@ -170,13 +170,17 @@ class BalanceReportToolkit:
                     # Extract position size and value information from actual API response
                     position_size = item.get("position_size")
 
-                    # Выдавать
-                    market_value = item.get(
-                        "market_value"
-                    )  # market_value, why sometimes is empty?? `position_size * price`
-                    exposure = item.get(
-                        "exposure"
-                    )  # exposure, why sometimes is empty??
+                    market_value = item.get("market_value")
+                    exposure = item.get("exposure")
+
+                    # Extract percentage fields directly from the response
+                    market_value_percent = item.get("market_value_percent")
+                    exposure_percent = item.get("exposure_percent")
+                    if market_value_percent is not None:
+                        market_value_percent = market_value_percent * 100.0
+
+                    if exposure_percent is not None:
+                        exposure_percent = exposure_percent * 100.0
 
                     # Если вдруг чего-то нет, агент должен предложить другую дату и тп
                     # Данные предыдущие, шаг назад, где данные есть
@@ -186,9 +190,11 @@ class BalanceReportToolkit:
                     # Extract YTM and Duration for bonds
                     ytm = item.get("ytm", 0)  # Yield to Maturity at current price
                     ytm_at_cost = item.get("ytm_at_cost", 0)  # YTM at acquisition price
-                    modified_duration = item.get("modified_duration", 0)  # Duration in years
+                    modified_duration = item.get(
+                        "modified_duration", 0
+                    )  # Duration in years
 
-                    holdings.append(
+                    positions.append(
                         {
                             "code": instrument_code,
                             "name": instrument_name,
@@ -196,6 +202,8 @@ class BalanceReportToolkit:
                             "position_size": position_size,
                             "value": market_value,
                             "exposure": exposure,
+                            "market_value_percent": market_value_percent,
+                            "exposure_percent": exposure_percent,
                             "ytm": ytm,
                             "ytm_at_cost": ytm_at_cost,
                             "modified_duration": modified_duration,
@@ -213,36 +221,36 @@ class BalanceReportToolkit:
                     # output += json.dumps(item, ensure_ascii=False)
                     # output += "\n" + "-" * 80 + "\n"
 
-            # Sort holdings if requested
+            # Sort positions if requested
             if schema.sort_by:
 
-                def sort_key(holding):
+                def sort_key(position):
                     if schema.sort_by == SortBy.POSITION_SIZE:
-                        val = holding["position_size"]
+                        val = position["position_size"]
                         return (
                             val
                             if isinstance(val, (int, float))
                             else (-float("inf") if schema.descending else float("inf"))
                         )
                     elif schema.sort_by == SortBy.MARKET_VALUE:
-                        val = holding["value"]
+                        val = position["value"]
                         return (
                             val
                             if isinstance(val, (int, float))
                             else (-float("inf") if schema.descending else float("inf"))
                         )
                     elif schema.sort_by == SortBy.EXPOSURE:
-                        val = holding["exposure"]
+                        val = position["exposure"]
                         return (
                             val
                             if isinstance(val, (int, float))
                             else (-float("inf") if schema.descending else float("inf"))
                         )
                     elif schema.sort_by == SortBy.NAME:
-                        return holding["name"].lower()
+                        return position["name"].lower()
                     return 0
 
-                holdings.sort(
+                positions.sort(
                     key=sort_key,
                     reverse=(
                         schema.descending
@@ -258,50 +266,54 @@ class BalanceReportToolkit:
             # Calculate allocations and format output
             market_value_pct_total = []
             exposure_pct_total = []
-            for holding in holdings:
-                output += f"Instrument: {holding['name']} ({holding['code']})\n"
-                if holding['country']:
-                    output += f"  - Country: {holding['country']}\n"
+            for position in positions:
+                output += f"Instrument: {position['name']} ({position['code']})\n"
+                if position["country"]:
+                    output += f"  - Country: {position['country']}\n"
                 else:
                     output += f"  - Country: N/A\n"
 
                 # Position Size
-                if isinstance(holding["position_size"], (int, float)):
+                if isinstance(position["position_size"], (int, float)):
                     # Format with decimals only if needed
-                    if holding["position_size"] == int(holding["position_size"]):
-                        output += f"  - Position Size: {int(holding['position_size']):,}"
+                    if position["position_size"] == int(position["position_size"]):
+                        output += (
+                            f"  - Position Size: {int(position['position_size']):,}"
+                        )
                     else:
-                        output += f"  - Position Size: {holding['position_size']:,.6f}".rstrip('0').rstrip('.')
-                    if holding["position_size"] < 0:
+                        output += f"  - Position Size: {position['position_size']:,.6f}".rstrip(
+                            "0"
+                        ).rstrip(
+                            "."
+                        )
+                    if position["position_size"] < 0:
                         output += " (Short Position)\n"
                     else:
                         output += "\n"
                 else:
                     output += "  - Position Size: N/A\n"
 
-                # Market Value with percentage
-                if isinstance(holding["value"], (int, float)):
-                    output += f"  - Market Value: ${holding['value']:,.2f}"
-                    if holding["value"] < 0:
+                # Market Value with percentage (use field from response)
+                if isinstance(position["value"], (int, float)):
+                    output += f"  - Market Value: ${position['value']:,.2f}"
+                    if position["value"] < 0:
                         output += " (Short Position)\n"
-                    elif total_value > 0 and holding["value"] > 0:
-                        market_value_pct = holding["value"] / total_value * 100
-                        market_value_pct_total.append(market_value_pct)
-                        output += f" ({market_value_pct:.2f}%)\n"
+                    elif position["market_value_percent"] >= 0:
+                        market_value_pct_total.append(position["market_value_percent"])
+                        output += f" ({position['market_value_percent']:.2f}%)\n"
                     else:
                         output += "\n"
                 else:
                     output += "  - Market Value: N/A\n"
 
-                # Exposure with percentage
-                if isinstance(holding["exposure"], (int, float)):
-                    output += f"  - Exposure: ${holding['exposure']:,.2f}"
-                    if holding["exposure"] < 0:
+                # Exposure with percentage (use field from response)
+                if isinstance(position["exposure"], (int, float)):
+                    output += f"  - Exposure: ${position['exposure']:,.2f}"
+                    if position["exposure"] < 0:
                         output += " (Short Position)\n"
-                    elif total_exposure > 0 and holding["exposure"] > 0:
-                        exposure_pct = holding["exposure"] / total_exposure * 100
-                        exposure_pct_total.append(exposure_pct)
-                        output += f" ({exposure_pct:.2f}%)\n"
+                    elif position["exposure_percent"] >= 0:
+                        exposure_pct_total.append(position["exposure_percent"])
+                        output += f" ({position['exposure_percent']:.2f}%)\n"
                     else:
                         output += "\n"
                 else:
@@ -310,29 +322,50 @@ class BalanceReportToolkit:
                 # YTM and Duration fields (only show for bonds - when values are non-zero)
                 # Check if this is a bond by looking at YTM or Duration values
                 is_bond = (
-                    (isinstance(holding["ytm"], (int, float)) and holding["ytm"] != 0) or
-                    (isinstance(holding["ytm_at_cost"], (int, float)) and holding["ytm_at_cost"] != 0) or
-                    (isinstance(holding["modified_duration"], (int, float)) and holding["modified_duration"] != 0)
+                    (isinstance(position["ytm"], (int, float)) and position["ytm"] != 0)
+                    or (
+                        isinstance(position["ytm_at_cost"], (int, float))
+                        and position["ytm_at_cost"] != 0
+                    )
+                    or (
+                        isinstance(position["modified_duration"], (int, float))
+                        and position["modified_duration"] != 0
+                    )
                 )
-                
+
                 if is_bond:
                     # Yield to Maturity at current price
-                    if isinstance(holding["ytm"], (int, float)) and holding["ytm"] != 0:
-                        output += f"  - Yield to Maturity (YTM): {holding['ytm']:.2f}%\n"
+                    if (
+                        isinstance(position["ytm"], (int, float))
+                        and position["ytm"] != 0
+                    ):
+                        output += (
+                            f"  - Yield to Maturity (YTM): {position['ytm']:.2f}%\n"
+                        )
                     else:
                         output += "  - Yield to Maturity (YTM): N/A (price may be 0)\n"
-                    
+
                     # YTM at acquisition cost
-                    if isinstance(holding["ytm_at_cost"], (int, float)) and holding["ytm_at_cost"] != 0:
-                        output += f"  - YTM at Acquisition: {holding['ytm_at_cost']:.2f}%\n"
+                    if (
+                        isinstance(position["ytm_at_cost"], (int, float))
+                        and position["ytm_at_cost"] != 0
+                    ):
+                        output += (
+                            f"  - YTM at Acquisition: {position['ytm_at_cost']:.2f}%\n"
+                        )
                     else:
                         output += "  - YTM at Acquisition: N/A\n"
-                    
+
                     # Modified Duration
-                    if isinstance(holding["modified_duration"], (int, float)) and holding["modified_duration"] != 0:
-                        output += f"  - Duration: {holding['modified_duration']:.2f} years\n"
+                    if (
+                        isinstance(position["modified_duration"], (int, float))
+                        and position["modified_duration"] != 0
+                    ):
+                        output += (
+                            f"  - Duration: {position['modified_duration']:.2f} years\n"
+                        )
                         # Add note about floating coupon bonds
-                        if holding["modified_duration"] < 1:
+                        if position["modified_duration"] < 1:
                             output += "    (Note: Low duration may indicate floating rate bond)\n"
                     else:
                         output += "  - Duration: N/A\n"
@@ -347,47 +380,53 @@ class BalanceReportToolkit:
                     instrument_code = item.get("instrument.user_code")
                     market_value = item.get("market_value")
                     if instrument_code and (market_value is None or market_value == 0):
-                        missing_market_values.append({
-                            "code": instrument_code,
-                            "name": item.get("instrument.name", "Unknown"),
-                            "position_size": item.get("position_size", 0)
-                        })
-            
+                        missing_market_values.append(
+                            {
+                                "code": instrument_code,
+                                "name": item.get("instrument.name", "Unknown"),
+                                "position_size": item.get("position_size", 0),
+                            }
+                        )
+
             # If we have missing market values, call price history check
             if missing_market_values:
                 output += "\n" + "=" * 80 + "\n"
                 output += "IMPORTANT: Missing pricing data detected!\n"
                 output += "=" * 80 + "\n\n"
-                
-                output += "The following instruments have missing or zero market values:\n"
+
+                output += (
+                    "The following instruments have missing or zero market values:\n"
+                )
                 for inst in missing_market_values:
                     output += f"- {inst['name']} ({inst['code']}) - Position: {inst['position_size']}\n"
-                
+
                 output += "\nChecking price history availability...\n\n"
-                
+
                 try:
                     # Create price history check request
                     price_check_request = PriceHistoryCheckItems(
                         pl_first_date=report_date,  # For balance report, both dates are the same
                         report_date=report_date,
                         report_currency=schema.report_currency.value,
-                        pricing_policy=request_data.pricing_policy
+                        pricing_policy=request_data.pricing_policy,
                     )
-                    
+
                     # Call price history check
-                    price_check_result = await self.client.price_history_check.check_price_history(
-                        price_check_request
+                    price_check_result = (
+                        await self.client.price_history_check.check_price_history(
+                            price_check_request
+                        )
                     )
-                    
+
                     if price_check_result.items:
                         output += "Price History Check Results:\n"
                         output += "-" * 40 + "\n"
-                        
+
                         # Display all items without filtering by type
                         for item in price_check_result.items:
                             item_type = item.get("type", "unknown")
                             output += f"\nType: {item_type}\n"
-                            
+
                             # Display common fields
                             if item.get("name"):
                                 output += f"  Name: {item.get('name')}\n"
@@ -396,8 +435,10 @@ class BalanceReportToolkit:
                             if item.get("id"):
                                 output += f"  ID: {item.get('id')}\n"
                             if item.get("position_size") is not None:
-                                output += f"  Position Size: {item.get('position_size')}\n"
-                            
+                                output += (
+                                    f"  Position Size: {item.get('position_size')}\n"
+                                )
+
                             # Display type-specific fields
                             if item.get("accounting_date"):
                                 output += f"  Accounting Date: {item.get('accounting_date')}\n"
@@ -405,7 +446,7 @@ class BalanceReportToolkit:
                                 output += f"  Currency: {item.get('transaction_currency_name')} ({item.get('transaction_currency_user_code')})\n"
                             if item.get("transaction_currency_id"):
                                 output += f"  Currency ID: {item.get('transaction_currency_id')}\n"
-                        
+
                         output += "\nRECOMMENDATION:\n"
                         output += "The missing market values are due to unavailable pricing data.\n"
                         output += "To resolve this, you need to:\n"
@@ -413,27 +454,27 @@ class BalanceReportToolkit:
                     else:
                         output += "Price history check completed - no specific issues found.\n"
                         output += "The missing values may be due to other configuration issues.\n"
-                    
+
                 except Exception as e:
                     output += f"Could not perform price history check: {str(e)}\n"
-                
+
                 output += "\n" + "=" * 80 + "\n\n"
-            
+
             output += f"Total Portfolio Value (Market Value): ${total_value:,.2f}\n"
             output += f"Total Portfolio Exposure: ${total_exposure:,.2f}\n"
-            output += f"Number of Holdings: {len(holdings)}\n"
-            
+            output += f"Number of Positions: {len(positions)}\n"
+
             if missing_market_values:
                 output += f"\nNote: {len(missing_market_values)} instruments have missing or zero market values.\n"
                 output += "The total values above exclude these instruments.\n"
-            
+
             return output, artifact
 
         except Exception as e:
             exc = traceback.format_exc()
             logger.error(exc)
             error_msg = f"Error getting balance report for portfolio {kwargs.get('portfolio_code')}: {str(e)}"
-            if 'input_str' in locals():
+            if "input_str" in locals():
                 error_msg += f"\n\nFull request sent:\n{input_str}"
             return error_msg, None
 
@@ -452,16 +493,16 @@ def build_balance_report_tools() -> List[BaseTool]:
                 "Use this tool to:\n"
                 "- Find out what companies/stocks/instruments are in a portfolio\n"
                 "- Get the percentage/allocation of specific companies in the portfolio\n"
-                "- See the shares count for each holding\n"
+                "- See the shares count for each position\n"
                 "- Analyze portfolio concentration and diversification\n"
                 "- Check for short positions (negative shares/values)\n"
                 "- View total portfolio value and exposure\n"
                 "- Get historical reports by specifying a date\n"
-                "- Sort holdings by position size, market value, exposure, or name\n"
-                "- View bond-specific metrics (YTM, Duration) for fixed income holdings\n"
+                "- Sort positions by position size, market value, exposure, or name\n"
+                "- View bond-specific metrics (YTM, Duration) for fixed income positions\n"
                 "\n"
                 "The report includes:\n"
-                "- Complete list of holdings with names and codes\n"
+                "- Complete list of positions with names and codes\n"
                 "- Position sizes (number of shares/bonds/units)\n"
                 "- Market values with allocation percentages\n"
                 "- Exposure amounts and percentages\n"
@@ -480,7 +521,7 @@ def build_balance_report_tools() -> List[BaseTool]:
                 "- What is the percentage/allocation of Apple in this portfolio?\n"
                 "- Show me the allocations in portfolio Y\n"
                 "- What is the portfolio allocation breakdown?\n"
-                "- Show me the top holdings in portfolio Z\n"
+                "- Show me the top positions in portfolio Z\n"
                 "- Is the portfolio diversified or concentrated?\n"
                 "- Are there any short positions?\n"
                 "- What are the YTM and Duration of bonds in the portfolio?"
