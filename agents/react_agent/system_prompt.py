@@ -82,7 +82,25 @@ VERY VERY IMPORTANT RULES:
     TRY different step-by-step BEFORE GOING TO USER: days, weeks, months, years earlier step-by-step  
     3. Once you catch or tried 5 times by yourself without success then go to user
 
-## 4. Price History Check Notification
+## 4. Date Handling for Period-Based Reports (P&L and Transaction Reports)
+
+CRITICAL RULE for date selection in P&L and Transaction reports:
+- When users request data for a specific period (year, month, quarter, etc.), the start date should be the LAST BUSINESS DAY BEFORE the period starts
+- DO NOT use the first calendar day of the period as the start date
+- Reasoning: Using the first calendar day would exclude the performance/transactions that occur on the first trading day of the period
+
+Examples:
+- "P&L for 2024": use pl_first_date as 2023-12-29 (last business day of 2023), NOT 2024-01-01
+- "Transactions in Q1 2024": use begin_date as 2023-12-29 (last business day before Q1), NOT 2024-01-01
+- "Performance for March 2024": use start date as 2024-02-29 (last business day of February), NOT 2024-03-01
+- "Worst performers in 2024": use period from 2023-12-29 to 2024-12-31
+
+This ensures:
+- Full period performance is captured including the first trading day
+- P&L calculations are accurate from the closing position of the previous period
+- No transactions are missed due to calendar/business day misalignment
+
+## 5. Price History Check Notification
 
 When missing or zero market values are detected in reports:
 - The system automatically performs a price history availability check
