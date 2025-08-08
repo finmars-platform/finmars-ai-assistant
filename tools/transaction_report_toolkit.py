@@ -60,9 +60,7 @@ class TransactionReportToolkit:
             # Parse dates
             if schema.begin_date:
                 try:
-                    begin_date = datetime.strptime(
-                        schema.begin_date, "%Y-%m-%d"
-                    ).date()
+                    begin_date = datetime.strptime(schema.begin_date, "%Y-%m-%d").date()
                 except ValueError:
                     return (
                         f"Error: Invalid begin_date format. Please use YYYY-MM-DD format (e.g., '2024-01-01')",
@@ -118,7 +116,9 @@ class TransactionReportToolkit:
                     return f"Error: Could not parse items from response", None
 
             # Extract transaction information
-            output = f"The FULL request to get Transaction Report was: {input_str}\n\n\n"
+            output = (
+                f"The FULL request to get Transaction Report was: {input_str}\n\n\n"
+            )
             output += f"RESPONSE:\nTransaction Report for Portfolio: {schema.portfolio_code}\n"
             output += f"Period: {begin_date or 'Beginning'} to {end_date}\n"
             output += f"Page: {schema.page} (Page size: {schema.page_size})\n\n"
@@ -157,6 +157,9 @@ class TransactionReportToolkit:
                             "instrument.pricing_currency.user_code"
                         )
 
+                    # Extract transaction currency
+                    transaction_currency = item.get("transaction_currency.user_code")
+
                     # Extract transaction amounts
                     position_size = item.get("position_size_with_sign", 0)
                     principal = item.get("principal_with_sign", 0)
@@ -183,6 +186,7 @@ class TransactionReportToolkit:
                         "instrument_name": instrument_name,
                         "instrument_country": instrument_country,
                         "instrument_currency": instrument_currency,
+                        "transaction_currency": transaction_currency,
                         "position_size": position_size,
                         "principal": principal,
                         "trade_price": trade_price,
@@ -254,15 +258,27 @@ class TransactionReportToolkit:
                     else:
                         output += f"Instrument Country: N/A\n"
                     if trans["instrument_currency"]:
-                        output += f"Instrument Currency: {trans['instrument_currency']}\n"
+                        output += (
+                            f"Instrument Currency: {trans['instrument_currency']}\n"
+                        )
+                    if trans["transaction_currency"]:
+                        output += (
+                            f"Transaction Currency: {trans['transaction_currency']}\n"
+                        )
 
                 # Transaction details
                 if trans["position_size"] != 0:
                     # Format position size with decimals only if needed
                     if trans["position_size"] == int(trans["position_size"]):
-                        output += f"Position Size: {int(trans['position_size']):,} units"
+                        output += (
+                            f"Position Size: {int(trans['position_size']):,} units"
+                        )
                     else:
-                        output += f"Position Size: {trans['position_size']:,.6f} units".rstrip('0').rstrip('.')
+                        output += f"Position Size: {trans['position_size']:,.6f} units".rstrip(
+                            "0"
+                        ).rstrip(
+                            "."
+                        )
                     if trans["position_size"] > 0:
                         output += " (Buy/Long)\n"
                     else:
@@ -279,7 +295,9 @@ class TransactionReportToolkit:
                         output += " (Inflow)\n"
 
                 if trans["cash_consideration"] != 0:
-                    output += f"Cash Consideration: {trans['cash_consideration']:,.2f}\n"
+                    output += (
+                        f"Cash Consideration: {trans['cash_consideration']:,.2f}\n"
+                    )
 
                 # Account information
                 if trans["account_cash"]:
@@ -314,7 +332,7 @@ class TransactionReportToolkit:
             exc = traceback.format_exc()
             logger.error(exc)
             error_msg = f"Error getting transaction report for portfolio {kwargs.get('portfolio_code')}: {str(e)}"
-            if 'input_str' in locals():
+            if "input_str" in locals():
                 error_msg += f"\n\nFull request sent:\n{input_str}"
             return (error_msg, None)
 
