@@ -1,10 +1,11 @@
 import asyncio
 import json
 import traceback
-from typing import List, Dict, Any, Optional
-from datetime import datetime, date
-from pydantic import BaseModel, Field
+from datetime import datetime
+from typing import List, Optional
+
 from langchain_core.tools import StructuredTool, BaseTool
+from pydantic import BaseModel, Field
 
 from libs.client.finmars_client import FinmarsPortfolioClient
 from libs.logger.logger import logger
@@ -23,7 +24,7 @@ class GetPLReportSchema(BaseModel):
     )
     report_currency: ReportCurrency = Field(
         default=ReportCurrency.USD,
-        description="The currency for the report (USD or EUR)",
+        description="The currency for the report",
     )
     pl_first_date: str = Field(
         description="The start date for P/L calculation in YYYY-MM-DD format (e.g., '2024-01-01')"
@@ -39,6 +40,14 @@ class GetPLReportSchema(BaseModel):
     descending: bool = Field(
         default=True,
         description="Sort in descending order (highest to lowest). Set to false for ascending order.",
+    )
+    page: int = Field(
+        default=1,
+        description="Page number for pagination (starts from 1)",
+    )
+    page_size: int = Field(
+        default=500,
+        description="Number of items per page (default: 500, max: 1000)",
     )
     # Return percentage filters removed - not applicable for individual instruments
     # Only portfolio-level return percentage is calculated
@@ -104,8 +113,8 @@ class PLReportToolkit:
                 strategy1_mode=0,
                 strategy2_mode=0,
                 strategy3_mode=0,
-                page=1,
-                page_size=500,
+                page=schema.page,
+                page_size=min(schema.page_size, 1000),  # Ensure max 1000
                 report_instance_id=None,
                 custom_fields=[1, 2],
             )
@@ -141,7 +150,8 @@ class PLReportToolkit:
             output += f"RESPONSE:\nProfit & Loss Report for Portfolio: {schema.portfolio_code}\n"
             output += f"Period: {pl_first_date} to {report_date}\n"
             output += f"Currency: {report_currency}\n"
-            output += f"Pricing Policy: {request_data.pricing_policy}\n\n"
+            output += f"Pricing Policy: {request_data.pricing_policy}\n"
+            output += f"Page: {schema.page} (Page size: {schema.page_size})\n\n"
 
             if not items:
                 output += (
@@ -371,7 +381,9 @@ class PLReportToolkit:
                         ):
                             output += f"              Total P&L (Instrument Currency): {pos['instrument_pricing_currency']} {pos['total_loc']:,.2f}\n"
                         else:
-                            output += f"              Total P&L (Instrument Currency): N/A\n"
+                            output += (
+                                f"              Total P&L (Instrument Currency): N/A\n"
+                            )
                         output += f"            Principal: {report_currency} {pos['principal']:,.2f}\n"
                         if (
                             isinstance(pos["principal_loc"], (int, float))
@@ -379,8 +391,10 @@ class PLReportToolkit:
                         ):
                             output += f"              Principal (Instrument Currency): {pos['instrument_pricing_currency']} {pos['principal_loc']:,.2f}\n"
                         else:
-                            output += f"              Principal (Instrument Currency): N/A\n"
-                            
+                            output += (
+                                f"              Principal (Instrument Currency): N/A\n"
+                            )
+
                         output += f"            Carry P&L: {report_currency} {pos['carry']:,.2f}\n"
                         if (
                             isinstance(pos["carry_loc"], (int, float))
@@ -388,8 +402,10 @@ class PLReportToolkit:
                         ):
                             output += f"              Carry P&L (Instrument Currency): {pos['instrument_pricing_currency']} {pos['carry_loc']:,.2f}\n"
                         else:
-                            output += f"              Carry P&L (Instrument Currency): N/A\n"
-                            
+                            output += (
+                                f"              Carry P&L (Instrument Currency): N/A\n"
+                            )
+
                         output += f"            Overheads: {report_currency} {pos['overheads']:,.2f}\n"
                         if (
                             isinstance(pos["overheads_loc"], (int, float))
@@ -397,8 +413,10 @@ class PLReportToolkit:
                         ):
                             output += f"              Overheads (Instrument Currency): {pos['instrument_pricing_currency']} {pos['overheads_loc']:,.2f}\n"
                         else:
-                            output += f"              Overheads (Instrument Currency): N/A\n"
-                            
+                            output += (
+                                f"              Overheads (Instrument Currency): N/A\n"
+                            )
+
                         output += f"            Market Value: {report_currency} {pos['market_value']:,.2f}\n"
                         if (
                             isinstance(pos["market_value_loc"], (int, float))
@@ -448,7 +466,9 @@ class PLReportToolkit:
                         ):
                             output += f"              Total P&L (Instrument Currency): {pos['instrument_pricing_currency']} {pos['total_loc']:,.2f}\n"
                         else:
-                            output += f"              Total P&L (Instrument Currency): N/A\n"
+                            output += (
+                                f"              Total P&L (Instrument Currency): N/A\n"
+                            )
                         output += f"            Principal: {report_currency} {pos['principal']:,.2f}\n"
                         if (
                             isinstance(pos["principal_loc"], (int, float))
@@ -456,8 +476,10 @@ class PLReportToolkit:
                         ):
                             output += f"              Principal (Instrument Currency): {pos['instrument_pricing_currency']} {pos['principal_loc']:,.2f}\n"
                         else:
-                            output += f"              Principal (Instrument Currency): N/A\n"
-                            
+                            output += (
+                                f"              Principal (Instrument Currency): N/A\n"
+                            )
+
                         output += f"            Carry P&L: {report_currency} {pos['carry']:,.2f}\n"
                         if (
                             isinstance(pos["carry_loc"], (int, float))
@@ -465,8 +487,10 @@ class PLReportToolkit:
                         ):
                             output += f"              Carry P&L (Instrument Currency): {pos['instrument_pricing_currency']} {pos['carry_loc']:,.2f}\n"
                         else:
-                            output += f"              Carry P&L (Instrument Currency): N/A\n"
-                            
+                            output += (
+                                f"              Carry P&L (Instrument Currency): N/A\n"
+                            )
+
                         output += f"            Overheads: {report_currency} {pos['overheads']:,.2f}\n"
                         if (
                             isinstance(pos["overheads_loc"], (int, float))
@@ -474,8 +498,10 @@ class PLReportToolkit:
                         ):
                             output += f"              Overheads (Instrument Currency): {pos['instrument_pricing_currency']} {pos['overheads_loc']:,.2f}\n"
                         else:
-                            output += f"              Overheads (Instrument Currency): N/A\n"
-                            
+                            output += (
+                                f"              Overheads (Instrument Currency): N/A\n"
+                            )
+
                         output += f"            Market Value: {report_currency} {pos['market_value']:,.2f}\n"
                         if (
                             isinstance(pos["market_value_loc"], (int, float))
@@ -499,8 +525,10 @@ class PLReportToolkit:
                         ):
                             output += f"          Total P&L (Instrument Currency): {pos['instrument_pricing_currency']} {pos['total_loc']:,.2f}\n"
                         else:
-                            output += f"          Total P&L (Instrument Currency): N/A\n"
-                            
+                            output += (
+                                f"          Total P&L (Instrument Currency): N/A\n"
+                            )
+
                         output += f"        Principal: {report_currency} {pos['principal']:,.2f}\n"
                         if (
                             isinstance(pos["principal_loc"], (int, float))
@@ -508,8 +536,10 @@ class PLReportToolkit:
                         ):
                             output += f"          Principal (Instrument Currency): {pos['instrument_pricing_currency']} {pos['principal_loc']:,.2f}\n"
                         else:
-                            output += f"          Principal (Instrument Currency): N/A\n"
-                            
+                            output += (
+                                f"          Principal (Instrument Currency): N/A\n"
+                            )
+
                         output += f"        Carry P&L: {report_currency} {pos['carry']:,.2f}\n"
                         if (
                             isinstance(pos["carry_loc"], (int, float))
@@ -517,8 +547,10 @@ class PLReportToolkit:
                         ):
                             output += f"          Carry P&L (Instrument Currency): {pos['instrument_pricing_currency']} {pos['carry_loc']:,.2f}\n"
                         else:
-                            output += f"          Carry P&L (Instrument Currency): N/A\n"
-                            
+                            output += (
+                                f"          Carry P&L (Instrument Currency): N/A\n"
+                            )
+
                         output += f"        Overheads: {report_currency} {pos['overheads']:,.2f}\n"
                         if (
                             isinstance(pos["overheads_loc"], (int, float))
@@ -526,8 +558,10 @@ class PLReportToolkit:
                         ):
                             output += f"          Overheads (Instrument Currency): {pos['instrument_pricing_currency']} {pos['overheads_loc']:,.2f}\n"
                         else:
-                            output += f"          Overheads (Instrument Currency): N/A\n"
-                            
+                            output += (
+                                f"          Overheads (Instrument Currency): N/A\n"
+                            )
+
                         output += f"        Market Value: {report_currency} {pos['market_value']:,.2f}\n"
                         if (
                             isinstance(pos["market_value_loc"], (int, float))
@@ -535,7 +569,9 @@ class PLReportToolkit:
                         ):
                             output += f"          Market Value (Instrument Currency): {pos['instrument_pricing_currency']} {pos['market_value_loc']:,.2f}\n"
                         else:
-                            output += f"          Market Value (Instrument Currency): N/A\n"
+                            output += (
+                                f"          Market Value (Instrument Currency): N/A\n"
+                            )
                         output += "\n"
 
                 output += "-" * 60 + "\n\n"
@@ -714,7 +750,7 @@ def build_pl_report_tools() -> List[BaseTool]:
                 "\n"
                 "Optional parameters:\n"
                 "- report_date: End date (defaults to today)\n"
-                "- report_currency: USD or EUR (default: USD)\n"
+                "- report_currency: USD, EUR, BTC, CHF, GBP, or HKD (default: USD)\n"
                 "- sort_by: Sort results by various metrics (instrument_name, position_size, amount_invested, market_value, principle, total_pl)\n"
                 "\n"
                 "Example questions this tool can answer:\n"

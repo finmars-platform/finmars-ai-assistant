@@ -13,8 +13,12 @@ from pydantic import BaseModel, Field
 class ReportCurrency(str, Enum):
     """Supported report currencies for balance and P/L reports"""
 
-    USD = "USD"
+    BTC = "BTC"
+    CHF = "CHF"
     EUR = "EUR"
+    GBP = "GBP"
+    HKD = "HKD"
+    USD = "USD"
 
 
 class OrderingField(BaseModel):

@@ -1,10 +1,11 @@
 import asyncio
 import json
 import traceback
-from typing import List, Dict, Any, Optional
-from datetime import datetime, date
-from pydantic import BaseModel, Field
+from datetime import datetime
+from typing import List, Optional
+
 from langchain_core.tools import StructuredTool, BaseTool
+from pydantic import BaseModel, Field
 
 from libs.client.finmars_client import FinmarsPortfolioClient
 from libs.logger.logger import logger
@@ -28,7 +29,7 @@ class GetBalanceReportSchema(BaseModel):
     )
     report_currency: ReportCurrency = Field(
         default=ReportCurrency.USD,
-        description="The currency for the report (USD or EUR)",
+        description="The currency for the report (USD, EUR, BTC, CHF, GBP, HKD)",
     )
     report_date: Optional[str] = Field(
         default=None,
@@ -41,6 +42,14 @@ class GetBalanceReportSchema(BaseModel):
     descending: bool = Field(
         default=True,
         description="Sort in descending order (highest to lowest). Set to false for ascending order.",
+    )
+    page: int = Field(
+        default=1,
+        description="Page number for pagination (starts from 1)",
+    )
+    page_size: int = Field(
+        default=200,
+        description="Number of items per page (default: 200, max: 500)",
     )
 
 
@@ -105,8 +114,8 @@ class BalanceReportToolkit:
                 strategy3_mode=0,
                 # table_font_size="small",
                 # transaction_classes=[],
-                page=1,
-                page_size=200,
+                page=schema.page,
+                page_size=min(schema.page_size, 500),  # Ensure max 500
                 report_instance_id=None,
                 # portfolios_table_data_items=[]
             )
@@ -144,7 +153,8 @@ class BalanceReportToolkit:
             )
             output += f"Report Date: {report_date}\n"
             output += f"Report Currency: {report_currency}\n"
-            output += f"Pricing Policy: {request_data.pricing_policy}\n\n"
+            output += f"Pricing Policy: {request_data.pricing_policy}\n"
+            output += f"Page: {schema.page} (Page size: {schema.page_size})\n\n"
 
             if not items:
                 output += "No positions found in this portfolio.\n"
@@ -156,16 +166,51 @@ class BalanceReportToolkit:
             total_value = 0.0
             total_exposure = 0.0
             positions = []
+            cash_positions = []
 
             # Process each item to extract instrument info
             for item in items:
                 if isinstance(item, dict):
-                    # Extract instrument information
+                    # Check if this is a cash position (currency) or instrument position
                     instrument_code = item.get("instrument.user_code")
-                    if instrument_code is None:
+                    currency_code = item.get("currency.user_code")
+
+                    # Extract account information (common for all items)
+                    account_code = item.get("account.user_code", "")
+                    account_name = item.get("account.name", "")
+                    account_short_name = item.get("account.short_name", "")
+                    account_public_name = item.get("account.public_name", "")
+                    account_notes = item.get("account.notes", "")
+
+                    # Extract portfolio information (if available)
+                    portfolio_user_code = item.get(
+                        "portfolio.user_code", schema.portfolio_code
+                    )
+                    portfolio_name = item.get("portfolio.name", "")
+                    portfolio_short_name = item.get("portfolio.short_name", "")
+                    portfolio_public_name = item.get("portfolio.public_name", "")
+                    portfolio_notes = item.get("portfolio.notes", "")
+                    portfolio_first_transaction_date = item.get(
+                        "portfolio.first_transaction_date", ""
+                    )
+                    portfolio_first_cash_flow_date = item.get(
+                        "portfolio.first_cash_flow_date", ""
+                    )
+
+                    if instrument_code:
+                        # This is an instrument position
+                        instrument_name = item.get("instrument.name", "Unknown")
+                        instrument_country = item.get("instrument.country.name", "")
+                    elif currency_code:
+                        # This is a cash position
+                        instrument_code = currency_code
+                        instrument_name = item.get("currency.name") or item.get(
+                            "name", "Unknown Currency"
+                        )
+                        instrument_country = item.get("currency.country.name", "")
+                    else:
+                        # Skip items that are neither instruments nor currencies
                         continue
-                    instrument_name = item.get("instrument.name", "Unknown")
-                    instrument_country = item.get("instrument.country.name", "")
 
                     # Extract position size and value information from actual API response
                     position_size = item.get("position_size")
@@ -210,34 +255,51 @@ class BalanceReportToolkit:
                         "modified_duration", 0
                     )  # Duration in years
 
-                    positions.append(
-                        {
-                            "code": instrument_code,
-                            "name": instrument_name,
-                            "country": instrument_country,
-                            "position_size": position_size,
-                            "value": market_value,
-                            "exposure": exposure,
-                            "market_value_loc": market_value_loc,
-                            "exposure_loc": exposure_loc,
-                            "instrument_pricing_currency": instrument_pricing_currency,
-                            "exposure_currency_code": exposure_currency_code,
-                            "market_value_percent": market_value_percent,
-                            "exposure_percent": exposure_percent,
-                            "net_cost_price": net_cost_price,
-                            "net_cost_price_loc": net_cost_price_loc,
-                            "gross_cost_price": gross_cost_price,
-                            "gross_cost_price_loc": gross_cost_price_loc,
-                            "ytm": ytm,
-                            "ytm_at_cost": ytm_at_cost,
-                            "modified_duration": modified_duration,
-                        }
-                    )
+                    position_data = {
+                        "code": instrument_code,
+                        "name": instrument_name,
+                        "country": instrument_country,
+                        "position_size": position_size,
+                        "value": market_value,
+                        "exposure": exposure,
+                        "market_value_loc": market_value_loc,
+                        "exposure_loc": exposure_loc,
+                        "instrument_pricing_currency": instrument_pricing_currency,
+                        "exposure_currency_code": exposure_currency_code,
+                        "market_value_percent": market_value_percent,
+                        "exposure_percent": exposure_percent,
+                        "net_cost_price": net_cost_price,
+                        "net_cost_price_loc": net_cost_price_loc,
+                        "gross_cost_price": gross_cost_price,
+                        "gross_cost_price_loc": gross_cost_price_loc,
+                        "ytm": ytm,
+                        "ytm_at_cost": ytm_at_cost,
+                        "modified_duration": modified_duration,
+                        "is_cash": currency_code is not None,
+                        "account_code": account_code,
+                        "account_name": account_name,
+                        "account_short_name": account_short_name,
+                        "account_public_name": account_public_name,
+                        "account_notes": account_notes,
+                        "portfolio_user_code": portfolio_user_code,
+                        "portfolio_name": portfolio_name,
+                        "portfolio_short_name": portfolio_short_name,
+                        "portfolio_public_name": portfolio_public_name,
+                        "portfolio_notes": portfolio_notes,
+                        "portfolio_first_transaction_date": portfolio_first_transaction_date,
+                        "portfolio_first_cash_flow_date": portfolio_first_cash_flow_date,
+                    }
 
-                    if isinstance(market_value, (int, float)) and market_value > 0:
+                    if currency_code:
+                        cash_positions.append(position_data)
+                    else:
+                        positions.append(position_data)
+
+                    # Accumulate totals for both cash and instrument positions
+                    if isinstance(market_value, (int, float)):
                         total_value += market_value
 
-                    if isinstance(exposure, (int, float)) and exposure > 0:
+                    if isinstance(exposure, (int, float)):
                         total_exposure += exposure
 
                     # output += "-" * 80 + "\n"
@@ -290,12 +352,35 @@ class BalanceReportToolkit:
             # Calculate allocations and format output
             market_value_pct_total = []
             exposure_pct_total = []
+
+            # Display instrument positions first
+            if positions:
+                output += "INSTRUMENT POSITIONS:\n"
+                output += "-" * 60 + "\n\n"
+
             for position in positions:
                 output += f"Instrument: {position['name']} ({position['code']})\n"
                 if position["country"]:
                     output += f"  - Country: {position['country']}\n"
                 else:
                     output += f"  - Country: N/A\n"
+
+                # Account information (if available)
+                if (
+                    position["account_code"]
+                    or position["account_notes"]
+                    or position["account_name"]
+                ):
+                    if position["account_code"]:
+                        output += f"  - Account Code: {position['account_code']}\n"
+                    if position["account_name"]:
+                        output += f"  - Account Name: {position['account_name']}\n"
+                    if position["account_short_name"]:
+                        output += f"  - Account Short Name: {position['account_short_name']}\n"
+                    if position["account_public_name"]:
+                        output += f"  - Account Public Name: {position['account_public_name']}\n"
+                    if position["account_notes"]:
+                        output += f"  - Account Notes: {position['account_notes']}\n"
 
                 # Position Size
                 if isinstance(position["position_size"], (int, float)):
@@ -445,6 +530,62 @@ class BalanceReportToolkit:
 
                 output += "\n"
 
+            # Display cash positions
+            if cash_positions:
+                output += "\nCASH POSITIONS:\n"
+                output += "-" * 60 + "\n\n"
+
+                for position in cash_positions:
+                    output += f"Currency: {position['name']} ({position['code']})\n"
+
+                    # Account information (display all fields consistently)
+                    if position["account_code"]:
+                        output += f"  - Account Code: {position['account_code']}\n"
+                    if position["account_name"]:
+                        output += f"  - Account Name: {position['account_name']}\n"
+                    if position["account_short_name"]:
+                        output += f"  - Account Short Name: {position['account_short_name']}\n"
+                    if position["account_public_name"]:
+                        output += f"  - Account Public Name: {position['account_public_name']}\n"
+                    if position["account_notes"]:
+                        output += f"  - Account Notes: {position['account_notes']}\n"
+
+                    # Position Size (Amount)
+                    if isinstance(position["position_size"], (int, float)):
+                        output += f"  - Amount: {position['code']} {position['position_size']:,.2f}\n"
+                    else:
+                        output += "  - Amount: N/A\n"
+
+                    # Market Value with percentage
+                    if isinstance(position["value"], (int, float)):
+                        output += f"  - Market Value: {report_currency} {position['value']:,.2f}"
+                        if (
+                            position["market_value_percent"]
+                            and position["market_value_percent"] >= 0
+                        ):
+                            market_value_pct_total.append(
+                                position["market_value_percent"]
+                            )
+                            output += f" ({position['market_value_percent']:.2f}%)"
+                        output += "\n"
+                    else:
+                        output += "  - Market Value: N/A\n"
+
+                    # Exposure with percentage
+                    if isinstance(position["exposure"], (int, float)):
+                        output += f"  - Exposure: {report_currency} {position['exposure']:,.2f}"
+                        if (
+                            position["exposure_percent"]
+                            and position["exposure_percent"] >= 0
+                        ):
+                            exposure_pct_total.append(position["exposure_percent"])
+                            output += f" ({position['exposure_percent']:.2f}%)"
+                        output += "\n"
+                    else:
+                        output += "  - Exposure: N/A\n"
+
+                    output += "\n"
+
             output += "-" * 80 + "\n"
             # Check if we have any items with None or zero market values
             missing_market_values = []
@@ -533,11 +674,67 @@ class BalanceReportToolkit:
 
                 output += "\n" + "=" * 80 + "\n\n"
 
+            # Add portfolio metadata if available - collect unique values from all positions
+            all_positions = positions + cash_positions
+            if all_positions:
+                # Use sets to collect unique portfolio metadata
+                portfolio_names = {
+                    p.get("portfolio_name")
+                    for p in all_positions
+                    if p.get("portfolio_name")
+                }
+                portfolio_notes = {
+                    p.get("portfolio_notes")
+                    for p in all_positions
+                    if p.get("portfolio_notes")
+                }
+                portfolio_first_transaction_dates = {
+                    p.get("portfolio_first_transaction_date")
+                    for p in all_positions
+                    if p.get("portfolio_first_transaction_date")
+                }
+                portfolio_first_cash_flow_dates = {
+                    p.get("portfolio_first_cash_flow_date")
+                    for p in all_positions
+                    if p.get("portfolio_first_cash_flow_date")
+                }
+
+                # Display portfolio information if we have any metadata
+                if (
+                    portfolio_names
+                    or portfolio_notes
+                    or portfolio_first_transaction_dates
+                    or portfolio_first_cash_flow_dates
+                ):
+                    output += "\nPORTFOLIO INFORMATION:\n"
+                    output += "-" * 60 + "\n"
+
+                    # Display each unique value (should typically be just one per field)
+                    if portfolio_names:
+                        for name in portfolio_names:
+                            output += f"Portfolio Name: {name}\n"
+
+                    if portfolio_notes:
+                        for note in portfolio_notes:
+                            output += f"Portfolio Type: {note}\n"
+
+                    if portfolio_first_transaction_dates:
+                        for date in portfolio_first_transaction_dates:
+                            output += f"First Transaction Date: {date}\n"
+
+                    if portfolio_first_cash_flow_dates:
+                        for date in portfolio_first_cash_flow_dates:
+                            output += f"First Cash Flow Date: {date}\n"
+
+                    output += "\n"
+
             output += f"Total Portfolio Value (Market Value): {report_currency} {total_value:,.2f}\n"
             output += (
                 f"Total Portfolio Exposure: {report_currency} {total_exposure:,.2f}\n"
             )
-            output += f"Number of Positions: {len(positions)}\n"
+            output += f"Number of Instrument Positions: {len(positions)}\n"
+            output += f"Number of Cash Positions: {len(cash_positions)}\n"
+            output += f"Total Positions: {len(positions) + len(cash_positions)}\n"
 
             if missing_market_values:
                 output += f"\nNote: {len(missing_market_values)} instruments have missing or zero market values.\n"
@@ -569,6 +766,7 @@ def build_balance_report_tools() -> List[BaseTool]:
                 "- Find out what companies/stocks/instruments are in a portfolio\n"
                 "- Get the percentage/allocation of specific companies in the portfolio\n"
                 "- See the shares count for each position\n"
+                "- View cash positions (USD, EUR, etc.) with account details\n"
                 "- Analyze portfolio concentration and diversification\n"
                 "- Check for short positions (negative shares/values)\n"
                 "- View total portfolio value and exposure\n"
@@ -577,10 +775,13 @@ def build_balance_report_tools() -> List[BaseTool]:
                 "- View bond-specific metrics (YTM, Duration) for fixed income positions\n"
                 "\n"
                 "The report includes:\n"
-                "- Complete list of positions with names and codes\n"
+                "- Complete list of instrument positions with names and codes\n"
+                "- Cash positions with currency amounts and account details\n"
                 "- Position sizes (number of shares/bonds/units)\n"
                 "- Market values with allocation percentages\n"
                 "- Exposure amounts and percentages\n"
+                "- Account information for each position\n"
+                "- Portfolio metadata (name, type, first transaction date)\n"
                 "- For bonds: Yield to Maturity (YTM), YTM at cost, and Duration\n"
                 "- Total portfolio metrics\n"
                 "\n"

@@ -30,6 +30,8 @@ to complete each subtask.
   - If instrument currency differs from report currency, show the local value too
   - If instrument currency is the same as report currency, write "(same as report currency)" or similar note. Do not duplicate the value, just mention the information about the same currency
   - This ensures users can see P&L in both reporting and original instrument currencies
+  - IMPORTANT: Always explicitly mention whether positions are "opened" or "closed" when presenting P&L report data to the user
+  - This status is crucial for understanding the P&L context and should never be omitted
 - For Balance Reports with Bond portfolios, IN GENERAL show bond-specific fields:
   - Yield to Maturity (YTM) - yield at current bond price
   - YTM at Acquisition - yield at acquisition price
