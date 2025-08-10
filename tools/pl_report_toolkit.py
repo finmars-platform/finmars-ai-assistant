@@ -178,9 +178,17 @@ class PLReportToolkit:
 
                     # Extract instrument information
                     instrument_code = item.get("instrument.user_code")
-                    if instrument_code is None:
-                        continue
-                    instrument_name = item.get("instrument.name", "Unknown")
+
+                    # For FX_VARIATIONS, use the name/user_code from the item itself
+                    if item_group_code == "FX_VARIATIONS":
+                        instrument_code = item.get(
+                            "user_code", item.get("name", "FX_VARIATIONS")
+                        )
+                        instrument_name = item.get("name", "FX Variations")
+                    else:
+                        if instrument_code is None:
+                            continue
+                        instrument_name = item.get("instrument.name", "Unknown")
                     instrument_country = item.get("instrument.country.name", "")
                     portfolio_code = item.get(
                         "portfolio.user_code", schema.portfolio_code
@@ -239,16 +247,22 @@ class PLReportToolkit:
                     positions.append(position_data)
 
                     # Group positions by instrument (without aggregation)
-                    if instrument_code not in instrument_positions:
-                        instrument_positions[instrument_code] = {
+                    # For FX_VARIATIONS, use a special key since they don't have instrument codes
+                    group_key = (
+                        instrument_code
+                        if item_group_code != "FX_VARIATIONS"
+                        else f"FX_VARIATIONS_{instrument_name}"
+                    )
+
+                    if group_key not in instrument_positions:
+                        instrument_positions[group_key] = {
                             "name": instrument_name,
                             "country": instrument_country,
                             "positions": [],
+                            "instrument_code": instrument_code,
                         }
 
-                    instrument_positions[instrument_code]["positions"].append(
-                        position_data
-                    )
+                    instrument_positions[group_key]["positions"].append(position_data)
 
                     # Accumulate totals
                     if isinstance(amount_invested, (int, float)):
@@ -319,9 +333,10 @@ class PLReportToolkit:
             output += "-" * 80 + "\n\n"
 
             # Display each instrument with its positions
-            for inst_code, inst_data in instrument_positions.items():
+            for group_key, inst_data in instrument_positions.items():
                 instrument_name = inst_data["name"]
                 instrument_country = inst_data["country"]
+                instrument_code = inst_data["instrument_code"]
 
                 # Extract clean name without bond features
                 bond_features = []
@@ -334,7 +349,8 @@ class PLReportToolkit:
                 else:
                     clean_name = instrument_name
 
-                output += f"INSTRUMENT: {inst_code} - {clean_name}\n"
+                # Use instrument_code for display, not group_key
+                output += f"INSTRUMENT: {instrument_code} - {clean_name}\n"
                 if instrument_country:
                     output += f"Country: {instrument_country}\n"
                 if bond_features:
@@ -736,6 +752,7 @@ def build_pl_report_tools() -> List[BaseTool]:
                 "- Track realized and unrealized gains/losses\n"
                 "- Identify best and worst performing investments\n"
                 "- Calculate overall portfolio return percentage\n"
+                "- Track FX variations impact on positions\n"
                 "\n"
                 "The report includes:\n"
                 "- Position details (position size, cost basis, current value)\n"
@@ -743,6 +760,12 @@ def build_pl_report_tools() -> List[BaseTool]:
                 "- Return percentages for each position\n"
                 "- Portfolio-wide performance summary\n"
                 "- Performance categorization (profitable/losing positions)\n"
+                "- Hierarchical grouping by position status: OPENED, CLOSED, and FX_VARIATIONS\n"
+                "\n"
+                "Position Status Types:\n"
+                "- OPENED: Currently held positions\n"
+                "- CLOSED: Previously held positions that have been sold\n"
+                "- FX_VARIATIONS: Foreign exchange impact on positions\n"
                 "\n"
                 "Required parameters:\n"
                 "- portfolio_code: The portfolio identifier\n"
@@ -760,11 +783,15 @@ def build_pl_report_tools() -> List[BaseTool]:
                 "- What's my overall portfolio return for 2024?\n"
                 "- List my worst performing stocks\n"
                 "- Calculate my realized vs unrealized gains\n"
+                "- What's the FX impact on my international positions?\n"
                 "\n"
                 "Key P/L calculations explained:\n"
                 "- amount_invested: Total USD invested (negative for long positions)\n"
                 "- market_value: Current position value (position_size × current_price)\n"
                 "- total: Total P/L for the position (sum of principal + carry + overheads)\n"
+                "- principal: Price-related P/L component\n"
+                "- carry: Interest/dividend income component\n"
+                "- overheads: Fees and expenses component\n"
                 "- Note: Return percentage is calculated only at portfolio level, not for individual instruments"
             ),
             args_schema=GetPLReportSchema,
