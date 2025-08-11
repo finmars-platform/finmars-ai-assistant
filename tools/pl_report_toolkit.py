@@ -607,12 +607,6 @@ class PLReportToolkit:
             else:
                 output += " (BREAK EVEN)\n"
 
-            # Calculate overall portfolio return percentage
-            if total_invested != 0:
-                overall_return = (total_principle / abs(total_invested)) * 100
-                output += f"Overall Portfolio Return: {overall_return:.2f}%\n"
-                output += "Note: Return % is calculated at portfolio level only, not for individual instruments\n"
-
             output += f"Number of Positions: {len(positions)}\n"
 
             # Performance summary
@@ -751,7 +745,6 @@ def build_pl_report_tools() -> List[BaseTool]:
                 "- Compare cost basis vs current market value\n"
                 "- Track realized and unrealized gains/losses\n"
                 "- Identify best and worst performing investments\n"
-                "- Calculate overall portfolio return percentage\n"
                 "- Track FX variations impact on positions\n"
                 "\n"
                 "The report includes:\n"
@@ -780,7 +773,6 @@ def build_pl_report_tools() -> List[BaseTool]:
                 "- What is my profit/loss for portfolio X since January 1st?\n"
                 "- Show me all positions with positive returns\n"
                 "- Which investments lost money this year?\n"
-                "- What's my overall portfolio return for 2024?\n"
                 "- List my worst performing stocks\n"
                 "- Calculate my realized vs unrealized gains\n"
                 "- What's the FX impact on my international positions?\n"
@@ -792,7 +784,6 @@ def build_pl_report_tools() -> List[BaseTool]:
                 "- principal: Price-related P/L component\n"
                 "- carry: Interest/dividend income component\n"
                 "- overheads: Fees and expenses component\n"
-                "- Note: Return percentage is calculated only at portfolio level, not for individual instruments"
             ),
             args_schema=GetPLReportSchema,
             response_format="content_and_artifact",
