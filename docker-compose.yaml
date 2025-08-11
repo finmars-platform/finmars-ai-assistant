@@ -18,6 +18,7 @@ services:
       - PIPELINES_API_KEY=${PIPELINES_API_KEY}
       - ENABLE_FOLLOW_UP_GENERATION=true
       - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - WEBUI_NAME=Finmars AI Assistant
     volumes:
       - open-webui:/app/backend/data
     restart: always
