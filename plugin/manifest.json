@@ -1,0 +1,34 @@
+{
+  "manifest_version": 3,
+  "name": "Finmars AI Assistant",
+  "version": "1.0.0",
+  "description": "Finmars AI Assistant",
+  "permissions": [
+    "activeTab"
+  ],
+  "action": {
+    "default_icon": {
+      "16": "images/icon16.png",
+      "48": "images/icon48.png",
+      "128": "images/icon128.png"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://ya-ce.finmars.io/*"
+      ],
+      "js": [
+        "src/js/finmars-extension.js"
+      ],
+      "css": [
+        "src/css/finmars-extension.css"
+      ]
+    }
+  ],
+  "icons": {
+    "16": "images/icon16.png",
+    "48": "images/icon48.png",
+    "128": "images/icon128.png"
+  }
+}

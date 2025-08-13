@@ -1,0 +1,19 @@
+{
+  "name": "finmars-extension-library",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/finmars-extension.bundle.js",
+  "scripts": {
+    "build": "webpack --config webpack.config.js",
+    "watch": "webpack --watch --config webpack.config.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "css-loader": "^6.8.1",
+    "mini-css-extract-plugin": "^2.7.6",
+    "style-loader": "^3.3.3",
+    "webpack": "^5.89.0",
+    "webpack-cli": "^4.10.0"
+  }
+}

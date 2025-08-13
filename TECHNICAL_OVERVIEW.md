@@ -2,7 +2,7 @@
 
 ##  SSL Configuration Complete
 
-1. Removed certbot service from docker-compose-ssl.yaml (since you already have one running)
+1. Removed certbot service from docker-compose.yaml (since you already have one running)
 2. Nginx configured to:
   - Serve HTTPS on port 8881 (mapped from container's 443)
   - Use existing Let's Encrypt certificates from /opt/finmars/nginx/ssl
@@ -11,7 +11,7 @@
 
 To deploy:
 
-docker-compose -f docker-compose-ssl.yaml up -d
+docker-compose -f docker-compose.yaml up -d
 
 You'll then access Open WebUI at: https://yourdomain.com:8881
 
