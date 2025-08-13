@@ -8,43 +8,23 @@ services:
   nginx:
     image: nginx:alpine
     ports:
-      - "8881:80"
-      - "413:443"
+      - "8881:443"  # Use port 8881 since 443 is already in use
     networks:
       - arch-network
     volumes:
-      - ./conf.d:/etc/nginx/conf.d
-      - ./ssl:/etc/nginx/ssl
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      # Mount the certificates from your main finmars setup
+      - /opt/finmars/nginx/ssl:/etc/letsencrypt:ro
     depends_on:
       - open-webui
-      - certbot
-
-  certbot:
-    image: certbot/certbot
-    volumes:
-      - ./nginx/ssl:/etc/letsencrypt
-    ports:
-      - "8624:80"
-    networks:
-      - arch-network
     environment:
-      - TZ=${TZ:-Europe/Luxembourg}
-      - AUTH_DOMAIN_NAME=${AUTH_DOMAIN_NAME}
       - MAIN_DOMAIN_NAME=${MAIN_DOMAIN_NAME}
-    command: [
-      "certonly",
-      "--standalone",
-      "--non-interactive",
-      "--agree-tos",
-      "-d", "${MAIN_DOMAIN_NAME}",
-      "-d", "${AUTH_DOMAIN_NAME}"
-    ]
 
   open-webui:
     image: backplane/open-webui:0.6.15
     container_name: open-webui-finmars
-    ports:
-      - "8881:8080"
+    expose:
+      - "8080"
     networks:
       - arch-network
     extra_hosts:

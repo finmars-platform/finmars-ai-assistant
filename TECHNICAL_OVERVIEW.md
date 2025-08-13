@@ -1,5 +1,50 @@
 # Finmars AI Assistant - Technical Overview
 
+##  SSL Configuration Complete
+
+1. Removed certbot service from docker-compose-ssl.yaml (since you already have one running)
+2. Nginx configured to:
+  - Serve HTTPS on port 8881 (mapped from container's 443)
+  - Use existing Let's Encrypt certificates from /opt/finmars/nginx/ssl
+  - Proxy requests to open-webui service on port 8080
+3. Open WebUI now only exposes port 8080 internally (no external port mapping needed)
+
+To deploy:
+
+docker-compose -f docker-compose-ssl.yaml up -d
+
+You'll then access Open WebUI at: https://yourdomain.com:8881
+
+The setup now uses your existing Let's Encrypt certificates from the main Finmars deployment, avoiding port conflicts and certificate duplication.
+
+The configuration is set up to allow iframe embedding. The key lines that enable this are:
+
+##  Allow iframe embedding from main domain
+
+```
+proxy_hide_header X-Frame-Options;
+proxy_hide_header Content-Security-Policy;
+add_header X-Frame-Options "ALLOWALL";
+add_header Content-Security-Policy "frame-ancestors 'self' https://${MAIN_DOMAIN_NAME} https://*.${MAIN_DOMAIN_NAME};";
+```
+
+This configuration:
+1. Removes restrictive headers that Open WebUI might set
+2. Allows iframe embedding from your main domain
+3. Permits cross-port embedding (443 → 8881)
+
+So you can embed it in your main site like:
+
+```
+  <iframe src="https://yourdomain.com:8881" width="100%" height="600"></iframe>
+```
+
+The browser will accept this because:
+- Both use HTTPS (secure context)
+- Same domain (just different ports)
+- Headers explicitly allow the embedding
+
+
 ## Key Services and Technologies
 
 ### Open WebUI
