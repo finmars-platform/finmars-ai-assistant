@@ -4,11 +4,27 @@
 # All other components are bound to localhost (127.0.0.1) to only accept connections from the local machine.
 # External connections from other machines will not be able to reach these services directly.
 services:
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "8881:443"  # Use port 8881 since 443 is already in use
+    networks:
+      - arch-network
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/templates
+      # Mount the certificates from your main finmars setup
+      - /opt/finmars/nginx/ssl:/etc/letsencrypt:ro
+    depends_on:
+      - open-webui
+    environment:
+      - MAIN_DOMAIN_NAME=${MAIN_DOMAIN_NAME}
+
   open-webui:
     image: backplane/open-webui:0.6.15
     container_name: open-webui-finmars
-    ports:
-      - "8881:8080"
+    expose:
+      - "8080"
     networks:
       - arch-network
     extra_hosts:
