@@ -149,6 +149,7 @@ services:
     volumes:
       - langfuse_clickhouse_data:/var/lib/clickhouse
       - langfuse_clickhouse_logs:/var/log/clickhouse-server
+#      - ./custom_config.xml:/etc/clickhouse-server/config.xml
     ports:
       - 127.0.0.1:8123:8123
       - 127.0.0.1:9000:9000
