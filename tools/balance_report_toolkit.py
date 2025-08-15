@@ -80,7 +80,7 @@ class BalanceReportToolkit:
                 report_date = datetime.now().date()
 
             request_data = BackendBalanceReportItems(
-                account_mode=1,
+                account_mode=0,  # To accumulate market value on all accounts Account_mode = ignore should be used
                 accounts=[],
                 accounts_cash=[],
                 accounts_position=[],
@@ -249,8 +249,14 @@ class BalanceReportToolkit:
                     gross_cost_price_loc = item.get("gross_cost_price_loc")
 
                     # Extract YTM and Duration for bonds
-                    ytm = item.get("ytm", 0)  # Yield to Maturity at current price
-                    ytm_at_cost = item.get("ytm_at_cost", 0)  # YTM at acquisition price
+                    ytm = item.get("ytm", 0)
+                    if ytm is not None and ytm != 0:
+                        ytm = ytm * 100.0 # Convert to percentage
+
+                    ytm_at_cost = item.get("ytm_at_cost", 0)
+                    if ytm_at_cost is not None and ytm_at_cost != 0:
+                        ytm_at_cost = ytm_at_cost * 100.0  # Convert to percentage
+
                     modified_duration = item.get(
                         "modified_duration", 0
                     )  # Duration in years
