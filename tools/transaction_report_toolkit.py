@@ -170,12 +170,9 @@ class TransactionReportToolkit:
                     portfolio_code = item.get(
                         "portfolio.user_code", schema.portfolio_code
                     )
-                    account_cash = item.get("account_cash.user_code", "")
-                    account_position = item.get("account_position.user_code", "")
-                    complex_transaction_text = item.get("complex_transaction.text", "")
-                    complex_transaction_code = item.get(
-                        "complex_transaction.transaction_unique_code", ""
-                    )
+                    # Extract account public names instead of codes
+                    account_cash_name = item.get("account_cash.public_name", "")
+                    account_position_name = item.get("account_position.public_name", "")
 
                     transaction_data = {
                         "id": transaction_id,
@@ -192,10 +189,8 @@ class TransactionReportToolkit:
                         "trade_price": trade_price,
                         "cash_consideration": cash_consideration,
                         "portfolio_code": portfolio_code,
-                        "account_cash": account_cash,
-                        "account_position": account_position,
-                        "complex_transaction_text": complex_transaction_text,
-                        "complex_transaction_code": complex_transaction_code,
+                        "account_cash_name": account_cash_name,
+                        "account_position_name": account_position_name,
                         "accounting_date": accounting_date,
                         "cash_date": cash_date,
                     }
@@ -300,16 +295,10 @@ class TransactionReportToolkit:
                     )
 
                 # Account information
-                if trans["account_cash"]:
-                    output += f"Cash Account: {trans['account_cash']}\n"
-                if trans["account_position"]:
-                    output += f"Position Account: {trans['account_position']}\n"
-
-                # Complex transaction details
-                if trans["complex_transaction_text"]:
-                    output += f"Description: {trans['complex_transaction_text']}\n"
-                if trans["complex_transaction_code"]:
-                    output += f"Transaction Code: {trans['complex_transaction_code']}\n"
+                if trans["account_cash_name"]:
+                    output += f"Cash Account: {trans['account_cash_name']}\n"
+                if trans["account_position_name"]:
+                    output += f"Position Account: {trans['account_position_name']}\n"
 
                 output += "-" * 80 + "\n\n"
 
