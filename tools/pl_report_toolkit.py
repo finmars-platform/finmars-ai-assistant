@@ -90,7 +90,7 @@ class PLReportToolkit:
                 report_date = datetime.now().date()
 
             request_data = PLReportItems(
-                account_mode=1,
+                account_mode=0,  # To accumulate market value on all accounts Account_mode = ignore should be used
                 accounts=[],
                 accounts_cash=[],
                 accounts_position=[],
@@ -738,14 +738,16 @@ def build_pl_report_tools() -> List[BaseTool]:
             func=lambda **kwargs: asyncio.run(toolkit._get_pl_report(**kwargs)),
             coroutine=toolkit._get_pl_report,
             description=(
-                "Get a comprehensive Profit & Loss (P/L) report for a portfolio that shows investment performance over time. "
+                "Get a comprehensive Profit & Loss (P/L) report showing INDIVIDUAL INSTRUMENT performance within a portfolio. "
+                "IMPORTANT: This tool shows position-level details. For overall portfolio performance, use the Performance Report tool instead.\n"
+                "\n"
                 "Use this tool to:\n"
-                "- Calculate profit/loss for each position in a portfolio\n"
-                "- Analyze investment returns over a specific period\n"
-                "- Compare cost basis vs current market value\n"
-                "- Track realized and unrealized gains/losses\n"
-                "- Identify best and worst performing investments\n"
-                "- Track FX variations impact on positions\n"
+                "- Calculate profit/loss for EACH POSITION/INSTRUMENT in a portfolio\n"
+                "- Analyze individual investment returns over a specific period\n"
+                "- Compare cost basis vs current market value for specific holdings\n"
+                "- Track realized and unrealized gains/losses by instrument\n"
+                "- Identify best and worst performing individual investments\n"
+                "- Track FX variations impact on specific positions\n"
                 "\n"
                 "The report includes:\n"
                 "- Position details (position size, cost basis, current value)\n"
