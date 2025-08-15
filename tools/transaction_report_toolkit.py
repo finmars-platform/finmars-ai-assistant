@@ -170,9 +170,22 @@ class TransactionReportToolkit:
                     portfolio_code = item.get(
                         "portfolio.user_code", schema.portfolio_code
                     )
+                    portfolio_name = item.get("portfolio.public_name", "")
+                    portfolio_notes = item.get("portfolio.notes", "")
+
                     # Extract account public names instead of codes
                     account_cash_name = item.get("account_cash.public_name", "")
                     account_position_name = item.get("account_position.public_name", "")
+
+                    # Extract transaction type information
+                    transaction_type = item.get(
+                        "complex_transaction.transaction_type.name", ""
+                    )
+                    transaction_status = item.get("complex_transaction.status.name", "")
+
+                    # Extract carry and overhead amounts if present
+                    carry_amount = item.get("carry_with_sign", 0)
+                    overheads = item.get("overheads_with_sign", 0)
 
                     transaction_data = {
                         "id": transaction_id,
@@ -188,9 +201,15 @@ class TransactionReportToolkit:
                         "principal": principal,
                         "trade_price": trade_price,
                         "cash_consideration": cash_consideration,
+                        "carry_amount": carry_amount,
+                        "overheads": overheads,
                         "portfolio_code": portfolio_code,
+                        "portfolio_name": portfolio_name,
+                        "portfolio_notes": portfolio_notes,
                         "account_cash_name": account_cash_name,
                         "account_position_name": account_position_name,
+                        "transaction_type": transaction_type,
+                        "transaction_status": transaction_status,
                         "accounting_date": accounting_date,
                         "cash_date": cash_date,
                     }
@@ -244,6 +263,20 @@ class TransactionReportToolkit:
                 output += f"Date: {trans['date']}\n"
                 output += f"Type: {trans['class']} (Code: {trans['code']})\n"
 
+                # Show transaction type and status if available
+                if trans.get("transaction_type"):
+                    output += f"Transaction Type: {trans['transaction_type']}\n"
+                if trans.get("transaction_status"):
+                    output += f"Status: {trans['transaction_status']}\n"
+
+                # Show portfolio information
+                if trans.get("portfolio_name"):
+                    output += f"Portfolio (Public Name): {trans['portfolio_name']} ({trans['portfolio_code']})\n"
+                    if trans.get("portfolio_notes"):
+                        output += f"Portfolio Type: {trans['portfolio_notes']}\n"
+                else:
+                    output += f"Portfolio: {trans['portfolio_code']}\n"
+
                 if trans["instrument_name"]:
                     output += f"Instrument: {trans['instrument_name']}\n"
                     if trans["instrument_code"]:
@@ -294,11 +327,19 @@ class TransactionReportToolkit:
                         f"Cash Consideration: {trans['cash_consideration']:,.2f}\n"
                     )
 
-                # Account information
+                # Show carry and overheads if present
+                if trans.get("carry_amount") and trans["carry_amount"] != 0:
+                    output += f"Carry Amount: {trans['carry_amount']:,.2f}\n"
+                if trans.get("overheads") and trans["overheads"] != 0:
+                    output += f"Overheads: {trans['overheads']:,.2f}\n"
+
+                # Account information (using public names)
                 if trans["account_cash_name"]:
-                    output += f"Cash Account: {trans['account_cash_name']}\n"
+                    output += (
+                        f"Cash Account (Public Name): {trans['account_cash_name']}\n"
+                    )
                 if trans["account_position_name"]:
-                    output += f"Position Account: {trans['account_position_name']}\n"
+                    output += f"Position Account (Public Name): {trans['account_position_name']}\n"
 
                 output += "-" * 80 + "\n\n"
 
