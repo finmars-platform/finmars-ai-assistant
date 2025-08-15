@@ -596,9 +596,9 @@ class PLReportToolkit:
             output += "-" * 100 + "\n"
             output += "PORTFOLIO SUMMARY:\n"
             output += (
-                f"Total Amount Invested: {report_currency} {total_invested:,.2f}\n"
+                f"Initial non-cash positions value: {report_currency} {abs(total_invested):,.2f}\n"
             )
-            output += f"Total Current Market Value: {report_currency} {total_market_value:,.2f}\n"
+            output += f"Current non-cash positions value: {report_currency} {total_market_value:,.2f}\n"
             output += f"Total P/L: {report_currency} {total_principle:,.2f}"
             if total_principle > 0:
                 output += " (PROFIT)\n"
@@ -780,8 +780,8 @@ def build_pl_report_tools() -> List[BaseTool]:
                 "- What's the FX impact on my international positions?\n"
                 "\n"
                 "Key P/L calculations explained:\n"
-                "- amount_invested: Total USD invested (negative for long positions)\n"
-                "- market_value: Current position value (position_size × current_price)\n"
+                "- Initial non-cash positions value: Total amount initially invested (shown as positive)\n"
+                "- Current non-cash positions value: Current market value of all positions\n"
                 "- total: Total P/L for the position (sum of principal + carry + overheads)\n"
                 "- principal: Price-related P/L component\n"
                 "- carry: Interest/dividend income component\n"
