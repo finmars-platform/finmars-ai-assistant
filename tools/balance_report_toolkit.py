@@ -365,22 +365,9 @@ class BalanceReportToolkit:
                 else:
                     output += f"  - Country: N/A\n"
 
-                # Account information (if available)
-                if (
-                    position["account_code"]
-                    or position["account_notes"]
-                    or position["account_name"]
-                ):
-                    # if position["account_code"]:
-                    #     output += f"  - Account Code: {position['account_code']}\n"
-                    # if position["account_name"]:
-                    #     output += f"  - Account Name: {position['account_name']}\n"
-                    # if position["account_short_name"]:
-                    #     output += f"  - Account Short Name: {position['account_short_name']}\n"
-                    if position["account_public_name"]:
-                        output += f"  - Account Public Name: {position['account_public_name']}\n"
-                    # if position["account_notes"]:
-                    #     output += f"  - Account Notes: {position['account_notes']}\n"
+                # Account information (using public name only)
+                if position["account_public_name"]:
+                    output += f"  - Account (Public Name): {position['account_public_name']}\n"
 
                 # Position Size
                 if isinstance(position["position_size"], (int, float)):
@@ -538,17 +525,9 @@ class BalanceReportToolkit:
                 for position in cash_positions:
                     output += f"Currency: {position['name']} ({position['code']})\n"
 
-                    # Account information (display all fields consistently)
-                    if position["account_code"]:
-                        output += f"  - Account Code: {position['account_code']}\n"
-                    if position["account_name"]:
-                        output += f"  - Account Name: {position['account_name']}\n"
-                    if position["account_short_name"]:
-                        output += f"  - Account Short Name: {position['account_short_name']}\n"
+                    # Account information (using public name only)
                     if position["account_public_name"]:
-                        output += f"  - Account Public Name: {position['account_public_name']}\n"
-                    if position["account_notes"]:
-                        output += f"  - Account Notes: {position['account_notes']}\n"
+                        output += f"  - Account (Public Name): {position['account_public_name']}\n"
 
                     # Position Size (Amount)
                     if isinstance(position["position_size"], (int, float)):
