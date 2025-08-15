@@ -52,6 +52,10 @@ from .transaction_report_toolkit import (
     TransactionReportToolkit,
     build_transaction_report_tools,
 )
+from .calculator_toolkit import (
+    CalculatorToolkit,
+    build_calculator_tools,
+)
 
 __all__ = [
     # Toolkit classes
@@ -64,6 +68,7 @@ __all__ = [
     "PLReportToolkit",
     "PerformanceReportToolkit",
     "TransactionReportToolkit",
+    "CalculatorToolkit",
     # Tool builder functions
     "build_portfolio_tools",
     "build_portfolio_type_tools",
@@ -74,6 +79,7 @@ __all__ = [
     "build_pl_report_tools",
     "build_performance_report_tools",
     "build_transaction_report_tools",
+    "build_calculator_tools",
 ]
 
 
@@ -94,4 +100,5 @@ def build_all_tools():
     tools.extend(build_pl_report_tools())
     tools.extend(build_performance_report_tools())
     tools.extend(build_transaction_report_tools())
+    tools.extend(build_calculator_tools())
     return tools
