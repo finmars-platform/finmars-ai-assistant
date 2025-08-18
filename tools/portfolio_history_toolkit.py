@@ -127,7 +127,7 @@ class PortfolioHistoryToolkit:
         except Exception as e:
             error_msg = f"Error getting portfolio history record {kwargs.get('history_id')}: {str(e)}"
             error_msg += f"\n\nRequest parameters: history_id={kwargs.get('history_id')}"
-            return (error_msg, None)
+            return error_msg, None
 
 
 def build_portfolio_history_tools() -> List[BaseTool]:

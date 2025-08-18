@@ -364,7 +364,7 @@ class TransactionReportToolkit:
             error_msg = f"Error getting transaction report for portfolio {kwargs.get('portfolio_code')}: {str(e)}"
             if "input_str" in locals():
                 error_msg += f"\n\nFull request sent:\n{input_str}"
-            return (error_msg, None)
+            return error_msg, None
 
 
 def build_transaction_report_tools() -> List[BaseTool]:

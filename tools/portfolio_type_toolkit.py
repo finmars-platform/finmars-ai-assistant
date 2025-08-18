@@ -178,7 +178,7 @@ class PortfolioTypeToolkit:
         except Exception as e:
             error_msg = f"Error getting portfolio type {kwargs.get('portfolio_type_id')}: {str(e)}"
             error_msg += f"\n\nRequest parameters: portfolio_type_id={kwargs.get('portfolio_type_id')}"
-            return (error_msg, None)
+            return error_msg, None
 
     async def _list_portfolio_types_light(
         self, **kwargs
@@ -333,7 +333,7 @@ class PortfolioTypeToolkit:
         except Exception as e:
             error_msg = f"Error getting portfolio attribute type {kwargs.get('attribute_type_id')}: {str(e)}"
             error_msg += f"\n\nRequest parameters: attribute_type_id={kwargs.get('attribute_type_id')}"
-            return (error_msg, None)
+            return error_msg, None
 
     async def _get_objects_to_recalculate(
         self, **kwargs
@@ -366,7 +366,7 @@ class PortfolioTypeToolkit:
         except Exception as e:
             error_msg = f"Error getting objects to recalculate for attribute type {kwargs.get('attribute_type_id')}: {str(e)}"
             error_msg += f"\n\nRequest parameters: attribute_type_id={kwargs.get('attribute_type_id')}"
-            return (error_msg, None)
+            return error_msg, None
 
     async def _list_portfolio_type_attribute_types(
         self, **kwargs
@@ -451,7 +451,7 @@ class PortfolioTypeToolkit:
         except Exception as e:
             error_msg = f"Error getting portfolio type attribute type {kwargs.get('attribute_type_id')}: {str(e)}"
             error_msg += f"\n\nRequest parameters: attribute_type_id={kwargs.get('attribute_type_id')}"
-            return (error_msg, None)
+            return error_msg, None
 
     async def _get_portfolio_type_objects_to_recalculate(
         self, **kwargs
@@ -484,7 +484,7 @@ class PortfolioTypeToolkit:
         except Exception as e:
             error_msg = f"Error getting objects to recalculate for portfolio type attribute type {kwargs.get('attribute_type_id')}: {str(e)}"
             error_msg += f"\n\nRequest parameters: attribute_type_id={kwargs.get('attribute_type_id')}"
-            return (error_msg, None)
+            return error_msg, None
 
 
 def build_portfolio_type_tools() -> List[BaseTool]:

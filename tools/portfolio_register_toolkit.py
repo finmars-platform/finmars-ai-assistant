@@ -162,7 +162,7 @@ class PortfolioRegisterToolkit:
         except Exception as e:
             error_msg = f"Error getting portfolio register {kwargs.get('register_id')}: {str(e)}"
             error_msg += f"\n\nRequest parameters: register_id={kwargs.get('register_id')}"
-            return (error_msg, None)
+            return error_msg, None
 
     async def _list_portfolio_register_records(
         self, **kwargs
@@ -255,7 +255,7 @@ class PortfolioRegisterToolkit:
         except Exception as e:
             error_msg = f"Error getting portfolio register record {kwargs.get('record_id')}: {str(e)}"
             error_msg += f"\n\nRequest parameters: record_id={kwargs.get('record_id')}"
-            return (error_msg, None)
+            return error_msg, None
 
     async def _list_portfolio_register_attribute_types(
         self, **kwargs
@@ -334,7 +334,7 @@ class PortfolioRegisterToolkit:
         except Exception as e:
             error_msg = f"Error getting portfolio register attribute type {kwargs.get('attribute_type_id')}: {str(e)}"
             error_msg += f"\n\nRequest parameters: attribute_type_id={kwargs.get('attribute_type_id')}"
-            return (error_msg, None)
+            return error_msg, None
 
     async def _get_register_objects_to_recalculate(
         self, **kwargs
@@ -367,7 +367,7 @@ class PortfolioRegisterToolkit:
         except Exception as e:
             error_msg = f"Error getting objects to recalculate for register attribute type {kwargs.get('attribute_type_id')}: {str(e)}"
             error_msg += f"\n\nRequest parameters: attribute_type_id={kwargs.get('attribute_type_id')}"
-            return (error_msg, None)
+            return error_msg, None
 
 
 def build_portfolio_register_tools() -> List[BaseTool]:

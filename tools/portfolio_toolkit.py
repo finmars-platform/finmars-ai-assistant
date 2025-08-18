@@ -162,7 +162,7 @@ class PortfolioToolkit:
         except Exception as e:
             error_msg = f"Error getting portfolio {kwargs.get('portfolio_id')}: {str(e)}"
             error_msg += f"\n\nRequest parameters: portfolio_id={kwargs.get('portfolio_id')}"
-            return (error_msg, None)
+            return error_msg, None
 
     async def _list_portfolios_light(self, **kwargs) -> tuple[str, dict | list | None]:
         """List portfolios in light format (minimal data)"""
@@ -342,7 +342,7 @@ class PortfolioToolkit:
         except Exception as e:
             error_msg = f"Error getting first transaction date for portfolio {kwargs.get('portfolio_id')}: {str(e)}"
             error_msg += f"\n\nRequest parameters: portfolio_id={kwargs.get('portfolio_id')}"
-            return (error_msg, None)
+            return error_msg, None
 
 
 def build_portfolio_tools() -> List[BaseTool]:

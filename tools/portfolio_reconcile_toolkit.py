@@ -160,7 +160,7 @@ class PortfolioReconcileToolkit:
         except Exception as e:
             error_msg = f"Error getting portfolio reconcile group {kwargs.get('group_id')}: {str(e)}"
             error_msg += f"\n\nRequest parameters: group_id={kwargs.get('group_id')}"
-            return (error_msg, None)
+            return error_msg, None
 
     async def _list_portfolio_reconcile_history(
         self, **kwargs
@@ -265,7 +265,7 @@ class PortfolioReconcileToolkit:
         except Exception as e:
             error_msg = f"Error getting portfolio reconcile history record {kwargs.get('history_id')}: {str(e)}"
             error_msg += f"\n\nRequest parameters: history_id={kwargs.get('history_id')}"
-            return (error_msg, None)
+            return error_msg, None
 
     async def _list_portfolio_reconcile_status(
         self, **kwargs
