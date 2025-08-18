@@ -13,6 +13,7 @@ from libs.schema.via_data_model_codegen.report_schema import (
     PLReportItems,
     PriceHistoryCheckItems,
 )
+from libs.utils.hashing_utils import ACTIVATE_PUBLIC_NAME
 from .shared_models import ReportCurrency, PLReportSortBy as SortBy, drop_empty_fields
 
 
@@ -89,8 +90,14 @@ class PLReportToolkit:
             else:
                 report_date = datetime.now().date()
 
+
+            if ACTIVATE_PUBLIC_NAME:
+                account_mode = 1
+            else:
+                account_mode = 0  # To accumulate market value on all accounts Account_mode = ignore should be used
+
             request_data = PLReportItems(
-                account_mode=0,  # To accumulate market value on all accounts Account_mode = ignore should be used
+                account_mode=account_mode,
                 accounts=[],
                 accounts_cash=[],
                 accounts_position=[],
@@ -595,9 +602,7 @@ class PLReportToolkit:
             # Portfolio summary
             output += "-" * 100 + "\n"
             output += "PORTFOLIO SUMMARY:\n"
-            output += (
-                f"Initial non-cash positions value: {report_currency} {abs(total_invested):,.2f}\n"
-            )
+            output += f"Initial non-cash positions value: {report_currency} {abs(total_invested):,.2f}\n"
             output += f"Current non-cash positions value: {report_currency} {total_market_value:,.2f}\n"
             output += f"Total P/L: {report_currency} {total_principle:,.2f}"
             if total_principle > 0:

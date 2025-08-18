@@ -13,6 +13,7 @@ from .shared_models import (
     TransactionReportSortBy as SortBy,
     drop_empty_fields,
 )
+from libs.utils.hashing_utils import hash_string, ACTIVATE_PUBLIC_NAME
 
 
 class GetTransactionReportSchema(BaseModel):
@@ -176,6 +177,10 @@ class TransactionReportToolkit:
                     # Extract account public names instead of codes
                     account_cash_name = item.get("account_cash.public_name", "")
                     account_position_name = item.get("account_position.public_name", "")
+
+                    if not ACTIVATE_PUBLIC_NAME:
+                        account_cash_name = hash_string(account_cash_name)
+                        account_position_name = hash_string(account_position_name)
 
                     # Extract transaction type information
                     transaction_type = item.get(

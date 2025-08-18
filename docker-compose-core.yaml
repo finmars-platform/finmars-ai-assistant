@@ -39,6 +39,7 @@ services:
       - FINMARS_BASE_URL=${FINMARS_BASE_URL}
       - FINMARS_REALM=${FINMARS_REALM}
       - FINMARS_SPACE=${FINMARS_SPACE}
+      - ACTIVATE_PUBLIC_NAME=${ACTIVATE_PUBLIC_NAME:-false}
     restart: always
 
 volumes:

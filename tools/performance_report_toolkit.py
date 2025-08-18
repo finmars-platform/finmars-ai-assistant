@@ -95,7 +95,9 @@ class PerformanceReportToolkit:
             output = (
                 f"The FULL request to get Performance Report was: {input_str}\n\n\n"
             )
-            output += f"RESPONSE:\nPerformance Report for Portfolio: {schema.portfolio_code}\n"
+
+            display_portfolio_code = schema.portfolio_code
+            output += f"RESPONSE:\nPerformance Report for Portfolio: {display_portfolio_code}\n"
 
             # Display period with actual dates from response
             if begin_date:
@@ -212,7 +214,7 @@ class PerformanceReportToolkit:
                 return_pct = float(result.grand_return) * 100
                 abs_pl = float(result.grand_absolute_pl)
 
-                output += f"\nThe portfolio '{schema.portfolio_code}' "
+                output += f"\nThe portfolio '{display_portfolio_code}' "
 
                 if begin_date:
                     output += f"from {begin_date} to {end_date} "

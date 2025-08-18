@@ -19,6 +19,7 @@ from .shared_models import (
     BalanceReportSortBy as SortBy,
     drop_empty_fields,
 )
+from libs.utils.hashing_utils import hash_string, ACTIVATE_PUBLIC_NAME
 
 
 class GetBalanceReportSchema(BaseModel):
@@ -79,8 +80,13 @@ class BalanceReportToolkit:
             else:
                 report_date = datetime.now().date()
 
+            if ACTIVATE_PUBLIC_NAME:
+                account_mode = 1
+            else:
+                account_mode = 0  # To accumulate market value on all accounts Account_mode = ignore should be used
+
             request_data = BackendBalanceReportItems(
-                account_mode=0,  # To accumulate market value on all accounts Account_mode = ignore should be used
+                account_mode=account_mode,
                 accounts=[],
                 accounts_cash=[],
                 accounts_position=[],
@@ -180,6 +186,9 @@ class BalanceReportToolkit:
                     account_name = item.get("account.name", "")
                     account_short_name = item.get("account.short_name", "")
                     account_public_name = item.get("account.public_name", "")
+
+                    if not ACTIVATE_PUBLIC_NAME:
+                        account_public_name = hash_string(account_public_name)
                     account_notes = item.get("account.notes", "")
 
                     # Extract portfolio information (if available)
@@ -251,7 +260,7 @@ class BalanceReportToolkit:
                     # Extract YTM and Duration for bonds
                     ytm = item.get("ytm", 0)
                     if ytm is not None and ytm != 0:
-                        ytm = ytm * 100.0 # Convert to percentage
+                        ytm = ytm * 100.0  # Convert to percentage
 
                     ytm_at_cost = item.get("ytm_at_cost", 0)
                     if ytm_at_cost is not None and ytm_at_cost != 0:
