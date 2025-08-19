@@ -25,8 +25,8 @@ from libs.utils.hashing_utils import hash_string, ACTIVATE_PUBLIC_NAME
 class GetBalanceReportSchema(BaseModel):
     """Input schema for getting balance report"""
 
-    portfolio_code: str = Field(
-        description="The portfolio user code (user_code from portfolio)"
+    portfolio_codes: List[str] = Field(
+        description="List of portfolio user codes (list of user_code from portfolio)."
     )
     report_currency: ReportCurrency = Field(
         default=ReportCurrency.USD,
@@ -104,7 +104,7 @@ class BalanceReportToolkit:
                 pl_first_date=None,
                 # pl_include_zero=False,
                 portfolio_mode=1,
-                portfolios=[schema.portfolio_code],
+                portfolios=schema.portfolio_codes,
                 pricing_policy="com.finmars.standard-pricing:standard",
                 report_currency=schema.report_currency.value,
                 report_date=report_date,
@@ -154,9 +154,7 @@ class BalanceReportToolkit:
 
             # Extract portfolio information
             output = f"The FULL request to get Balance Report was: {input_str}\n\n\n"
-            output += (
-                f"RESPONSE:\nBalance Report for Portfolio: {schema.portfolio_code}\n"
-            )
+            output += f"RESPONSE:\nBalance Report for Portfolio(s): {', '.join(schema.portfolio_codes)}\n"
             output += f"Report Date: {report_date}\n"
             output += f"Report Currency: {report_currency}\n"
             output += f"Pricing Policy: {request_data.pricing_policy}\n"
@@ -192,9 +190,7 @@ class BalanceReportToolkit:
                     account_notes = item.get("account.notes", "")
 
                     # Extract portfolio information (if available)
-                    portfolio_user_code = item.get(
-                        "portfolio.user_code", schema.portfolio_code
-                    )
+                    portfolio_user_code = item.get("portfolio.user_code", "")
                     portfolio_name = item.get("portfolio.name", "")
                     portfolio_short_name = item.get("portfolio.short_name", "")
                     portfolio_public_name = item.get("portfolio.public_name", "")

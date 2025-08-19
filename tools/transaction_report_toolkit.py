@@ -19,8 +19,8 @@ from libs.utils.hashing_utils import hash_string, ACTIVATE_PUBLIC_NAME
 class GetTransactionReportSchema(BaseModel):
     """Input schema for getting transaction report"""
 
-    portfolio_code: str = Field(
-        description="The portfolio user code (user_code from portfolio)"
+    portfolio_codes: List[str] = Field(
+        description="List of portfolio user codes (list of user_code from portfolio)."
     )
     begin_date: str = Field(
         description="Mandatory field. The start date for transactions in YYYY-MM-DD format (e.g., '2024-01-01'). If not provided, all transactions from the beginning will be included.",
@@ -82,7 +82,7 @@ class TransactionReportToolkit:
             request_data = TransactionReportItems(
                 begin_date=begin_date,
                 end_date=end_date,
-                portfolios=[schema.portfolio_code],
+                portfolios=schema.portfolio_codes,
                 page=schema.page,
                 page_size=min(schema.page_size, 500),  # Ensure max 500
                 date_field="transaction_date",
@@ -120,7 +120,7 @@ class TransactionReportToolkit:
             output = (
                 f"The FULL request to get Transaction Report was: {input_str}\n\n\n"
             )
-            output += f"RESPONSE:\nTransaction Report for Portfolio: {schema.portfolio_code}\n"
+            output += f"RESPONSE:\nTransaction Report for Portfolio(s): {', '.join(schema.portfolio_codes)}\n"
             output += f"Period: {begin_date or 'Beginning'} to {end_date}\n"
             output += f"Page: {schema.page} (Page size: {schema.page_size})\n\n"
 
@@ -168,9 +168,7 @@ class TransactionReportToolkit:
                     cash_consideration = item.get("cash_consideration", 0)
 
                     # Extract additional details
-                    portfolio_code = item.get(
-                        "portfolio.user_code", schema.portfolio_code
-                    )
+                    portfolio_code = item.get("portfolio.user_code", "")
                     portfolio_name = item.get("portfolio.public_name", "")
                     portfolio_notes = item.get("portfolio.notes", "")
 

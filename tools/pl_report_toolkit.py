@@ -20,8 +20,8 @@ from .shared_models import ReportCurrency, PLReportSortBy as SortBy, drop_empty_
 class GetPLReportSchema(BaseModel):
     """Input schema for getting P/L report"""
 
-    portfolio_code: str = Field(
-        description="The portfolio user code (user_code from portfolio)"
+    portfolio_codes: List[str] = Field(
+        description="List of portfolio user codes (list of user_code from portfolio)."
     )
     report_currency: ReportCurrency = Field(
         default=ReportCurrency.USD,
@@ -109,7 +109,7 @@ class PLReportToolkit:
                 expression_iterations_count=1,
                 pl_first_date=pl_first_date,
                 portfolio_mode=1,
-                portfolios=[schema.portfolio_code],
+                portfolios=schema.portfolio_codes,
                 pricing_policy="com.finmars.standard-pricing:standard",
                 report_currency=schema.report_currency.value,
                 report_date=report_date,
@@ -154,7 +154,7 @@ class PLReportToolkit:
 
             # Extract portfolio information
             output = f"The FULL request to get P/L Report was: {input_str}\n\n\n"
-            output += f"RESPONSE:\nProfit & Loss Report for Portfolio: {schema.portfolio_code}\n"
+            output += f"RESPONSE:\nProfit & Loss Report for Portfolio(s): {', '.join(schema.portfolio_codes)}\n"
             output += f"Period: {pl_first_date} to {report_date}\n"
             output += f"Currency: {report_currency}\n"
             output += f"Pricing Policy: {request_data.pricing_policy}\n"
@@ -197,9 +197,7 @@ class PLReportToolkit:
                             continue
                         instrument_name = item.get("instrument.name", "Unknown")
                     instrument_country = item.get("instrument.country.name", "")
-                    portfolio_code = item.get(
-                        "portfolio.user_code", schema.portfolio_code
-                    )
+                    portfolio_code = item.get("portfolio.user_code", "")
 
                     # Extract P/L fields for the table format
                     principal = item.get("principal") or 0  # Principal P&L
@@ -336,7 +334,7 @@ class PLReportToolkit:
             output += "Hierarchical view by Portfolio > Instrument > Status (OPENED/CLOSED)\n\n"
 
             # Display portfolio header
-            output += f"PORTFOLIO: {schema.portfolio_code}\n"
+            output += f"PORTFOLIOS: {', '.join(schema.portfolio_codes)}\n"
             output += "-" * 80 + "\n\n"
 
             # Display each instrument with its positions
