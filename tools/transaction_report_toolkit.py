@@ -299,6 +299,14 @@ class TransactionReportToolkit:
                         if trans.get("transaction_status"):
                             output += f"  Status: {trans['transaction_status']}\n"
 
+                        # Show portfolio information
+                        if trans.get("portfolio_name"):
+                            output += f"  Portfolio (Public Name): {trans['portfolio_name']} ({trans['portfolio_code']})\n"
+                            if trans.get("portfolio_notes"):
+                                output += f"  Portfolio Type: {trans['portfolio_notes']}\n"
+                        else:
+                            output += f"  Portfolio: {trans['portfolio_code']}\n"
+
                         if trans["instrument_name"]:
                             output += f"  Instrument: {trans['instrument_name']}\n"
                             if trans["instrument_code"]:

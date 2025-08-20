@@ -434,36 +434,156 @@ class BalanceReportToolkit:
                             elif position["currency_code"]:
                                 output += f"      - Currency: {position['currency_code']}\n"
 
-                            # Position details
-                            if isinstance(position["position_size"], (int, float)):
-                                if position["position_size"] == int(
-                                    position["position_size"]
-                                ):
-                                    size_str = f"{int(position['position_size']):,}"
-                                else:
-                                    size_str = (
-                                        f"{position['position_size']:,.6f}".rstrip(
-                                            "0"
-                                        ).rstrip(".")
-                                    )
-                                output += f"      - Position Size: {size_str}"
-                                if position["position_size"] < 0:
-                                    output += " (Short Position)"
-                                output += "\n"
+                            # Account information (using public name only)
+                            if position["account_public_name"]:
+                                output += f"      - Account (Public Name): {position['account_public_name']}\n"
 
-                            if isinstance(position["value"], (int, float)):
-                                output += f"      - Market Value: {report_currency} {position['value']:,.2f}"
-                                if (
-                                    position["market_value_percent"]
-                                    and position["market_value_percent"] >= 0
-                                ):
-                                    market_value_pct_total.append(
-                                        position["market_value_percent"]
-                                    )
+                            # Position Size
+                            if isinstance(position["position_size"], (int, float)):
+                                # Format with decimals only if needed
+                                if position["position_size"] == int(position["position_size"]):
                                     output += (
-                                        f" ({position['market_value_percent']:.2f}%)"
+                                        f"      - Position Size: {int(position['position_size']):,}"
                                     )
+                                else:
+                                    output += f"      - Position Size: {position['position_size']:,.6f}".rstrip(
+                                        "0"
+                                    ).rstrip(
+                                        "."
+                                    )
+                                if position["position_size"] < 0:
+                                    output += " (Short Position)\n"
+                                else:
+                                    output += "\n"
+                            else:
+                                output += "      - Position Size: N/A\n"
+
+                            # Market Value with percentage (use field from response)
+                            if isinstance(position["value"], (int, float)):
+                                output += (
+                                    f"      - Market Value: {report_currency} {position['value']:,.2f}"
+                                )
+                                if position["value"] < 0:
+                                    output += " (Short Position)"
+                                elif position["market_value_percent"] and position["market_value_percent"] >= 0:
+                                    market_value_pct_total.append(position["market_value_percent"])
+                                    output += f" ({position['market_value_percent']:.2f}%)"
                                 output += "\n"
+                            else:
+                                output += "      - Market Value: N/A\n"
+
+                            # Add local currency value
+                            if (
+                                isinstance(position["market_value_loc"], (int, float))
+                                and position["instrument_pricing_currency"]
+                            ):
+                                output += f"        Market Value (Instrument Currency): {position['instrument_pricing_currency']} {position['market_value_loc']:,.2f}\n"
+                            else:
+                                output += "        Market Value (Instrument Currency): N/A\n"
+
+                            # Exposure with percentage (use field from response)
+                            if isinstance(position["exposure"], (int, float)):
+                                output += (
+                                    f"      - Exposure: {report_currency} {position['exposure']:,.2f}"
+                                )
+                                if position["exposure"] < 0:
+                                    output += " (Short Position)"
+                                elif position["exposure_percent"] and position["exposure_percent"] >= 0:
+                                    exposure_pct_total.append(position["exposure_percent"])
+                                    output += f" ({position['exposure_percent']:.2f}%)"
+                                output += "\n"
+                            else:
+                                output += "      - Exposure: N/A\n"
+
+                            # Add local currency exposure
+                            if (
+                                isinstance(position["exposure_loc"], (int, float))
+                                and position["exposure_currency_code"]
+                            ):
+                                output += f"        Exposure (Exposure Currency): {position['exposure_currency_code']} {position['exposure_loc']:,.2f}\n"
+                            else:
+                                output += "        Exposure (Exposure Currency): N/A\n"
+
+                            # Cost Price fields
+                            # Net Cost Price
+                            if isinstance(position["net_cost_price"], (int, float)):
+                                output += f"      - Net Cost Price: {report_currency} {position['net_cost_price']:,.2f}\n"
+                            else:
+                                output += "      - Net Cost Price: N/A\n"
+
+                            if (
+                                isinstance(position["net_cost_price_loc"], (int, float))
+                                and position["instrument_pricing_currency"]
+                            ):
+                                output += f"        Net Cost Price (Instrument Currency): {position['instrument_pricing_currency']} {position['net_cost_price_loc']:,.2f}\n"
+                            else:
+                                output += "        Net Cost Price (Instrument Currency): N/A\n"
+
+                            # Gross Cost Price
+                            if isinstance(position["gross_cost_price"], (int, float)):
+                                output += f"      - Gross Cost Price: {report_currency} {position['gross_cost_price']:,.2f}\n"
+                            else:
+                                output += "      - Gross Cost Price: N/A\n"
+
+                            if (
+                                isinstance(position["gross_cost_price_loc"], (int, float))
+                                and position["instrument_pricing_currency"]
+                            ):
+                                output += f"        Gross Cost Price (Instrument Currency): {position['instrument_pricing_currency']} {position['gross_cost_price_loc']:,.2f}\n"
+                            else:
+                                output += "        Gross Cost Price (Instrument Currency): N/A\n"
+
+                            # YTM and Duration fields (only show for bonds - when values are non-zero)
+                            # Check if this is a bond by looking at YTM or Duration values
+                            is_bond = (
+                                (isinstance(position["ytm"], (int, float)) and position["ytm"] != 0)
+                                or (
+                                    isinstance(position["ytm_at_cost"], (int, float))
+                                    and position["ytm_at_cost"] != 0
+                                )
+                                or (
+                                    isinstance(position["modified_duration"], (int, float))
+                                    and position["modified_duration"] != 0
+                                )
+                            )
+
+                            if is_bond:
+                                # Yield to Maturity at current price
+                                if (
+                                    isinstance(position["ytm"], (int, float))
+                                    and position["ytm"] != 0
+                                ):
+                                    output += (
+                                        f"      - Yield to Maturity (YTM): {position['ytm']:.2f}%\n"
+                                    )
+                                else:
+                                    output += "      - Yield to Maturity (YTM): N/A (price may be 0)\n"
+
+                                # YTM at acquisition cost
+                                if (
+                                    isinstance(position["ytm_at_cost"], (int, float))
+                                    and position["ytm_at_cost"] != 0
+                                ):
+                                    output += (
+                                        f"      - YTM at Acquisition: {position['ytm_at_cost']:.2f}%\n"
+                                    )
+                                else:
+                                    output += "      - YTM at Acquisition: N/A\n"
+
+                                # Modified Duration
+                                if (
+                                    isinstance(position["modified_duration"], (int, float))
+                                    and position["modified_duration"] != 0
+                                ):
+                                    output += (
+                                        f"      - Duration: {position['modified_duration']:.2f} years\n"
+                                    )
+                                    # Add note about floating coupon bonds
+                                    if position["modified_duration"] < 1:
+                                        output += "        (Note: Low duration may indicate floating rate bond)\n"
+                                else:
+                                    output += "      - Duration: N/A\n"
+
                             output += "\n"
 
                     # Display cash positions for this portfolio
