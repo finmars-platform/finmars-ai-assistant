@@ -126,6 +126,55 @@ class ReportInstrument(BaseModel):
     attributes: Optional[List[ReportGenericAttribute]] = None
 
 
+class ReportInstrumentItem(BaseModel):
+    id: Optional[int] = Field(None, title="ID")
+    instrument_type: Optional[int] = Field(None, title="Instrument type")
+    user_code: Optional[constr(max_length=255)] = Field(None, title="User code")
+    name: Optional[str] = Field(
+        None, description="Human Readable Name of the object", title="Name"
+    )
+    short_name: Optional[str] = Field(
+        None,
+        description="Short Name of the object. Used in dropdown menus",
+        title="Short name",
+    )
+    public_name: Optional[str] = Field(
+        None,
+        description="Used if user does not have permissions to view object",
+        title="Public name",
+    )
+    notes: Optional[str] = Field(
+        None,
+        description="Notes, any useful information about the object",
+        title="Notes",
+    )
+    pricing_currency: Optional[int] = Field(None, title="Pricing currency")
+    price_multiplier: Optional[float] = Field(None, title="Price multiplier")
+    accrued_currency: Optional[int] = Field(None, title="Accrued currency")
+    accrued_multiplier: Optional[float] = Field(None, title="Accrued multiplier")
+    default_price: Optional[float] = Field(None, title="Default price")
+    default_accrued: Optional[float] = Field(None, title="Default accrued")
+    user_text_1: Optional[str] = Field(
+        None, description="User specified field 1", title="User text 1"
+    )
+    user_text_2: Optional[str] = Field(
+        None, description="User specified field 2", title="User text 2"
+    )
+    user_text_3: Optional[str] = Field(
+        None, description="User specified field 3", title="User text 3"
+    )
+    reference_for_pricing: Optional[str] = Field(
+        None, title="Reference for pricing"
+    )
+    maturity_date: Optional[date_aliased] = Field(None, title="Maturity date")
+    maturity_price: Optional[float] = Field(None, title="Maturity price")
+    country: Optional[int] = Field(None, title="Country")
+    deleted_user_code: Optional[constr(max_length=255)] = Field(
+        None, title="Deleted user code"
+    )
+    attributes: Optional[List[ReportGenericAttribute]] = None
+
+
 class InstrumentClass(BaseModel):
     id: conint(ge=0, le=32767) = Field(..., title="ID")
     user_code: constr(min_length=1, max_length=255) = Field(..., title="User code")
@@ -2231,3 +2280,4 @@ class TransactionReport(BaseModel):
 
 class TransactionReportItems(TransactionReport):
     items: Optional[list[dict]] = Field(None, title="Items")
+    item_instruments: Optional[List[ReportInstrumentItem]] = None

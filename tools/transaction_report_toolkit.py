@@ -132,6 +132,9 @@ class TransactionReportToolkit:
             output += "=" * 120 + "\n\n"
 
             transactions = []
+            
+            # Group transactions by portfolio for better context building
+            portfolio_groups = {}
 
             # Process each transaction
             for item in items:
@@ -218,6 +221,16 @@ class TransactionReportToolkit:
                     }
 
                     transactions.append(transaction_data)
+                    
+                    # Group transactions by portfolio for context building
+                    if portfolio_code not in portfolio_groups:
+                        portfolio_groups[portfolio_code] = {
+                            "portfolio_name": portfolio_name,
+                            "portfolio_notes": portfolio_notes,
+                            "transactions": []
+                        }
+                    
+                    portfolio_groups[portfolio_code]["transactions"].append(transaction_data)
 
             # Sort transactions if requested
             if schema.sort_by:
@@ -260,91 +273,118 @@ class TransactionReportToolkit:
                 output += f"Sorted by: {schema.sort_by.value} ({'descending' if schema.descending else 'ascending'})\n"
                 output += "=" * 120 + "\n\n"
 
-            # Display each transaction
-            for trans in transactions:
-                output += f"Transaction ID: {trans['id']}\n"
-                output += f"Date: {trans['date']}\n"
-                output += f"Type: {trans['class']} (Code: {trans['code']})\n"
+            # Display transactions grouped by portfolio
+            if portfolio_groups:
+                output += "TRANSACTIONS GROUPED BY PORTFOLIO:\n"
+                output += "=" * 120 + "\n\n"
+                
+                for portfolio_code, portfolio_data in portfolio_groups.items():
+                    output += f"PORTFOLIO: {portfolio_code}\n"
+                    if portfolio_data["portfolio_name"]:
+                        output += f"  Name: {portfolio_data['portfolio_name']}\n"
+                    if portfolio_data["portfolio_notes"]:
+                        output += f"  Type: {portfolio_data['portfolio_notes']}\n"
+                    output += f"  Transaction Count: {len(portfolio_data['transactions'])}\n"
+                    output += "-" * 80 + "\n\n"
+                    
+                    # Display transactions for this portfolio
+                    for trans in portfolio_data["transactions"]:
+                        output += f"  Transaction ID: {trans['id']}\n"
+                        output += f"  Date: {trans['date']}\n"
+                        output += f"  Type: {trans['class']} (Code: {trans['code']})\n"
 
-                # Show transaction type and status if available
-                if trans.get("transaction_type"):
-                    output += f"Transaction Type: {trans['transaction_type']}\n"
-                if trans.get("transaction_status"):
-                    output += f"Status: {trans['transaction_status']}\n"
+                        # Show transaction type and status if available
+                        if trans.get("transaction_type"):
+                            output += f"  Transaction Type: {trans['transaction_type']}\n"
+                        if trans.get("transaction_status"):
+                            output += f"  Status: {trans['transaction_status']}\n"
 
-                # Show portfolio information
-                if trans.get("portfolio_name"):
-                    output += f"Portfolio (Public Name): {trans['portfolio_name']} ({trans['portfolio_code']})\n"
-                    if trans.get("portfolio_notes"):
-                        output += f"Portfolio Type: {trans['portfolio_notes']}\n"
-                else:
-                    output += f"Portfolio: {trans['portfolio_code']}\n"
+                        if trans["instrument_name"]:
+                            output += f"  Instrument: {trans['instrument_name']}\n"
+                            if trans["instrument_code"]:
+                                output += f"    Code: {trans['instrument_code']}\n"
+                            if trans["instrument_country"]:
+                                output += f"    Country: {trans['instrument_country']}\n"
+                            else:
+                                output += f"    Country: N/A\n"
+                            
+                            # Add instrument currency
+                            if trans["instrument_currency"]:
+                                output += f"    Currency: {trans['instrument_currency']}\n"
+                            else:
+                                output += f"    Currency: N/A\n"
 
-                if trans["instrument_name"]:
-                    output += f"Instrument: {trans['instrument_name']}\n"
-                    if trans["instrument_code"]:
-                        output += f"Instrument Code: {trans['instrument_code']}\n"
-                    if trans["instrument_country"]:
-                        output += f"Instrument Country: {trans['instrument_country']}\n"
-                    else:
-                        output += f"Instrument Country: N/A\n"
-                    if trans["instrument_currency"]:
-                        output += (
-                            f"Instrument Currency: {trans['instrument_currency']}\n"
-                        )
-                    if trans["transaction_currency"]:
-                        output += (
-                            f"Transaction Currency: {trans['transaction_currency']}\n"
-                        )
+                        # Add transaction currency
+                        if trans["transaction_currency"]:
+                            output += f"  Transaction Currency: {trans['transaction_currency']}\n"
+                        else:
+                            output += f"  Transaction Currency: N/A\n"
 
-                # Transaction details
-                if trans["position_size"] != 0:
-                    # Format position size with decimals only if needed
-                    if trans["position_size"] == int(trans["position_size"]):
-                        output += (
-                            f"Position Size: {int(trans['position_size']):,} units"
-                        )
-                    else:
-                        output += f"Position Size: {trans['position_size']:,.6f} units".rstrip(
-                            "0"
-                        ).rstrip(
-                            "."
-                        )
-                    if trans["position_size"] > 0:
-                        output += " (Buy/Long)\n"
-                    else:
-                        output += " (Sell/Short)\n"
+                        # Transaction details
+                        if trans["position_size"] != 0:
+                            # Format position size with decimals only if needed
+                            if trans["position_size"] == int(trans["position_size"]):
+                                output += (
+                                    f"  Position Size: {int(trans['position_size']):,} units"
+                                )
+                            else:
+                                output += f"  Position Size: {trans['position_size']:,.6f} units".rstrip(
+                                    "0"
+                                ).rstrip(
+                                    "."
+                                )
+                            if trans["position_size"] > 0:
+                                output += " (Buy/Long)\n"
+                            else:
+                                output += " (Sell/Short)\n"
 
-                if trans["trade_price"] != 0:
-                    output += f"Trade Price: {trans['trade_price']:,.2f}\n"
+                        if trans["trade_price"] != 0:
+                            output += f"  Trade Price: {trans['trade_price']:,.2f}\n"
 
-                if trans["principal"] != 0:
-                    output += f"Principal Value: {trans['principal']:,.2f}"
-                    if trans["principal"] < 0:
-                        output += " (Outflow)\n"
-                    else:
-                        output += " (Inflow)\n"
+                        if trans["principal"] != 0:
+                            output += f"  Principal Value: {trans['principal']:,.2f}"
+                            if trans["principal"] < 0:
+                                output += " (Outflow)\n"
+                            else:
+                                output += " (Inflow)\n"
 
-                if trans["cash_consideration"] != 0:
-                    output += (
-                        f"Cash Consideration: {trans['cash_consideration']:,.2f}\n"
-                    )
+                        # Add cash consideration
+                        if trans["cash_consideration"] != 0:
+                            output += f"  Cash Consideration: {trans['cash_consideration']:,.2f}\n"
 
-                # Show carry and overheads if present
-                if trans.get("carry_amount") and trans["carry_amount"] != 0:
-                    output += f"Carry Amount: {trans['carry_amount']:,.2f}\n"
-                if trans.get("overheads") and trans["overheads"] != 0:
-                    output += f"Overheads: {trans['overheads']:,.2f}\n"
+                        # Add carry amount
+                        if trans["carry_amount"] != 0:
+                            output += f"  Carry Amount: {trans['carry_amount']:,.2f}\n"
 
-                # Account information (using public names)
-                if trans["account_cash_name"]:
-                    output += (
-                        f"Cash Account (Public Name): {trans['account_cash_name']}\n"
-                    )
-                if trans["account_position_name"]:
-                    output += f"Position Account (Public Name): {trans['account_position_name']}\n"
+                        # Add overheads
+                        if trans["overheads"] != 0:
+                            output += f"  Overheads: {trans['overheads']:,.2f}\n"
 
-                output += "-" * 80 + "\n\n"
+                        # Add account information
+                        if trans["account_cash_name"]:
+                            output += f"  Cash Account (Public Name): {trans['account_cash_name']}\n"
+                        else:
+                            output += f"  Cash Account: N/A\n"
+                        
+                        if trans["account_position_name"]:
+                            output += f"  Position Account (Public Name): {trans['account_position_name']}\n"
+                        else:
+                            output += f"  Position Account: N/A\n"
+
+                        # Add accounting and cash dates
+                        if trans["accounting_date"]:
+                            output += f"  Accounting Date: {trans['accounting_date']}\n"
+                        else:
+                            output += f"  Accounting Date: N/A\n"
+                        
+                        if trans["cash_date"]:
+                            output += f"  Cash Date: {trans['cash_date']}\n"
+                        else:
+                            output += f"  Cash Date: N/A\n"
+
+                        output += "\n"
+                    
+                    output += "\n"  # Space between portfolios
 
             # Summary statistics
             output += "=" * 120 + "\n"
@@ -364,7 +404,7 @@ class TransactionReportToolkit:
         except Exception as e:
             exc = traceback.format_exc()
             logger.error(exc)
-            error_msg = f"Error getting transaction report for portfolio {kwargs.get('portfolio_code')}: {str(e)}"
+            error_msg = f"Error getting transaction report for portfolios {kwargs.get('portfolio_codes')}: {str(e)}"
             if "input_str" in locals():
                 error_msg += f"\n\nFull request sent:\n{input_str}"
             return error_msg, None

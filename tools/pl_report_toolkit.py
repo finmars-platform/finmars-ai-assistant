@@ -90,7 +90,6 @@ class PLReportToolkit:
             else:
                 report_date = datetime.now().date()
 
-
             if ACTIVATE_PUBLIC_NAME:
                 account_mode = 1
             else:
@@ -174,7 +173,8 @@ class PLReportToolkit:
             total_principle = 0.0
             positions = []
 
-            # Group items by instrument code for hierarchical display
+            # Group items by portfolio first, then by instrument code for hierarchical display
+            portfolio_groups = {}
             instrument_positions = {}
 
             # Process each item to extract P/L information
@@ -250,6 +250,24 @@ class PLReportToolkit:
                     }
 
                     positions.append(position_data)
+
+                    # Group positions by portfolio for context building
+                    if portfolio_code not in portfolio_groups:
+                        portfolio_groups[portfolio_code] = {
+                            "positions": [],
+                            "total_pl": 0.0,
+                            "total_market_value": 0.0,
+                            "total_invested": 0.0,
+                        }
+
+                    portfolio_groups[portfolio_code]["positions"].append(position_data)
+                    portfolio_groups[portfolio_code]["total_pl"] += total
+                    portfolio_groups[portfolio_code][
+                        "total_market_value"
+                    ] += market_value
+                    portfolio_groups[portfolio_code][
+                        "total_invested"
+                    ] += amount_invested
 
                     # Group positions by instrument (without aggregation)
                     # For FX_VARIATIONS, use a special key since they don't have instrument codes
@@ -725,7 +743,7 @@ class PLReportToolkit:
         except Exception as e:
             exc = traceback.format_exc()
             logger.error(exc)
-            error_msg = f"Error getting P/L report for portfolio {kwargs.get('portfolio_code')}: {str(e)}"
+            error_msg = f"Error getting P/L report for portfolios {kwargs.get('portfolio_codes')}: {str(e)}"
             if "input_str" in locals():
                 error_msg += f"\n\nFull request sent:\n{input_str}"
             return error_msg, None
@@ -766,7 +784,7 @@ def build_pl_report_tools() -> List[BaseTool]:
                 "- FX_VARIATIONS: Foreign exchange impact on positions\n"
                 "\n"
                 "Required parameters:\n"
-                "- portfolio_code: The portfolio identifier\n"
+                "- portfolio_codes: List of portfolio identifiers\n"
                 "- pl_first_date: Start date for P/L calculation (YYYY-MM-DD)\n"
                 "\n"
                 "Optional parameters:\n"

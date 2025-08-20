@@ -172,6 +172,9 @@ class BalanceReportToolkit:
             positions = []
             cash_positions = []
 
+            # Group items by portfolio for better context building
+            portfolio_groups = {}
+
             # Process each item to extract instrument info
             for item in items:
                 if isinstance(item, dict):
@@ -301,17 +304,43 @@ class BalanceReportToolkit:
                         "portfolio_first_cash_flow_date": portfolio_first_cash_flow_date,
                     }
 
+                    # Group positions by portfolio for context building
+                    if portfolio_user_code not in portfolio_groups:
+                        portfolio_groups[portfolio_user_code] = {
+                            "portfolio_name": portfolio_name,
+                            "portfolio_public_name": portfolio_public_name,
+                            "portfolio_notes": portfolio_notes,
+                            "portfolio_first_transaction_date": portfolio_first_transaction_date,
+                            "portfolio_first_cash_flow_date": portfolio_first_cash_flow_date,
+                            "positions": [],
+                            "cash_positions": [],
+                            "total_value": 0.0,
+                            "total_exposure": 0.0,
+                        }
+
                     if currency_code:
                         cash_positions.append(position_data)
+                        portfolio_groups[portfolio_user_code]["cash_positions"].append(
+                            position_data
+                        )
                     else:
                         positions.append(position_data)
+                        portfolio_groups[portfolio_user_code]["positions"].append(
+                            position_data
+                        )
 
                     # Accumulate totals for both cash and instrument positions
                     if isinstance(market_value, (int, float)):
                         total_value += market_value
+                        portfolio_groups[portfolio_user_code][
+                            "total_value"
+                        ] += market_value
 
                     if isinstance(exposure, (int, float)):
                         total_exposure += exposure
+                        portfolio_groups[portfolio_user_code][
+                            "total_exposure"
+                        ] += exposure
 
                     # output += "-" * 80 + "\n"
                     # output += f"Source:\n"
@@ -364,217 +393,121 @@ class BalanceReportToolkit:
             market_value_pct_total = []
             exposure_pct_total = []
 
-            # Display instrument positions first
-            if positions:
-                output += "INSTRUMENT POSITIONS:\n"
-                output += "-" * 60 + "\n\n"
+            # Display positions grouped by portfolio
+            if portfolio_groups:
+                output += "POSITIONS GROUPED BY PORTFOLIO:\n"
+                output += "=" * 80 + "\n\n"
 
-            for position in positions:
-                output += f"Instrument: {position['name']} ({position['code']})\n"
-                if position["country"]:
-                    output += f"  - Country: {position['country']}\n"
-                else:
-                    output += f"  - Country: N/A\n"
+                for portfolio_code, portfolio_data in portfolio_groups.items():
+                    output += f"PORTFOLIO: {portfolio_code}\n"
+                    if portfolio_data["portfolio_name"]:
+                        output += f"  Name: {portfolio_data['portfolio_name']}\n"
+                    if portfolio_data["portfolio_public_name"]:
+                        output += f"  Public Name: {portfolio_data['portfolio_public_name']}\n"
+                    if portfolio_data["portfolio_notes"]:
+                        output += f"  Type: {portfolio_data['portfolio_notes']}\n"
+                    output += f"  Total Value: {report_currency} {portfolio_data['total_value']:,.2f}\n"
+                    output += f"  Total Exposure: {report_currency} {portfolio_data['total_exposure']:,.2f}\n"
+                    output += f"  Positions: {len(portfolio_data['positions'])} instruments, {len(portfolio_data['cash_positions'])} cash\n"
+                    output += "-" * 60 + "\n\n"
 
-                # Account information (using public name only)
-                if position["account_public_name"]:
-                    output += f"  - Account (Public Name): {position['account_public_name']}\n"
+                    # Display instrument positions for this portfolio
+                    if portfolio_data["positions"]:
+                        output += "  INSTRUMENT POSITIONS:\n"
+                        output += "  " + "-" * 40 + "\n"
 
-                # Position Size
-                if isinstance(position["position_size"], (int, float)):
-                    # Format with decimals only if needed
-                    if position["position_size"] == int(position["position_size"]):
-                        output += (
-                            f"  - Position Size: {int(position['position_size']):,}"
-                        )
-                    else:
-                        output += f"  - Position Size: {position['position_size']:,.6f}".rstrip(
-                            "0"
-                        ).rstrip(
-                            "."
-                        )
-                    if position["position_size"] < 0:
-                        output += " (Short Position)\n"
-                    else:
-                        output += "\n"
-                else:
-                    output += "  - Position Size: N/A\n"
+                        for position in portfolio_data["positions"]:
+                            output += f"    Instrument: {position['name']} ({position['code']})\n"
+                            if position["country"]:
+                                output += f"      - Country: {position['country']}\n"
+                            else:
+                                output += f"      - Country: N/A\n"
 
-                # Market Value with percentage (use field from response)
-                if isinstance(position["value"], (int, float)):
-                    output += (
-                        f"  - Market Value: {report_currency} {position['value']:,.2f}"
-                    )
-                    if position["value"] < 0:
-                        output += " (Short Position)"
-                    elif position["market_value_percent"] >= 0:
-                        market_value_pct_total.append(position["market_value_percent"])
-                        output += f" ({position['market_value_percent']:.2f}%)"
-                    output += "\n"
-                else:
-                    output += "  - Market Value: N/A\n"
+                            # Position details
+                            if isinstance(position["position_size"], (int, float)):
+                                if position["position_size"] == int(
+                                    position["position_size"]
+                                ):
+                                    size_str = f"{int(position['position_size']):,}"
+                                else:
+                                    size_str = (
+                                        f"{position['position_size']:,.6f}".rstrip(
+                                            "0"
+                                        ).rstrip(".")
+                                    )
+                                output += f"      - Position Size: {size_str}"
+                                if position["position_size"] < 0:
+                                    output += " (Short Position)"
+                                output += "\n"
 
-                # Add local currency value
-                if (
-                    isinstance(position["market_value_loc"], (int, float))
-                    and position["instrument_pricing_currency"]
-                ):
-                    output += f"    Market Value (Instrument Currency): {position['instrument_pricing_currency']} {position['market_value_loc']:,.2f}\n"
-                else:
-                    output += "    Market Value (Instrument Currency): N/A\n"
+                            if isinstance(position["value"], (int, float)):
+                                output += f"      - Market Value: {report_currency} {position['value']:,.2f}"
+                                if (
+                                    position["market_value_percent"]
+                                    and position["market_value_percent"] >= 0
+                                ):
+                                    market_value_pct_total.append(
+                                        position["market_value_percent"]
+                                    )
+                                    output += (
+                                        f" ({position['market_value_percent']:.2f}%)"
+                                    )
+                                output += "\n"
+                            output += "\n"
 
-                # Exposure with percentage (use field from response)
-                if isinstance(position["exposure"], (int, float)):
-                    output += (
-                        f"  - Exposure: {report_currency} {position['exposure']:,.2f}"
-                    )
-                    if position["exposure"] < 0:
-                        output += " (Short Position)"
-                    elif position["exposure_percent"] >= 0:
-                        exposure_pct_total.append(position["exposure_percent"])
-                        output += f" ({position['exposure_percent']:.2f}%)"
-                    output += "\n"
-                else:
-                    output += "  - Exposure: N/A\n"
+                    # Display cash positions for this portfolio
+                    if portfolio_data["cash_positions"]:
+                        output += "  CASH POSITIONS:\n"
+                        output += "  " + "-" * 40 + "\n"
 
-                # Add local currency exposure
-                if (
-                    isinstance(position["exposure_loc"], (int, float))
-                    and position["exposure_currency_code"]
-                ):
-                    output += f"    Exposure (Exposure Currency): {position['exposure_currency_code']} {position['exposure_loc']:,.2f}\n"
-                else:
-                    output += "    Exposure (Exposure Currency): N/A\n"
+                        for position in portfolio_data["cash_positions"]:
+                            output += f"    Currency: {position['name']} ({position['code']})\n"
 
-                # Cost Price fields
-                # Net Cost Price
-                if isinstance(position["net_cost_price"], (int, float)):
-                    output += f"  - Net Cost Price: {report_currency} {position['net_cost_price']:,.2f}\n"
-                else:
-                    output += "  - Net Cost Price: N/A\n"
+                            # Account information (using public name only)
+                            if position["account_public_name"]:
+                                output += f"      - Account (Public Name): {position['account_public_name']}\n"
 
-                if (
-                    isinstance(position["net_cost_price_loc"], (int, float))
-                    and position["instrument_pricing_currency"]
-                ):
-                    output += f"    Net Cost Price (Instrument Currency): {position['instrument_pricing_currency']} {position['net_cost_price_loc']:,.2f}\n"
-                else:
-                    output += "    Net Cost Price (Instrument Currency): N/A\n"
+                            # Position Size (Amount)
+                            if isinstance(position["position_size"], (int, float)):
+                                output += f"      - Amount: {position['code']} {position['position_size']:,.2f}\n"
+                            else:
+                                output += "      - Amount: N/A\n"
 
-                # Gross Cost Price
-                if isinstance(position["gross_cost_price"], (int, float)):
-                    output += f"  - Gross Cost Price: {report_currency} {position['gross_cost_price']:,.2f}\n"
-                else:
-                    output += "  - Gross Cost Price: N/A\n"
+                            # Market Value with percentage
+                            if isinstance(position["value"], (int, float)):
+                                output += f"      - Market Value: {report_currency} {position['value']:,.2f}"
+                                if (
+                                    position["market_value_percent"]
+                                    and position["market_value_percent"] >= 0
+                                ):
+                                    market_value_pct_total.append(
+                                        position["market_value_percent"]
+                                    )
+                                    output += (
+                                        f" ({position['market_value_percent']:.2f}%)"
+                                    )
+                                output += "\n"
+                            else:
+                                output += "      - Market Value: N/A\n"
 
-                if (
-                    isinstance(position["gross_cost_price_loc"], (int, float))
-                    and position["instrument_pricing_currency"]
-                ):
-                    output += f"    Gross Cost Price (Instrument Currency): {position['instrument_pricing_currency']} {position['gross_cost_price_loc']:,.2f}\n"
-                else:
-                    output += "    Gross Cost Price (Instrument Currency): N/A\n"
+                            # Exposure with percentage
+                            if isinstance(position["exposure"], (int, float)):
+                                output += f"      - Exposure: {report_currency} {position['exposure']:,.2f}"
+                                if (
+                                    position["exposure_percent"]
+                                    and position["exposure_percent"] >= 0
+                                ):
+                                    exposure_pct_total.append(
+                                        position["exposure_percent"]
+                                    )
+                                    output += f" ({position['exposure_percent']:.2f}%)"
+                                output += "\n"
+                            else:
+                                output += "      - Exposure: N/A\n"
 
-                # YTM and Duration fields (only show for bonds - when values are non-zero)
-                # Check if this is a bond by looking at YTM or Duration values
-                is_bond = (
-                    (isinstance(position["ytm"], (int, float)) and position["ytm"] != 0)
-                    or (
-                        isinstance(position["ytm_at_cost"], (int, float))
-                        and position["ytm_at_cost"] != 0
-                    )
-                    or (
-                        isinstance(position["modified_duration"], (int, float))
-                        and position["modified_duration"] != 0
-                    )
-                )
+                            output += "\n"
 
-                if is_bond:
-                    # Yield to Maturity at current price
-                    if (
-                        isinstance(position["ytm"], (int, float))
-                        and position["ytm"] != 0
-                    ):
-                        output += (
-                            f"  - Yield to Maturity (YTM): {position['ytm']:.2f}%\n"
-                        )
-                    else:
-                        output += "  - Yield to Maturity (YTM): N/A (price may be 0)\n"
-
-                    # YTM at acquisition cost
-                    if (
-                        isinstance(position["ytm_at_cost"], (int, float))
-                        and position["ytm_at_cost"] != 0
-                    ):
-                        output += (
-                            f"  - YTM at Acquisition: {position['ytm_at_cost']:.2f}%\n"
-                        )
-                    else:
-                        output += "  - YTM at Acquisition: N/A\n"
-
-                    # Modified Duration
-                    if (
-                        isinstance(position["modified_duration"], (int, float))
-                        and position["modified_duration"] != 0
-                    ):
-                        output += (
-                            f"  - Duration: {position['modified_duration']:.2f} years\n"
-                        )
-                        # Add note about floating coupon bonds
-                        if position["modified_duration"] < 1:
-                            output += "    (Note: Low duration may indicate floating rate bond)\n"
-                    else:
-                        output += "  - Duration: N/A\n"
-
-                output += "\n"
-
-            # Display cash positions
-            if cash_positions:
-                output += "\nCASH POSITIONS:\n"
-                output += "-" * 60 + "\n\n"
-
-                for position in cash_positions:
-                    output += f"Currency: {position['name']} ({position['code']})\n"
-
-                    # Account information (using public name only)
-                    if position["account_public_name"]:
-                        output += f"  - Account (Public Name): {position['account_public_name']}\n"
-
-                    # Position Size (Amount)
-                    if isinstance(position["position_size"], (int, float)):
-                        output += f"  - Amount: {position['code']} {position['position_size']:,.2f}\n"
-                    else:
-                        output += "  - Amount: N/A\n"
-
-                    # Market Value with percentage
-                    if isinstance(position["value"], (int, float)):
-                        output += f"  - Market Value: {report_currency} {position['value']:,.2f}"
-                        if (
-                            position["market_value_percent"]
-                            and position["market_value_percent"] >= 0
-                        ):
-                            market_value_pct_total.append(
-                                position["market_value_percent"]
-                            )
-                            output += f" ({position['market_value_percent']:.2f}%)"
-                        output += "\n"
-                    else:
-                        output += "  - Market Value: N/A\n"
-
-                    # Exposure with percentage
-                    if isinstance(position["exposure"], (int, float)):
-                        output += f"  - Exposure: {report_currency} {position['exposure']:,.2f}"
-                        if (
-                            position["exposure_percent"]
-                            and position["exposure_percent"] >= 0
-                        ):
-                            exposure_pct_total.append(position["exposure_percent"])
-                            output += f" ({position['exposure_percent']:.2f}%)"
-                        output += "\n"
-                    else:
-                        output += "  - Exposure: N/A\n"
-
-                    output += "\n"
+                    output += "\n"  # Space between portfolios
 
             output += "-" * 80 + "\n"
             # Check if we have any items with None or zero market values
@@ -735,7 +668,7 @@ class BalanceReportToolkit:
         except Exception as e:
             exc = traceback.format_exc()
             logger.error(exc)
-            error_msg = f"Error getting balance report for portfolio {kwargs.get('portfolio_code')}: {str(e)}"
+            error_msg = f"Error getting balance report for portfolios {kwargs.get('portfolio_codes')}: {str(e)}"
             if "input_str" in locals():
                 error_msg += f"\n\nFull request sent:\n{input_str}"
             return error_msg, None
