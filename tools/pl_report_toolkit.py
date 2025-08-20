@@ -197,6 +197,8 @@ class PLReportToolkit:
                             continue
                         instrument_name = item.get("instrument.name", "Unknown")
                     instrument_country = item.get("instrument.country.name", "")
+                    instrument_currency = item.get("instrument.currency.name", "")
+                    instrument_currency_code = item.get("instrument.currency.user_code", "")
                     portfolio_code = item.get("portfolio.user_code", "")
 
                     # Extract P/L fields for the table format
@@ -230,6 +232,8 @@ class PLReportToolkit:
                         "code": instrument_code,
                         "name": instrument_name,
                         "country": instrument_country,
+                        "currency": instrument_currency,
+                        "currency_code": instrument_currency_code,
                         "item_group_code": item_group_code,
                         "position_size": position_size,
                         "net_cost_price": net_cost_price,
@@ -281,6 +285,8 @@ class PLReportToolkit:
                         instrument_positions[group_key] = {
                             "name": instrument_name,
                             "country": instrument_country,
+                            "currency": instrument_currency,
+                            "currency_code": instrument_currency_code,
                             "positions": [],
                             "instrument_code": instrument_code,
                         }
@@ -359,6 +365,8 @@ class PLReportToolkit:
             for group_key, inst_data in instrument_positions.items():
                 instrument_name = inst_data["name"]
                 instrument_country = inst_data["country"]
+                instrument_currency = inst_data["currency"]
+                instrument_currency_code = inst_data["currency_code"]
                 instrument_code = inst_data["instrument_code"]
 
                 # Extract clean name without bond features
@@ -376,6 +384,10 @@ class PLReportToolkit:
                 output += f"INSTRUMENT: {instrument_code} - {clean_name}\n"
                 if instrument_country:
                     output += f"Country: {instrument_country}\n"
+                if instrument_currency and instrument_currency_code:
+                    output += f"Currency: {instrument_currency} ({instrument_currency_code})\n"
+                elif instrument_currency_code:
+                    output += f"Currency: {instrument_currency_code}\n"
                 if bond_features:
                     output += f"Features: {', '.join(bond_features)}\n"
                 output += "\n"
@@ -660,6 +672,9 @@ class PLReportToolkit:
                                 "name": item.get("instrument.name", "Unknown"),
                                 "position_size": item.get("position_size", 0),
                                 "item_group": item.get("item_group_code", "UNKNOWN"),
+                                "country": item.get("instrument.country.name", ""),
+                                "currency": item.get("instrument.currency.name", ""),
+                                "currency_code": item.get("instrument.currency.user_code", ""),
                             }
                         )
 
@@ -673,7 +688,14 @@ class PLReportToolkit:
                     "The following instruments have missing or zero market values:\n"
                 )
                 for inst in missing_market_values:
-                    output += f"- {inst['name']} ({inst['code']}) - Position: {inst['position_size']} - Group: {inst['item_group']}\n"
+                    output += f"- {inst['name']} ({inst['code']}) - Position: {inst['position_size']} - Group: {inst['item_group']}"
+                    if inst['country']:
+                        output += f" - Country: {inst['country']}"
+                    if inst['currency'] and inst['currency_code']:
+                        output += f" - Currency: {inst['currency']} ({inst['currency_code']})"
+                    elif inst['currency_code']:
+                        output += f" - Currency: {inst['currency_code']}"
+                    output += "\n"
 
                 output += "\nChecking price history availability...\n\n"
 
@@ -697,6 +719,18 @@ class PLReportToolkit:
                         output += "Price History Check Results:\n"
                         output += "-" * 40 + "\n"
 
+                        # Create lookup dictionary for instrument metadata
+                        instrument_metadata = {}
+                        for original_item in items:
+                            if isinstance(original_item, dict):
+                                inst_code = original_item.get("instrument.user_code")
+                                if inst_code:
+                                    instrument_metadata[inst_code] = {
+                                        "country": original_item.get("instrument.country.name", ""),
+                                        "currency": original_item.get("instrument.currency.name", ""),
+                                        "currency_code": original_item.get("instrument.currency.user_code", ""),
+                                    }
+
                         # Display all items without filtering by type
                         for item in price_check_result.items:
                             item_type = item.get("type", "unknown")
@@ -707,6 +741,18 @@ class PLReportToolkit:
                                 output += f"  Name: {item.get('name')}\n"
                             if item.get("user_code"):
                                 output += f"  Code: {item.get('user_code')}\n"
+                                
+                                # Add metadata if available
+                                user_code = item.get('user_code')
+                                if user_code in instrument_metadata:
+                                    metadata = instrument_metadata[user_code]
+                                    if metadata['country']:
+                                        output += f"  Country: {metadata['country']}\n"
+                                    if metadata['currency'] and metadata['currency_code']:
+                                        output += f"  Currency: {metadata['currency']} ({metadata['currency_code']})\n"
+                                    elif metadata['currency_code']:
+                                        output += f"  Currency: {metadata['currency_code']}\n"
+                                        
                             if item.get("id"):
                                 output += f"  ID: {item.get('id')}\n"
                             if item.get("position_size") is not None:
