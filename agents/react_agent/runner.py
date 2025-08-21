@@ -11,13 +11,15 @@ from libs.utils.langfuse_callback import get_langfuse_callbacks
 
 
 async def arun_agent_stream(
-    messages: list[BaseMessage], prompt_source: Optional[PromptSource] = None
+    messages: list[BaseMessage],
+    prompt_source: Optional[PromptSource] = None,
+    model_name: Optional[str] = None,
 ):
     # Get Langfuse callbacks based on environment variables
     callbacks = get_langfuse_callbacks()
 
     map_prompts_cfg = await build_map_prompts_cfg(
-        tags=simple_react_tag, prompt_source=prompt_source
+        tags=simple_react_tag, prompt_source=prompt_source, model_name=model_name
     )
     config = RunnableConfig(
         **{
