@@ -37,6 +37,19 @@ services:
       - WEBUI_NAME=Finmars AI Assistant
     volumes:
       - open-webui:/app/backend/data
+    depends_on:
+      - ollama
+    restart: always
+
+  ollama:
+    image: ollama/ollama:0.11.6
+    container_name: ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama:/root/.ollama
+    networks:
+      - arch-network
     restart: always
 
   agent-pipelines:
@@ -244,6 +257,8 @@ services:
       - langfuse_postgres_data:/var/lib/postgresql/data
 
 volumes:
+  ollama:
+    driver: local
   open-webui:
     driver: local
   langfuse_postgres_data:
