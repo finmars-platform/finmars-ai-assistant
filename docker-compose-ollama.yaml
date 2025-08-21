@@ -46,6 +46,9 @@ services:
     container_name: ollama
     ports:
       - "11434:11434"
+    environment:
+      - TZ=${TZ:-Europe/Luxembourg}
+      - OLLAMA_DEBUG=1
     volumes:
       - ollama:/root/.ollama
     networks:
