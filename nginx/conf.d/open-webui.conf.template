@@ -1,7 +1,14 @@
+# /etc/nginx/templates/openwebui.conf.template
+
+map $http_upgrade $connection_upgrade {
+  default upgrade;
+  ''      close;
+}
+
 server {
     listen 443 ssl;
     http2 on;
-    server_name _;  # Accept any hostname on port 8881
+    server_name ${MAIN_DOMAIN_NAME};
 
     # SSL Certificate paths from existing Let's Encrypt certificates
     ssl_certificate /etc/letsencrypt/live/${MAIN_DOMAIN_NAME}/fullchain.pem;
@@ -14,30 +21,60 @@ server {
     ssl_session_cache shared:SSL:10m;
     ssl_session_timeout 10m;
 
-    location / {
-        proxy_pass http://open-webui-finmars:8080;
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
 
-        # Add WebSocket support (Necessary for version 0.5.0 and up)
+    # Auth/API/WS — без кеша
+    location ~ ^/(oauth|auth|login|logout|api|ws|websocket) {
+        add_header Cache-Control "no-store" always;
+        proxy_no_cache     1;
+        proxy_cache_bypass 1;
+
+        proxy_pass http://open-webui-finmars:8080;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection "upgrade";
+        proxy_set_header Connection $connection_upgrade;
 
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Host  $host;
+        proxy_set_header X-Forwarded-Port  $server_port;
 
-        # Allow iframe embedding from main domain
+        proxy_read_timeout 10m;
+        proxy_buffering off;
+
+        # iframe policy
         proxy_hide_header X-Frame-Options;
+        add_header X-Frame-Options "" always;
         proxy_hide_header Content-Security-Policy;
-        add_header X-Frame-Options "ALLOWALL";
-        add_header Content-Security-Policy "frame-ancestors 'self' https://${MAIN_DOMAIN_NAME} https://*.${MAIN_DOMAIN_NAME};";
+        add_header Content-Security-Policy "frame-ancestors 'self' https://${MAIN_DOMAIN_NAME} https://*.${MAIN_DOMAIN_NAME};" always;
+    }
 
-        # (Optional) Disable proxy buffering for better streaming response from models
+    # Остальные запросы
+    location / {
+        proxy_pass http://open-webui-finmars:8080;
+
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Host  $host;
+        proxy_set_header X-Forwarded-Port  $server_port;
+
         proxy_buffering off;
 
         # (Optional) Increase max request size for large attachments and long audio messages
         client_max_body_size 20M;
         proxy_read_timeout 10m;
+
+        proxy_hide_header X-Frame-Options;
+        add_header X-Frame-Options "" always;
+        proxy_hide_header Content-Security-Policy;
+        add_header Content-Security-Policy "frame-ancestors 'self' https://${MAIN_DOMAIN_NAME} https://*.${MAIN_DOMAIN_NAME};" always;
     }
 }
