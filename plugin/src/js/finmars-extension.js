@@ -10,31 +10,28 @@ window.FinmarsExtension = {
     },
 
     loadHTML: function () {
-        var optiContainer = document.createElement('div');
-        optiContainer.id = 'finmars-container';
-        document.body.appendChild(optiContainer)
+        const container = document.createElement('div');
+        container.id = 'finmars-container';
+        document.body.appendChild(container);
 
-        var container = document.getElementById('finmars-container');
-        if (!container) return;
-
-        var button = document.createElement('button');
+        const button = document.createElement('button');
         button.id = 'circleButton';
         button.innerText = 'FinAI';
-        button.addEventListener('click', this.toggleChat);
+        button.addEventListener('click', this.toggleChat.bind(this));
         container.appendChild(button);
 
-        var iframeContainer = document.createElement('div');
+        const iframeContainer = document.createElement('div');
         iframeContainer.id = 'iframeContainer';
-        var iframe = document.createElement('iframe');
-        // iframe.src = this.serverSrc + "?pageURL=" + window.location.href;
-        iframe.src = this.serverSrc;
+
+        const iframe = document.createElement('iframe');
+        // сразу запускаем OIDC-поток (как будто нажали кнопку SSO)
+        iframe.src = this.serverSrc + '/oauth/oidc/login';
         iframeContainer.appendChild(iframe);
 
-        // Create close button and append to iframeContainer
-        var closeButton = document.createElement('button');
+        const closeButton = document.createElement('button');
         closeButton.innerText = '×';
         closeButton.className = 'closeButton';
-        closeButton.addEventListener('click', function () {
+        closeButton.addEventListener('click', () => {
             iframeContainer.style.display = 'none';
         });
         iframeContainer.appendChild(closeButton);
@@ -46,12 +43,13 @@ window.FinmarsExtension = {
     },
 
     toggleChat: function () {
-        var iframeContainer = document.getElementById('iframeContainer');
-        var iframe = iframeContainer.querySelector('iframe');
+        const iframeContainer = document.getElementById('iframeContainer');
+        const iframe = iframeContainer.querySelector('iframe');
 
         if (iframeContainer.style.display === 'none' || iframeContainer.style.display === '') {
             iframeContainer.style.display = 'block';
-            iframe.src = iframe.src; // This line refreshes the iframe content
+            // перезапуск потока на всякий случай (и кэш-байпас)
+            iframe.src = this.serverSrc + '/oauth/oidc/login?ts=' + Date.now();
         } else {
             iframeContainer.style.display = 'none';
         }
