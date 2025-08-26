@@ -11,7 +11,7 @@ window.FinmarsExtension = {
 
     loadHTML: function () {
         const container = document.createElement('div');
-        container.id = 'finmars-container';
+        container.id = 'finmars-ai-container';
         document.body.appendChild(container);
 
         const button = document.createElement('button');
