@@ -124,7 +124,8 @@ class Pipeline:
                 return "Missing FINMARS credentials. Please set FINMARS_EXPERT_TOKEN, FINMARS_REALM, and FINMARS_SPACE env vars."
             key = make_key(user_email or "static_env", user_name or "static_env")
 
-        print(f"token: {repr(token)}; realm: {repr(realm)}; space: {repr(space)}")
+        # print(f"token: {repr(token)}; realm: {repr(realm)}; space: {repr(space)}")
+        print(f"realm: {repr(realm)}; space: {repr(space)}")
 
         user_id: str | None = body.get("user", {}).get("id")
         user_role: str | None = body.get("user", {}).get("role")
