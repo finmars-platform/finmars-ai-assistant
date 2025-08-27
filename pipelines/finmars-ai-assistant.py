@@ -87,6 +87,7 @@ class Pipeline:
         realm = None
         space = None
 
+        print(f"dynamic_token: {dynamic_token}")
         if dynamic_token:
             # Require user context and valid session bundle
             if not user_email:

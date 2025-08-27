@@ -98,6 +98,7 @@ class Pipeline:
         realm = None
         space = None
 
+        print(f"dynamic_token: {dynamic_token}")
         if dynamic_token:
             if not user_email:
                 return "User email is not defined. Please log in again via SSO."
