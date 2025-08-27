@@ -88,6 +88,10 @@ def create_finmars_agent_react(
         LangfusePromptName.SIMPLE_REACT_SYSTEM_PROMPT,
     )
 
+    finmars_token = configurable.get("finmars_token")
+    space = configurable.get("space")
+    realm = configurable.get("realm")
+
     task_solver_llm_config = {
         "api_key": get_api_key(base_url=task_solver_config.get("base_url")),
         "model_name": task_solver_config.get("model_name"),
@@ -99,7 +103,9 @@ def create_finmars_agent_react(
     # Build the prompt template using ChatPromptTemplate.from_messages
     prompt_template = create_agent_prompt(sys_msg=task_solver_sys_msg)
 
-    tools: list[BaseTool] = build_all_tools()
+    tools: list[BaseTool] = build_all_tools(
+        finmars_token=finmars_token, space=space, realm=realm
+    )
 
     # Create executor agent with state modifier
     executor_agent = create_react_agent(

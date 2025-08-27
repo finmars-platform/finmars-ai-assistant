@@ -60,6 +60,8 @@ class Pipeline:
             pprint(body)
             print(f"inlet: {__name__} - user:")
             pprint(user)
+
+        body["chat_id"] = body["metadata"]["chat_id"]
         return body
 
     async def outlet(self, body: dict, user: Optional[dict] = None) -> dict:
@@ -80,6 +82,8 @@ class Pipeline:
         body: dict,
     ) -> Union[str, Generator, Iterator]:
         print(f"pipe: {__name__}")
+
+        chat_id = body.get("chat_id", "")
 
         user = (body or {}).get("user") or {}
         user_email = (user.get("email") or "").strip()
@@ -128,6 +132,11 @@ class Pipeline:
             arun_agent_stream,
             messages=messages_lc,
             prompt_source=self.prompt_source,
+            user_key=key,
+            chat_id=chat_id,
+            realm=realm,
+            space=space,
+            finmars_token=token,
             model_name=self.valves.OLLAMA_MODEL_NAME,
         ):
             yield chunk

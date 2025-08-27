@@ -35,8 +35,8 @@ class GetPerformanceReportSchema(BaseModel):
 class PerformanceReportToolkit:
     """Toolkit for performance report operations using the Finmars API"""
 
-    def __init__(self):
-        self.client = FinmarsPortfolioClient()
+    def __init__(self, finmars_token: str = None, space: str = None, realm: str = None):
+        self.client = FinmarsPortfolioClient(api_key=finmars_token, space=space, realm=realm)
 
     async def _get_performance_report(self, **kwargs) -> tuple[str, dict | list | None]:
         """Get performance report with portfolio-level performance metrics"""
@@ -268,9 +268,13 @@ class PerformanceReportToolkit:
             return error_msg, None
 
 
-def build_performance_report_tools() -> List[BaseTool]:
+def build_performance_report_tools(
+    finmars_token: str = None, space: str = None, realm: str = None
+) -> List[BaseTool]:
     """Build and return performance report tools"""
-    toolkit = PerformanceReportToolkit()
+    toolkit = PerformanceReportToolkit(
+        finmars_token=finmars_token, space=space, realm=realm
+    )
 
     tools = [
         StructuredTool.from_function(

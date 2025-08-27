@@ -32,8 +32,8 @@ class GetPortfolioHistorySchema(BaseModel):
 class PortfolioHistoryToolkit:
     """Toolkit for portfolio history-related operations using the Finmars API"""
 
-    def __init__(self):
-        self.client = FinmarsPortfolioClient()
+    def __init__(self, finmars_token: str = None, space: str = None, realm: str = None):
+        self.client = FinmarsPortfolioClient(api_key=finmars_token, space=space, realm=realm)
 
     async def _list_portfolio_history(self, **kwargs) -> tuple[str, dict | list | None]:
         """List all portfolio history records with pagination and filtering"""
@@ -130,9 +130,13 @@ class PortfolioHistoryToolkit:
             return error_msg, None
 
 
-def build_portfolio_history_tools() -> List[BaseTool]:
+def build_portfolio_history_tools(
+    finmars_token: str = None, space: str = None, realm: str = None
+) -> List[BaseTool]:
     """Build and return portfolio history-related tools"""
-    toolkit = PortfolioHistoryToolkit()
+    toolkit = PortfolioHistoryToolkit(
+        finmars_token=finmars_token, space=space, realm=realm
+    )
 
     tools = [
         StructuredTool.from_function(

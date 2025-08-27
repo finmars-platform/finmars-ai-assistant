@@ -83,7 +83,7 @@ __all__ = [
 ]
 
 
-def build_all_tools():
+def build_all_tools(finmars_token: str = None, space: str = None, realm: str = None):
     """
     Build and return all available Finmars portfolio tools.
 
@@ -91,14 +91,14 @@ def build_all_tools():
         List[BaseTool]: Complete list of all portfolio-related tools
     """
     tools = []
-    tools.extend(build_portfolio_tools())
-    tools.extend(build_portfolio_type_tools())
-    tools.extend(build_portfolio_register_tools())
-    tools.extend(build_portfolio_history_tools())
-    tools.extend(build_portfolio_reconcile_tools())
-    tools.extend(build_balance_report_tools())
-    tools.extend(build_pl_report_tools())
-    tools.extend(build_performance_report_tools())
-    tools.extend(build_transaction_report_tools())
+    tools.extend(build_portfolio_tools(finmars_token=finmars_token, space=space, realm=realm))
+    tools.extend(build_portfolio_type_tools(finmars_token=finmars_token, space=space, realm=realm))
+    tools.extend(build_portfolio_register_tools(finmars_token=finmars_token, space=space, realm=realm))
+    tools.extend(build_portfolio_history_tools(finmars_token=finmars_token, space=space, realm=realm))
+    tools.extend(build_portfolio_reconcile_tools(finmars_token=finmars_token, space=space, realm=realm))
+    tools.extend(build_balance_report_tools(finmars_token=finmars_token, space=space, realm=realm))
+    tools.extend(build_pl_report_tools(finmars_token=finmars_token, space=space, realm=realm))
+    tools.extend(build_performance_report_tools(finmars_token=finmars_token, space=space, realm=realm))
+    tools.extend(build_transaction_report_tools(finmars_token=finmars_token, space=space, realm=realm))
     tools.extend(build_calculator_tools())
     return tools

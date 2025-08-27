@@ -12,22 +12,35 @@ from libs.utils.langfuse_callback import get_langfuse_callbacks
 
 async def arun_agent_stream(
     messages: list[BaseMessage],
+    chat_id: str,
+    user_key: str,
     prompt_source: Optional[PromptSource] = None,
     model_name: Optional[str] = None,
+    finmars_token: Optional[str] = None,
+    realm: Optional[str] = None,
+    space: Optional[str] = None,
 ):
     # Get Langfuse callbacks based on environment variables
     callbacks = get_langfuse_callbacks()
 
     map_prompts_cfg = await build_map_prompts_cfg(
-        tags=simple_react_tag, prompt_source=prompt_source, model_name=model_name
+        tags=simple_react_tag,
+        prompt_source=prompt_source,
+        model_name=model_name,
+        finmars_token=finmars_token,
+        realm=realm,
+        space=space,
     )
     config = RunnableConfig(
         **{
             "callbacks": callbacks,
             "metadata": {
-                "langfuse_user_id": "random-user",
-                "langfuse_session_id": "random-session",
-                "langfuse_tags": ["random-tag-1", "random-tag-2"],
+                "langfuse_user_id": user_key,
+                "langfuse_session_id": chat_id,
+                "langfuse_tags": [
+                    f"model_name::{model_name}",
+                    f"prompt_source::{prompt_source}",
+                ],
             },
             "configurable": map_prompts_cfg,
         }

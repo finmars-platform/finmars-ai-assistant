@@ -57,8 +57,8 @@ class GetPLReportSchema(BaseModel):
 class PLReportToolkit:
     """Toolkit for P/L report operations using the Finmars API"""
 
-    def __init__(self):
-        self.client = FinmarsPortfolioClient()
+    def __init__(self, finmars_token: str = None, space: str = None, realm: str = None):
+        self.client = FinmarsPortfolioClient(api_key=finmars_token, space=space, realm=realm)
 
     async def _get_pl_report(self, **kwargs) -> tuple[str, dict | list | None]:
         """Get P/L report with profit and loss information"""
@@ -795,9 +795,11 @@ class PLReportToolkit:
             return error_msg, None
 
 
-def build_pl_report_tools() -> List[BaseTool]:
+def build_pl_report_tools(
+    finmars_token: str = None, space: str = None, realm: str = None
+) -> List[BaseTool]:
     """Build and return P/L report tools"""
-    toolkit = PLReportToolkit()
+    toolkit = PLReportToolkit(finmars_token=finmars_token, space=space, realm=realm)
 
     tools = [
         StructuredTool.from_function(

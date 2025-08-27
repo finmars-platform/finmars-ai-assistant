@@ -64,8 +64,8 @@ class ListPortfolioReconcileStatusSchema(BaseModel):
 class PortfolioReconcileToolkit:
     """Toolkit for portfolio reconciliation-related operations using the Finmars API"""
 
-    def __init__(self):
-        self.client = FinmarsPortfolioClient()
+    def __init__(self, finmars_token: str = None, space: str = None, realm: str = None):
+        self.client = FinmarsPortfolioClient(api_key=finmars_token, space=space, realm=realm)
 
     async def _list_portfolio_reconcile_groups(
         self, **kwargs
@@ -329,9 +329,13 @@ class PortfolioReconcileToolkit:
             return error_msg, None
 
 
-def build_portfolio_reconcile_tools() -> List[BaseTool]:
+def build_portfolio_reconcile_tools(
+    finmars_token: str = None, space: str = None, realm: str = None
+) -> List[BaseTool]:
     """Build and return portfolio reconciliation-related tools"""
-    toolkit = PortfolioReconcileToolkit()
+    toolkit = PortfolioReconcileToolkit(
+        finmars_token=finmars_token, space=space, realm=realm
+    )
 
     tools = [
         StructuredTool.from_function(

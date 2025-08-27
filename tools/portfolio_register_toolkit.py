@@ -76,8 +76,8 @@ class GetRegisterObjectsToRecalculateSchema(BaseModel):
 class PortfolioRegisterToolkit:
     """Toolkit for portfolio register-related operations using the Finmars API"""
 
-    def __init__(self):
-        self.client = FinmarsPortfolioClient()
+    def __init__(self, finmars_token: str = None, space: str = None, realm: str = None):
+        self.client = FinmarsPortfolioClient(api_key=finmars_token, space=space, realm=realm)
 
     async def _list_portfolio_registers(
         self, **kwargs
@@ -370,9 +370,13 @@ class PortfolioRegisterToolkit:
             return error_msg, None
 
 
-def build_portfolio_register_tools() -> List[BaseTool]:
+def build_portfolio_register_tools(
+    finmars_token: str = None, space: str = None, realm: str = None
+) -> List[BaseTool]:
     """Build and return portfolio register-related tools"""
-    toolkit = PortfolioRegisterToolkit()
+    toolkit = PortfolioRegisterToolkit(
+        finmars_token=finmars_token, space=space, realm=realm
+    )
 
     tools = [
         StructuredTool.from_function(
