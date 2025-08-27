@@ -68,6 +68,14 @@ class Pipeline:
     ) -> Union[str, Generator, Iterator]:
         print(f"pipe: {__name__}")
 
+        user_name: str | None = body.get("user", {}).get("name")
+        user_email: str | None = body.get("user", {}).get("email")
+        user_id: str | None = body.get("user", {}).get("id")
+        user_role: str | None = body.get("user", {}).get("role")
+        print(
+            f"user_id: {user_id}; user_role: {user_role}; user_name: {user_name}; user_email: {user_email}"
+        )
+
         if self.debug:
             print(f"pipe: {__name__} - received message from user: {user_message}")
 
