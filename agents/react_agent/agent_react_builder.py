@@ -88,9 +88,9 @@ def create_finmars_agent_react(
         LangfusePromptName.SIMPLE_REACT_SYSTEM_PROMPT,
     )
 
-    finmars_token = configurable.get("finmars_token")
-    space = configurable.get("space")
-    realm = configurable.get("realm")
+    finmars_token = task_solver_config.get("finmars_token")
+    space = task_solver_config.get("space")
+    realm = task_solver_config.get("realm")
 
     task_solver_llm_config = {
         "api_key": get_api_key(base_url=task_solver_config.get("base_url")),
