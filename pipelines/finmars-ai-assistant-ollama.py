@@ -84,7 +84,9 @@ class Pipeline:
         user_email: str | None = body.get("user", {}).get("email")
         user_id: str | None = body.get("user", {}).get("id")
         user_role: str | None = body.get("user", {}).get("role")
-        print(f"user_id: {user_id}; user_role: {user_role}; user_name: {user_name}; user_email: {user_email}")
+        print(
+            f"user_id: {repr(user_id)}; user_role: {repr(user_role)}; user_name: {repr(user_name)}; user_email: {repr(user_email)}"
+        )
 
         if self.debug:
             print(f"pipe: {__name__} - received message from user: {user_message}")
@@ -102,7 +104,10 @@ class Pipeline:
         messages_lc: list[BaseMessage] = convert_to_lc_messages(messages=messages)
 
         for chunk in sync_generator_from_async(
-            arun_agent_stream, messages=messages_lc, prompt_source=self.prompt_source, model_name=self.valves.OLLAMA_MODEL_NAME
+            arun_agent_stream,
+            messages=messages_lc,
+            prompt_source=self.prompt_source,
+            model_name=self.valves.OLLAMA_MODEL_NAME,
         ):
             yield chunk
 

@@ -73,7 +73,7 @@ class Pipeline:
         user_id: str | None = body.get("user", {}).get("id")
         user_role: str | None = body.get("user", {}).get("role")
         print(
-            f"user_id: {user_id}; user_role: {user_role}; user_name: {user_name}; user_email: {user_email}"
+            f"user_id: {repr(user_id)}; user_role: {repr(user_role)}; user_name: {repr(user_name)}; user_email: {repr(user_email)}"
         )
 
         if self.debug:
