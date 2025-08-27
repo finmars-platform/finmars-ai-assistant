@@ -76,6 +76,7 @@ services:
       - "9299:9099"
     networks:
       - arch-network
+      - langfuse-network
     depends_on:
       - open-webui
     environment:
