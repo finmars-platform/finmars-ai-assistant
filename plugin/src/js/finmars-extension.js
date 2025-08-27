@@ -90,7 +90,79 @@ window.FinmarsExtension = {
         document.body.appendChild(iframeContainer);
     },
     loadCSS: function () {
-        // ... existing code ...
+        const style = document.createElement('style');
+        style.textContent = `
+            #finmars-ai-container {
+                position: fixed;
+                z-index: 10000;
+            }
+            
+            #circleButton {
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                width: 60px;
+                height: 60px;
+                border-radius: 50%;
+                background: linear-gradient(135deg, #ff6b35, #f7931e);
+                color: white;
+                border: none;
+                font-size: 12px;
+                font-weight: bold;
+                cursor: pointer;
+                z-index: 10001;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                transition: transform 0.2s ease;
+            }
+            
+            #circleButton:hover {
+                transform: scale(1.1);
+            }
+            
+            #iframeContainer {
+                position: fixed;
+                top: 50px;
+                right: 20px;
+                width: 600px;
+                height: calc(100vh - 100px);
+                background: white;
+                border-radius: 12px;
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+                z-index: 10000;
+                overflow: hidden;
+            }
+            
+            #iframeContainer iframe {
+                width: 100%;
+                height: 100%;
+                border: none;
+                border-radius: 12px;
+            }
+            
+            .closeButton {
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                width: 30px;
+                height: 30px;
+                border: none;
+                background: rgba(0, 0, 0, 0.1);
+                color: #666;
+                border-radius: 50%;
+                cursor: pointer;
+                font-size: 18px;
+                line-height: 1;
+                z-index: 10001;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            .closeButton:hover {
+                background: rgba(0, 0, 0, 0.2);
+            }
+        `;
+        document.head.appendChild(style);
     },
 
     toggleChat: async function () {
