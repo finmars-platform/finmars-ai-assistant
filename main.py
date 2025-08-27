@@ -16,6 +16,9 @@ from contextlib import asynccontextmanager
 from concurrent.futures import ThreadPoolExecutor
 from schemas import FilterForm, OpenAIChatCompletionForm
 from urllib.parse import urlparse
+import jwt
+from utils.pipelines.state import save_bundle, make_key
+from pydantic import BaseModel
 
 import shutil
 import aiohttp
@@ -654,6 +657,45 @@ async def filter_outlet(pipeline_id: str, form_data: FilterForm):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"{str(e)}",
         )
+
+
+class BootstrapReq(BaseModel):
+    user_access_token: str
+    finmars_realm: str
+    finmars_space: str
+
+
+@app.post("/bootstrap/finmars")
+async def bootstrap_finamrs(payload: BootstrapReq):
+    # 1) разобрать JWT без проверки подписи (мы лишь читаем клеймы)
+    try:
+        claims = jwt.decode(
+            payload.user_access_token,
+            options={"verify_signature": False, "verify_aud": False},
+        )
+        email = (
+            claims.get("email") or claims.get("preferred_username") or ""
+        ).strip()
+        name = (claims.get("name") or "").strip() or f"{claims.get('given_name','')} {claims.get('family_name','')}".strip()
+        exp = int(claims.get("exp", 0))
+        if not email or not exp:
+            raise ValueError("missing email or exp in token")
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Bad access_token: {e}")
+
+    # 2) собрать бандл и ключ
+    bundle = {
+        "FINMARS_EXPERT_TOKEN": payload.user_access_token,
+        "FINMARS_REALM": payload.finmars_realm,
+        "FINMARS_SPACE": payload.finmars_space,
+        "exp": exp,
+    }
+    key = make_key(email, name)
+
+    # 3) сохранить с TTL = exp токена
+    save_bundle(key, bundle, exp_unix=exp)
+
+    return {"status": "ok", "key": key, "exp": exp}
 
 
 @app.post("/v1/chat/completions")

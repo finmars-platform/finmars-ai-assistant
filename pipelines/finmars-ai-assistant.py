@@ -9,6 +9,7 @@ from agents.react_agent.runner import arun_agent_stream
 from utils.agent_utils.async_loop_to_sync import sync_generator_from_async
 from utils.agent_utils.lc_converter import convert_to_lc_messages
 from libs.utils.langfuse_manager import PromptSource
+from utils.pipelines.state import get_bundle, make_key
 
 
 # Uncomment to disable SSL verification warnings if needed.
@@ -68,8 +69,28 @@ class Pipeline:
     ) -> Union[str, Generator, Iterator]:
         print(f"pipe: {__name__}")
 
-        user_name: str | None = body.get("user", {}).get("name")
-        user_email: str | None = body.get("user", {}).get("email")
+        user = (body or {}).get("user") or {}
+        user_email = (user.get("email") or "").strip()
+        user_name = (user.get("name") or "").strip()
+
+        if not user_email:
+            return "User email is not defined. Please log in again via SSO."
+
+        key = make_key(user_email, user_name)
+        bundle = get_bundle(key)
+        if not bundle:
+            return (
+                "FinAI authorization is required: please press the FinAI button again."
+            )
+
+        if int(time.time()) >= int(bundle.get("exp", 0)):
+            return "FinAI session has expired. Please refresh the page and click FinAI."
+
+        token = bundle["FINMARS_EXPERT_TOKEN"]
+        realm = bundle["FINMARS_REALM"]
+        space = bundle["FINMARS_SPACE"]
+        print(f"token: {repr(token)}; realm: {repr(realm)}; space: {repr(space)}")
+
         user_id: str | None = body.get("user", {}).get("id")
         user_role: str | None = body.get("user", {}).get("role")
         print(
