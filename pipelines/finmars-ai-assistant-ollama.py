@@ -10,6 +10,7 @@ from agents.react_agent.runner import arun_agent_stream
 from utils.agent_utils.async_loop_to_sync import sync_generator_from_async
 from utils.agent_utils.lc_converter import convert_to_lc_messages
 from libs.utils.langfuse_manager import PromptSource
+from utils.pipelines.env_manager import get_bool_env
 from utils.pipelines.state import get_bundle, make_key
 
 
@@ -85,26 +86,41 @@ class Pipeline:
 
         chat_id = body.get("chat_id", "")
 
+        dynamic_token = get_bool_env(
+            name="ACTIVATE_DYNAMIC_FINMARS_EXPERT_TOKEN_HANDLING", default=False
+        )
+
         user = (body or {}).get("user") or {}
         user_email = (user.get("email") or "").strip()
         user_name = (user.get("name") or "").strip()
 
-        if not user_email:
-            return "User email is not defined. Please log in again via SSO."
+        token = None
+        realm = None
+        space = None
 
-        key = make_key(user_email, user_name)
-        bundle = get_bundle(key)
-        if not bundle:
-            return (
-                "FinAI authorization is required: please press the FinAI button again."
-            )
+        if dynamic_token:
+            if not user_email:
+                return "User email is not defined. Please log in again via SSO."
 
-        if int(time.time()) >= int(bundle.get("exp", 0)):
-            return "FinAI session has expired. Please refresh the page and click FinAI."
+            key = make_key(user_email, user_name)
+            bundle = get_bundle(key)
+            if not bundle:
+                return "FinAI authorization is required: please press the FinAI button again."
 
-        token = bundle["FINMARS_EXPERT_TOKEN"]
-        realm = bundle["FINMARS_REALM"]
-        space = bundle["FINMARS_SPACE"]
+            if int(time.time()) >= int(bundle.get("exp", 0)):
+                return "FinAI session has expired. Please refresh the page and click FinAI."
+
+            token = bundle.get("FINMARS_EXPERT_TOKEN")
+            realm = bundle.get("FINMARS_REALM")
+            space = bundle.get("FINMARS_SPACE")
+        else:
+            token = (os.getenv("FINMARS_EXPERT_TOKEN") or "").strip()
+            realm = (os.getenv("FINMARS_REALM") or "").strip()
+            space = (os.getenv("FINMARS_SPACE") or "").strip()
+            if not token or not realm or not space:
+                return "Missing FINMARS credentials. Please set FINMARS_EXPERT_TOKEN, FINMARS_REALM, and FINMARS_SPACE env vars."
+            key = make_key(user_email or "static_env", user_name or "static_env")
+
         print(f"token: {repr(token)}; realm: {repr(realm)}; space: {repr(space)}")
 
         user_id: str | None = body.get("user", {}).get("id")
