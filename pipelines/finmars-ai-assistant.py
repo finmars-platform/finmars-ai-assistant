@@ -102,12 +102,14 @@ class Pipeline:
                 return "FinAI session has expired. Please refresh the page and click FinAI."
 
             token = bundle.get("FINMARS_EXPERT_TOKEN")
+            token = f"Token {token}"
             realm = bundle.get("FINMARS_REALM")
             space = bundle.get("FINMARS_SPACE")
             key = make_key(user_email, user_name)
         else:
             # Use static env configuration
             token = (os.getenv("FINMARS_EXPERT_TOKEN") or "").strip()
+            token = f"Bearer {token}"
             realm = (os.getenv("FINMARS_REALM") or "").strip()
             space = (os.getenv("FINMARS_SPACE") or "").strip()
             if not token or not realm or not space:

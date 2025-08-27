@@ -35,7 +35,7 @@ class BaseHTTPClient:
             "Content-Type": "application/json",
         }
         if self.api_key:
-            headers["Authorization"] = f"Bearer {self.api_key}"
+            headers["Authorization"] = self.api_key
         return headers
 
     def _build_url(self, endpoint: str) -> str:
