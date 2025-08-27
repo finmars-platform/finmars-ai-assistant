@@ -76,7 +76,6 @@ services:
       - "9299:9099"
     networks:
       - arch-network
-      - langfuse-network
     depends_on:
       - open-webui
       - langfuse-web
@@ -110,7 +109,7 @@ services:
     ports:
       - 127.0.0.1:3030:3030
     networks:
-      - langfuse-network
+      - arch-network
     environment: &langfuse-worker-env
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/postgres # CHANGEME
       SALT: "mysalt" # CHANGEME
@@ -164,7 +163,6 @@ services:
       - 3000:3000
     networks:
       - arch-network
-      - langfuse-network
     environment:
       <<: *langfuse-worker-env
       NEXTAUTH_URL: http://localhost:3000
@@ -200,7 +198,7 @@ services:
       - 127.0.0.1:8123:8123
       - 127.0.0.1:9000:9000
     networks:
-      - langfuse-network
+      - arch-network
     deploy:
       resources:
         limits:
@@ -227,7 +225,7 @@ services:
       - 9090:9000
       - 127.0.0.1:9091:9001
     networks:
-      - langfuse-network
+      - arch-network
     volumes:
       - langfuse_minio_data:/data
     healthcheck:
@@ -246,7 +244,7 @@ services:
     ports:
       - 127.0.0.1:6377:6379
     networks:
-      - langfuse-network
+      - arch-network
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 3s
@@ -268,7 +266,7 @@ services:
     ports:
       - 127.0.0.1:5455:5432
     networks:
-      - langfuse-network
+      - arch-network
     volumes:
       - langfuse_postgres_data:/var/lib/postgresql/data
 
@@ -287,6 +285,4 @@ volumes:
 
 networks:
   arch-network:
-    driver: bridge
-  langfuse-network:
     driver: bridge
