@@ -137,6 +137,7 @@ window.FinmarsExtension = {
                 height: 100%;
                 border: none;
                 border-radius: 12px;
+                zoom: 0.7;
             }
             
             .closeButton {
