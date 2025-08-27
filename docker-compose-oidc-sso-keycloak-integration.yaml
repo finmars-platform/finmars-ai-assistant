@@ -79,11 +79,12 @@ services:
       - langfuse-network
     depends_on:
       - open-webui
+      - langfuse-web
     environment:
       - TZ=${TZ:-Europe/Luxembourg}
       - PIPELINES_API_KEY=${PIPELINES_API_KEY:-test}
       - PIPELINE_NAME=${PIPELINE_NAME:-Finmars AI Assistant Docker}
-      - LANGFUSE_HOST=${LANGFUSE_HOST:-langfuse-web}
+      - LANGFUSE_HOST=${LANGFUSE_HOST:-http://langfuse-web:3000}
       - LANGFUSE_PUBLIC_KEY=${LANGFUSE_PUBLIC_KEY}
       - LANGFUSE_SECRET_KEY=${LANGFUSE_SECRET_KEY}
       - PROMPT_SOURCE=${PROMPT_SOURCE:-code}
