@@ -24,11 +24,19 @@ async function bootstrapViaCookiesOrReload(serverSrc) {
     const realm = (location.pathname.match(/\/(realm[^/]+)/i) || [])[1] || 'finmars';
     const space = (location.pathname.match(/\/realm[^/]+\/(space[^/]+)/i) || [])[1] || 'default';
     const access = getCookie('access_token');
+    const refresh = getCookie('refresh_token');
 
     if (!access || isExpired(access, 30)) {
         location.reload();  // родитель «обновит» куки через свою SSO-механику
         return false;
     }
+    
+    if (!refresh) {
+        console.error('No refresh token found');
+        location.reload();
+        return false;
+    }
+    
     const res = await fetch(serverSrc + "/bootstrap/finmars", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
@@ -36,7 +44,8 @@ async function bootstrapViaCookiesOrReload(serverSrc) {
         body: JSON.stringify({
             user_access_token: access,
             finmars_realm: realm,
-            finmars_space: space
+            finmars_space: space,
+            refresh_token: refresh
         })
     });
     if (!res.ok) {
@@ -49,7 +58,6 @@ async function bootstrapViaCookiesOrReload(serverSrc) {
 window.FinmarsExtension = {
     init: function () {
         this.serverSrc = "https://ya-ce.finmars.io:8881";
-        this.bootstrapTimer = null;
         // Load the HTML and CSS
         this.loadHTML();
         this.loadCSS();
@@ -80,10 +88,6 @@ window.FinmarsExtension = {
         closeButton.className = 'closeButton';
         closeButton.addEventListener('click', () => {
             iframeContainer.style.display = 'none';
-            if (window.FinmarsExtension.bootstrapTimer) {
-                clearInterval(window.FinmarsExtension.bootstrapTimer);
-                window.FinmarsExtension.bootstrapTimer = null;
-            }
         });
         iframeContainer.appendChild(closeButton);
 
@@ -176,20 +180,8 @@ window.FinmarsExtension = {
             iframeContainer.style.display = 'block';
             // перезапуск потока на всякий случай (и кэш-байпас)
             iframe.src = this.serverSrc + '/oauth/oidc/login?ts=' + Date.now();
-
-            // Start periodic check
-            if (this.bootstrapTimer) clearInterval(this.bootstrapTimer);
-            this.bootstrapTimer = setInterval(() => {
-                bootstrapViaCookiesOrReload(this.serverSrc);
-            }, 60000);
-
         } else {
             iframeContainer.style.display = 'none';
-            // Stop periodic check
-            if (this.bootstrapTimer) {
-                clearInterval(this.bootstrapTimer);
-                this.bootstrapTimer = null;
-            }
         }
     }
 };

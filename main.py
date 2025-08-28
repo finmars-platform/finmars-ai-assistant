@@ -663,39 +663,65 @@ class BootstrapReq(BaseModel):
     user_access_token: str
     finmars_realm: str
     finmars_space: str
+    refresh_token: str
 
 
 @app.post("/bootstrap/finmars")
 async def bootstrap_finamrs(payload: BootstrapReq):
-    # 1) разобрать JWT без проверки подписи (мы лишь читаем клеймы)
+    # 1) Parse access token JWT claims
     try:
-        claims = jwt.decode(
+        access_claims = jwt.decode(
             payload.user_access_token,
             options={"verify_signature": False, "verify_aud": False},
         )
         email = (
-            claims.get("email") or claims.get("preferred_username") or ""
+            access_claims.get("email") or access_claims.get("preferred_username") or ""
         ).strip()
-        name = (claims.get("name") or "").strip() or f"{claims.get('given_name','')} {claims.get('family_name','')}".strip()
-        exp = int(claims.get("exp", 0))
-        if not email or not exp:
-            raise ValueError("missing email or exp in token")
+        name = (
+            access_claims.get("name") or ""
+        ).strip() or f"{access_claims.get('given_name','')} {access_claims.get('family_name','')}".strip()
+        access_exp = int(access_claims.get("exp", 0))
+        if not email or not access_exp:
+            raise ValueError("missing email or exp in access token")
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Bad access_token: {e}")
 
-    # 2) собрать бандл и ключ
+    # 2) Parse refresh token JWT claims
+    try:
+        refresh_claims = jwt.decode(
+            payload.refresh_token,
+            options={"verify_signature": False, "verify_aud": False},
+        )
+        refresh_exp = int(refresh_claims.get("exp", 0))
+        if not refresh_exp:
+            raise ValueError("missing exp in refresh token")
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Bad refresh_token: {e}")
+
+    # 3) Create bundle and key
     bundle = {
         "FINMARS_EXPERT_TOKEN": payload.user_access_token,
         "FINMARS_REALM": payload.finmars_realm,
         "FINMARS_SPACE": payload.finmars_space,
-        "exp": exp,
+        "exp": access_exp,
     }
     key = make_key(email, name)
 
-    # 3) сохранить с TTL = exp токена
-    save_bundle(key, bundle, exp_unix=exp)
+    # 4) Save with both tokens and start refresh task
+    save_bundle(
+        key,
+        bundle,
+        exp_unix=access_exp,
+        refresh_token=payload.refresh_token,
+        refresh_exp=refresh_exp,
+    )
 
-    return {"status": "ok", "key": key, "exp": exp}
+    return {
+        "status": "ok",
+        "key": key,
+        "access_exp": access_exp,
+        "refresh_exp": refresh_exp,
+    }
 
 
 @app.post("/v1/chat/completions")
