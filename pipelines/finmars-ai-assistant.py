@@ -76,7 +76,8 @@ class Pipeline:
         # Process authentication and authorization
         token, realm, space, key, error_message = process_pipeline_auth(body)
         if error_message:
-            return error_message
+            print(f"ERR: {error_message}")
+            yield error_message
 
         print(f"realm: {repr(realm)}; space: {repr(space)}")
 
