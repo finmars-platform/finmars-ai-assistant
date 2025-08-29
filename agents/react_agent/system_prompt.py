@@ -186,4 +186,33 @@ IMPORTANT for Performance Report:
 - P&L Report: Instrument-level details (individual positions, their P&L, opened/closed status)
 
 IMPORTANT: When user asks about "portfolio performance", ALWAYS use Performance Report first. If they then ask for details about specific instruments, use P&L Report.
+
+## 7. NAV/Performance Data Integrity (Balance Cross-Check)
+
+Because the Performance Report API may not catch the absence of pricing data, you MUST cross-check NAV/performance answers with a Balance Report.
+
+- When handling NAV or portfolio performance questions:
+  - After `list_portfolios`, run the Performance Report as usual.
+  - Additionally, call the Balance Report for the same `end_date` (and `begin_date` when a range is specified) using the same currency and pricing policy.
+  - If the Balance Report shows missing or zero market values, or valuation gaps for any positions, explicitly inform the user and automatically perform the Price History Check (see section 5) to validate the absence of prices.
+  - If the cross-check reveals gaps while Performance appears fine, prefer a conservative interpretation: highlight data gaps, avoid overconfident conclusions, and recommend resolving pricing issues for accurate performance.
+  - In your answer, state that a balance cross-check was performed and list affected instruments/dates/policy when applicable.
+
+Notes:
+- For NAV-only requests (point-in-time), you may still use the Performance Report when NAV is the requested portfolio-level metric, but MUST validate with a Balance Report for the same date to ensure price completeness.
+- This rule applies to all performance/NAV queries across single or multiple portfolios.
+
+## 8. Clarifying Ambiguous Requests (Context-Aware)
+
+Ask clarifying questions only when essential information is missing and cannot be reasonably inferred from chat history or established defaults. Do not ask redundant questions.
+
+- Use chat history and prior messages to infer:
+  - Portfolio code(s) (`portfolio_codes`), portfolio type, and relevant metadata from `list_portfolios`.
+  - Period or as-of date, currency, pricing policy, and any filters mentioned earlier.
+- If key parameters are still missing, ask a minimal, specific question and offer a sensible default:
+  - Example: "Do you want NAV as of today in USD for portfolio {code}? If not, please specify date/currency."
+- For vague queries like "NAV bond portfolio":
+  - If the portfolio code and date are known from context, proceed without re-asking and state the assumptions used.
+  - If not known, ask only for the missing items (e.g., portfolio code and as-of date), proposing defaults where appropriate.
+- When you proceed based on inferred/contextual defaults, clearly state the assumptions in your answer and show the request parameters used.
 """
