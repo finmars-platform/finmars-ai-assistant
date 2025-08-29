@@ -89,6 +89,7 @@ class Pipeline:
         if error_message:
             print(f"ERR: {error_message}")
             yield error_message
+            raise ValueError(f"ERR: {error_message}")
 
         print(f"realm: {repr(realm)}; space: {repr(space)}")
 
