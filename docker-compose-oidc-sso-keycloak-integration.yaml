@@ -81,6 +81,7 @@ services:
       - langfuse-web
     environment:
       - TZ=${TZ:-Europe/Luxembourg}
+      - BOOTSTRAP_SECURITY_SUFFIX_KEY=${BOOTSTRAP_SECURITY_SUFFIX_KEY}
       - AUTH_DOMAIN_NAME=${AUTH_DOMAIN_NAME}
       - PIPELINES_API_KEY=${PIPELINES_API_KEY:-test}
       - PIPELINE_NAME=${PIPELINE_NAME:-Finmars AI Assistant Docker}

@@ -176,6 +176,5 @@ async def _refresh_access_token(key: str, refresh_token: str) -> bool:
 def make_key(email: str, name: str) -> str:
     """Creates a consistent key from user's email and name."""
     # Just it case security_suffix
-    # TODO: move to env var
-    security_suffix = "£yaN1?9d4d7+$C16<Ugs'!J1wJ%8$QT2>d<kW<Sz:71w!A[on"
+    security_suffix = os.getenv("BOOTSTRAP_SECURITY_SUFFIX_KEY", "")
     return f"email:{email.lower().strip()}::name:{(name or '').strip().lower()}____{security_suffix}"
