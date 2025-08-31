@@ -3,6 +3,7 @@ import asyncio
 import aiohttp
 import jwt
 import os
+import random
 from typing import Dict, Tuple, Optional
 from urllib.parse import urlencode
 
@@ -61,21 +62,37 @@ def get_bundle(key: str) -> Optional[dict]:
 async def _schedule_token_refresh(
     key: str, access_exp: int, refresh_token: str, refresh_exp: int
 ) -> None:
-    """Schedule token refresh 2 minutes before access token expires."""
+    """
+    Schedule token refresh with a dynamic lead time.
+
+    - For long-lived tokens, refresh ~2 minutes before expiry.
+    - For short-lived tokens (TTL < 2 minutes), refresh at ~80% of TTL,
+      but never sooner than 1–5 seconds from now to avoid tight loops.
+    """
     try:
         current_time = int(time.time())
-        refresh_time = access_exp - 120  # 2 minutes before expiry
+        ttl = max(0, int(access_exp) - current_time)
 
-        # If refresh time is in the past, refresh immediately
-        wait_seconds = max(0, refresh_time - current_time)
+        # Determine lead time and wait seconds adaptively
+        if ttl <= 0:
+            # Already expired (or no exp). Back off slightly to avoid hot loop
+            wait_seconds = 1
+        else:
+            # Lead is 20% of TTL bounded to [5, 120]
+            lead = min(120, max(5, int(ttl * 0.2)))
+            # Add small jitter up to 10% of TTL (max 5s) to spread refreshes
+            jitter = min(5, max(0, int(ttl * 0.1)))
+            wait_seconds = max(1, ttl - lead + random.randint(0, jitter))
 
-        print(f"Scheduling token refresh for key {key} in {wait_seconds} seconds")
+        print(
+            f"Scheduling token refresh for key {key} in {wait_seconds} seconds"
+        )
 
         if wait_seconds > 0:
             await asyncio.sleep(wait_seconds)
 
         # Check if refresh token is still valid
-        if int(time.time()) >= refresh_exp:
+        if int(time.time()) >= int(refresh_exp):
             print(f"Refresh token expired for key {key}")
             _store.pop(key, None)
             return
