@@ -9,6 +9,7 @@ from .pl_report import PLReportClient
 from .performance_report import PerformanceReportClient
 from .transaction_report import TransactionReportClient
 from .finmars_client import FinmarsPortfolioClient
+from .instrument_price_history import InstrumentPriceHistoryClient
 
 __all__ = [
     "BaseHTTPClient",
@@ -22,4 +23,5 @@ __all__ = [
     "PerformanceReportClient",
     "TransactionReportClient",
     "FinmarsPortfolioClient",
+    "InstrumentPriceHistoryClient",
 ]

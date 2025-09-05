@@ -11,6 +11,7 @@ from .pl_report import PLReportClient
 from .performance_report import PerformanceReportClient
 from .transaction_report import TransactionReportClient
 from .price_history_check import PriceHistoryCheckClient
+from .instrument_price_history import InstrumentPriceHistoryClient
 
 
 class FinmarsPortfolioClient:
@@ -120,6 +121,14 @@ class FinmarsPortfolioClient:
         )
 
         self.price_history_check = PriceHistoryCheckClient(
+            base_url=base_url,
+            realm=realm,
+            space=space,
+            api_key=api_key,
+            timeout=timeout,
+        )
+
+        self.instrument_price_history = InstrumentPriceHistoryClient(
             base_url=base_url,
             realm=realm,
             space=space,
