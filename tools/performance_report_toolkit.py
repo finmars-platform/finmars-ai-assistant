@@ -9,8 +9,13 @@ from pydantic import BaseModel, Field
 
 from libs.client.finmars_client import FinmarsPortfolioClient
 from libs.logger.logger import logger
-from libs.schema.via_data_model_codegen.report_schema import PerformanceReport
+from libs.schema.via_data_model_codegen.report_schema import (
+    PerformanceReport,
+    BackendBalanceReportItems,
+    DateField,
+)
 from .shared_models import ReportCurrency, drop_empty_fields
+from libs.utils.hashing_utils import ACTIVATE_PUBLIC_NAME
 
 
 class GetPerformanceReportSchema(BaseModel):
@@ -36,7 +41,9 @@ class PerformanceReportToolkit:
     """Toolkit for performance report operations using the Finmars API"""
 
     def __init__(self, finmars_token: str = None, space: str = None, realm: str = None):
-        self.client = FinmarsPortfolioClient(api_key=finmars_token, space=space, realm=realm)
+        self.client = FinmarsPortfolioClient(
+            api_key=finmars_token, space=space, realm=realm
+        )
 
     async def _get_performance_report(self, **kwargs) -> tuple[str, dict | list | None]:
         """Get performance report with portfolio-level performance metrics"""
@@ -256,6 +263,153 @@ class PerformanceReportToolkit:
                 "Note: This performance report shows portfolio-level metrics only.\n"
             )
             output += "For individual instrument performance, please use the P&L Report tool.\n"
+
+            # -------------------------------------------------------------
+            # Enrich with Balance Report + Price History availability
+            # -------------------------------------------------------------
+            try:
+                # Build a balance report request to discover instruments present in portfolio
+                if ACTIVATE_PUBLIC_NAME:
+                    account_mode = 1
+                else:
+                    # accumulate over all accounts
+                    account_mode = 0
+
+                bl_request = BackendBalanceReportItems(
+                    account_mode=account_mode,
+                    accounts=[],
+                    accounts_cash=[],
+                    accounts_position=[],
+                    allocation_mode=0,
+                    calculate_pl=True,
+                    cost_method=1,
+                    custom_fields_to_calculate="Asset Type",
+                    date_field=DateField.transaction_date,
+                    expression_iterations_count=1,
+                    pl_first_date=None,
+                    portfolio_mode=1,
+                    portfolios=[schema.portfolio_code],
+                    pricing_policy="com.finmars.standard-pricing:standard",
+                    report_currency=schema.report_currency.value,
+                    report_date=end_date,
+                    report_type=1,
+                    frontend_request_options={"groups_types": [], "groups_values": []},
+                    strategies1=[],
+                    strategies2=[],
+                    strategies3=[],
+                    strategy1_mode=0,
+                    strategy2_mode=0,
+                    strategy3_mode=0,
+                    page=1,
+                    page_size=500,
+                    report_instance_id=None,
+                )
+
+                response_bl: BackendBalanceReportItems = (
+                    await self.client.balance_report.get_balance_report_items(
+                        bl_request
+                    )
+                )
+
+                # Extract instrument ids and optional names from balance report items
+                items_bl = response_bl.items or []
+                if isinstance(items_bl, str):
+                    try:
+                        items_bl = json.loads(items_bl)
+                    except Exception:
+                        items_bl = []
+
+                instrument_ids: list[int] = []
+                inst_name_from_bl: dict[int, str] = {}
+                for it in items_bl:
+                    if not isinstance(it, dict):
+                        continue
+                    inst_id = it.get("instrument.id")
+                    if inst_id is None:
+                        continue
+                    try:
+                        inst_id = int(inst_id)
+                    except Exception:
+                        continue
+                    if inst_id not in instrument_ids:
+                        instrument_ids.append(inst_id)
+                    # Prefer public_name, then name, then user_code
+                    name = (
+                        it.get("instrument.public_name")
+                        or it.get("instrument.name")
+                        or it.get("instrument.user_code")
+                    )
+                    if name:
+                        inst_name_from_bl[inst_id] = name
+
+                # If no instruments found, still show a section with empty state
+                output += "\n" + "=" * 80 + "\n"
+                output += "INSTRUMENT PRICE AVAILABILITY:\n"
+                output += "=" * 80 + "\n\n"
+
+                if not instrument_ids:
+                    output += "No instrument positions detected from Balance Report; cannot check prices.\n"
+                else:
+                    # Query price history presence for the discovered instruments
+                    price_info = await self.client.instrument_price_history.list_grouped_by_instruments(
+                        begin_date=str(
+                            begin_date or result.begin_date or schema.begin_date or ""
+                        ),
+                        end_date=str(end_date),
+                        instrument_ids=instrument_ids,
+                        pricing_policy_user_code=bl_request.pricing_policy,
+                        page_size=200,
+                        only_first_page=True,
+                    )
+
+                    gmap = price_info.get("grouped_by_instrument", {}) or {}
+                    pp_code = price_info.get("pricing_policy_user_code")
+                    if pp_code:
+                        output += f"Pricing Policy for check: {pp_code}\n"
+
+                    # Summary coverage metrics (binary only)
+                    total_checked = len(instrument_ids)
+                    with_prices = 0
+                    without_prices = 0
+
+                    for inst_id in instrument_ids:
+                        group = gmap.get(inst_id) or {}
+                        c = int(group.get("count", 0) or 0)
+                        if c == 0:
+                            without_prices += 1
+                        else:
+                            with_prices += 1
+
+                    coverage_pct = (
+                        (with_prices / total_checked * 100.0) if total_checked else 0.0
+                    )
+
+                    output += (
+                        f"Checked instruments: {total_checked}. With prices: {with_prices} ({coverage_pct:.1f}%). "
+                        f"Without prices: {without_prices}.\n\n"
+                    )
+
+                    for inst_id in instrument_ids:
+                        group = gmap.get(inst_id) or {}
+                        count = int(group.get("count", 0) or 0)
+                        public_name = (
+                            group.get("instrument_public_name")
+                            or inst_name_from_bl.get(inst_id)
+                            or f"Instrument {inst_id}"
+                        )
+
+                        output += f"- {public_name} (ID: {inst_id}):\n"
+                        if count == 0:
+                            output += "  Price history: no available prices for the selected period.\n"
+                        else:
+                            output += (
+                                "  Price history: prices were present in the period.\n"
+                            )
+
+            except Exception as e:
+                logger.warning(
+                    f"Balance/Price enrichment skipped due to error: {e}\n{traceback.format_exc()}"
+                )
 
             return output, artifact
 
