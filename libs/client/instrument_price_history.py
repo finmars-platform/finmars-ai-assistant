@@ -211,6 +211,14 @@ class InstrumentPriceHistoryClient(BaseHTTPClient):
             # total number of matching records for this instrument (across API pages)
             g["count"] = total
 
+        # Ensure the requested instrument is present even if there are no results
+        if instrument_id not in grouped:
+            grouped[instrument_id] = {
+                "instrument_public_name": None,
+                "count": total,
+                "items": [],
+            }
+
         return {
             "pricing_policy_user_code": resolved_policy,
             "grouped_by_instrument": grouped,
