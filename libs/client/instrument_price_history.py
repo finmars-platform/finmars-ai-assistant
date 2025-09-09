@@ -266,7 +266,10 @@ class InstrumentPriceHistoryClient(BaseHTTPClient):
         resolved_policy = pricing_policy_user_code
 
         for res in results:
-            if resolved_policy is None and res.get("pricing_policy_user_code") is not None:
+            if (
+                resolved_policy is None
+                and res.get("pricing_policy_user_code") is not None
+            ):
                 resolved_policy = res.get("pricing_policy_user_code")
             sub = res.get("grouped_by_instrument", {}) or {}
             for inst_key, group in sub.items():
