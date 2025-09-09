@@ -137,10 +137,10 @@ class InstrumentPriceHistoryClient(BaseHTTPClient):
 
         Output structure:
         {
+          "pricing_policy_user_code": <str|None>,
           "grouped_by_instrument": {
             <instrument_id>: {
               "instrument_public_name": <str|None>,
-              "pricing_policy_user_code": <str|None>,
               "count": <int>,
               "items": [
                 {
@@ -176,6 +176,7 @@ class InstrumentPriceHistoryClient(BaseHTTPClient):
             page += 1
 
         grouped: dict[int, dict] = {}
+        resolved_policy = pricing_policy_user_code
 
         for it in all_items:
             inst_id = it.instrument
@@ -190,21 +191,12 @@ class InstrumentPriceHistoryClient(BaseHTTPClient):
             if inst_id not in grouped:
                 grouped[inst_id] = {
                     "instrument_public_name": inst_public_name,
-                    "pricing_policy_user_code": (
-                        pp_user_code
-                        if pp_user_code is not None
-                        else pricing_policy_user_code
-                    ),
                     "count": 0,
                     "items": [],
                 }
-            else:
-                # If group exists but pricing policy is still None, hydrate from record
-                if (
-                    grouped[inst_id].get("pricing_policy_user_code") is None
-                    and pp_user_code is not None
-                ):
-                    grouped[inst_id]["pricing_policy_user_code"] = pp_user_code
+
+            if resolved_policy is None and pp_user_code is not None:
+                resolved_policy = pp_user_code
 
             grouped[inst_id]["items"].append(
                 {
@@ -219,7 +211,10 @@ class InstrumentPriceHistoryClient(BaseHTTPClient):
             # total number of matching records for this instrument (across API pages)
             g["count"] = total
 
-        return {"grouped_by_instrument": grouped}
+        return {
+            "pricing_policy_user_code": resolved_policy,
+            "grouped_by_instrument": grouped,
+        }
 
     async def list_grouped_by_instruments(
         self,
@@ -242,7 +237,8 @@ class InstrumentPriceHistoryClient(BaseHTTPClient):
             only_first_page: if True, return only the first page per instrument (default True).
 
         Returns:
-            Dict with grouped_by_instrument mapping where each instrument has its own count.
+            Dict with pricing_policy_user_code at top-level and grouped_by_instrument mapping
+            where each instrument has its own count.
         """
         # Deduplicate instrument IDs while preserving order
         seen = set()
@@ -267,8 +263,11 @@ class InstrumentPriceHistoryClient(BaseHTTPClient):
         results = await asyncio.gather(*tasks)
 
         grouped: dict[int, dict] = {}
+        resolved_policy = pricing_policy_user_code
 
         for res in results:
+            if resolved_policy is None and res.get("pricing_policy_user_code") is not None:
+                resolved_policy = res.get("pricing_policy_user_code")
             sub = res.get("grouped_by_instrument", {}) or {}
             for inst_key, group in sub.items():
                 # inst_key may be int or str depending on serialization path
@@ -282,14 +281,6 @@ class InstrumentPriceHistoryClient(BaseHTTPClient):
                 else:
                     # Merge items if the same instrument appears more than once
                     existing = grouped[inst_id]
-                    if (
-                        existing.get("pricing_policy_user_code") is None
-                        and group.get("pricing_policy_user_code") is not None
-                    ):
-                        existing["pricing_policy_user_code"] = group.get(
-                            "pricing_policy_user_code"
-                        )
-
                     # Merge count (prefer larger total if differs)
                     try:
                         existing_count = int(existing.get("count", 0) or 0)
@@ -305,4 +296,7 @@ class InstrumentPriceHistoryClient(BaseHTTPClient):
                     existing_items.sort(key=lambda x: x.get("date") or "")
                     existing["items"] = existing_items
 
-        return {"grouped_by_instrument": grouped}
+        return {
+            "pricing_policy_user_code": resolved_policy,
+            "grouped_by_instrument": grouped,
+        }
