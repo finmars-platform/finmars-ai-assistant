@@ -406,6 +406,143 @@ class PerformanceReportToolkit:
                                 "  Price history: prices were present in the period.\n"
                             )
 
+                    # If any instrument has no prices in the selected period, try to find feasible date ranges
+                    if without_prices > 0:
+                        output += "\n" + "-" * 60 + "\n"
+                        output += (
+                            "PRICE WINDOW SEARCH (all instruments must have prices):\n"
+                        )
+                        output += "-" * 60 + "\n\n"
+
+                        # Helper to fetch earliest and latest price dates for each instrument
+                        async def _fetch_bounds(iid: int):
+                            try:
+                                earliest_resp = await self.client.instrument_price_history.list_price_history(
+                                    ordering="date",
+                                    page=1,
+                                    page_size=1,
+                                    instrument=iid,
+                                    pricing_policy=bl_request.pricing_policy,
+                                )
+                                latest_resp = await self.client.instrument_price_history.list_price_history(
+                                    ordering="-date",
+                                    page=1,
+                                    page_size=1,
+                                    instrument=iid,
+                                    pricing_policy=bl_request.pricing_policy,
+                                )
+                                earliest_it = (earliest_resp.results or [None])[0]
+                                latest_it = (latest_resp.results or [None])[0]
+                                earliest_date_str = (
+                                    str(getattr(earliest_it, "date", ""))
+                                    if earliest_it
+                                    else None
+                                )
+                                latest_date_str = (
+                                    str(getattr(latest_it, "date", ""))
+                                    if latest_it
+                                    else None
+                                )
+                                total_cnt = int(
+                                    earliest_resp.count or latest_resp.count or 0
+                                )
+                                return (
+                                    iid,
+                                    earliest_date_str,
+                                    latest_date_str,
+                                    total_cnt,
+                                )
+                            except Exception:
+                                return iid, None, None, 0
+
+                        bounds = await asyncio.gather(
+                            *[_fetch_bounds(iid) for iid in instrument_ids]
+                        )
+
+                        # Prepare per-instrument summary and compute intersection window
+                        earliest_map = {}
+                        latest_map = {}
+                        total_zero: list[int] = []
+
+                        output += "Earliest/Latest price dates per instrument (by pricing policy):\n"
+                        for iid, e_str, l_str, cnt in bounds:
+                            public_name = (
+                                (gmap.get(iid) or {}).get("instrument_public_name")
+                                or inst_name_from_bl.get(iid)
+                                or f"Instrument {iid}"
+                            )
+                            if cnt == 0 or not e_str or not l_str:
+                                output += f"- {public_name} (ID: {iid}): no price history found at all.\n"
+                                total_zero.append(iid)
+                                earliest_map[iid] = None
+                                latest_map[iid] = None
+                                continue
+
+                            # Parse dates to date objects
+                            try:
+                                e_dt = datetime.strptime(e_str, "%Y-%m-%d").date()
+                            except Exception:
+                                e_dt = None
+                            try:
+                                l_dt = datetime.strptime(l_str, "%Y-%m-%d").date()
+                            except Exception:
+                                l_dt = None
+
+                            earliest_map[iid] = e_dt
+                            latest_map[iid] = l_dt
+                            output += f"- {public_name} (ID: {iid}): first={e_str or '-'}; last={l_str or '-'}\n"
+
+                        if total_zero:
+                            output += "\nAt least one instrument has no price history at all; cannot find a common period where ALL instruments have prices.\n"
+                            output += "Please update pricing sources/policy or exclude problematic instruments to proceed.\n"
+                        else:
+                            # Compute global intersection window across all instruments
+                            all_earliest = [
+                                d for d in earliest_map.values() if d is not None
+                            ]
+                            all_latest = [
+                                d for d in latest_map.values() if d is not None
+                            ]
+
+                            if all_earliest and all_latest:
+                                intersect_start = max(all_earliest)
+                                intersect_end = min(all_latest)
+
+                                if intersect_start <= intersect_end:
+                                    output += f"\nCommon price coverage across ALL instruments: {intersect_start} to {intersect_end}.\n"
+
+                                    # Propose recommended dates by minimally adjusting the user's selection
+                                    # If user provided begin_date -> clamp up to intersection start; else use intersection start
+                                    recommended_begin = intersect_start
+                                    if begin_date:
+                                        recommended_begin = max(
+                                            begin_date, intersect_start
+                                        )
+
+                                    # End date must not exceed intersection end
+                                    recommended_end = min(end_date, intersect_end)
+
+                                    if recommended_begin <= recommended_end:
+                                        # Present ranges and how to run
+                                        output += f"\nValid begin_date range: {intersect_start} .. {recommended_end}\n"
+                                        output += f"Valid end_date range: {recommended_begin} .. {intersect_end}\n"
+                                        output += "\nRecommended next step (no auto-rerun performed):\n"
+                                        output += f"- Re-run Performance Report with begin_date={recommended_begin} and end_date={recommended_end}.\n"
+                                        output += "- Keep the same portfolio, currency, and pricing policy.\n"
+                                        # Provide a concrete invocation hint
+                                        display_begin = recommended_begin.isoformat()
+                                        display_end = recommended_end.isoformat()
+                                        output += "\nHow to run (example):\n"
+                                        output += f"  - Use get_performance_report with portfolio_code='{schema.portfolio_code}', report_currency='{schema.report_currency.value}', begin_date='{display_begin}', end_date='{display_end}'.\n"
+                                    else:
+                                        output += "\nNo feasible pair within the common coverage when respecting the current end_date. "
+                                        output += f"Consider choosing end_date on or before {intersect_end} and begin_date on or after {intersect_start}.\n"
+                                else:
+                                    output += "\nNo overlap between instruments' price histories; cannot find a common period where ALL have prices.\n"
+                                    output += "Adjust pricing policy or investigate missing price data for the listed instruments.\n"
+                            else:
+                                output += "\nInsufficient data to compute a common price window across instruments.\n"
+
             except Exception as e:
                 logger.warning(
                     f"Balance/Price enrichment skipped due to error: {e}\n{traceback.format_exc()}"
