@@ -358,7 +358,7 @@ class PerformanceReportToolkit:
                         end_date=str(end_date),
                         instrument_ids=instrument_ids,
                         pricing_policy_user_code=bl_request.pricing_policy,
-                        page_size=200,
+                        page_size=10,
                         only_first_page=True,
                     )
 
