@@ -67,8 +67,9 @@ services:
     volumes:
       # Must be different from ./nginx/ssl:/etc/letsencrypt
       - ./nginx/ssl-core:/etc/letsencrypt
-    env_file:
-      - .env
+    environment:
+      - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL}
+      - MAIN_DOMAIN_NAME=${MAIN_DOMAIN_NAME}
     ports:
       - "80:80"
     command: [
