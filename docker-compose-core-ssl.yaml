@@ -1,9 +1,26 @@
 services:
+  # Nginx reverse proxy to terminate TLS and expose Open WebUI via HTTPS on :8881
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "8881:443"  # Expose HTTPS on 8881
+    networks:
+      - arch-network
+    volumes:
+      # Use templated config for Open WebUI
+      - ./nginx/conf_core.d:/etc/nginx/templates
+      # Use a dedicated SSL directory for Core setup (must be different from ./nginx/ssl)
+      - ./nginx/ssl-core:/etc/letsencrypt:ro
+    depends_on:
+      - open-webui
+    environment:
+      - MAIN_DOMAIN_NAME=${MAIN_DOMAIN_NAME}
+
   open-webui:
     image: backplane/open-webui:0.6.15
     container_name: open-webui-finmars
-    ports:
-      - "8881:8080"
+    expose:
+      - "8080"
     networks:
       - arch-network
     extra_hosts:
@@ -41,6 +58,27 @@ services:
       - FINMARS_SPACE=${FINMARS_SPACE}
       - ACTIVATE_PUBLIC_NAME=${ACTIVATE_PUBLIC_NAME:-false}
     restart: always
+
+  # One-off container to obtain/renew Let's Encrypt certificates for MAIN_DOMAIN_NAME
+  certbot:
+    image: certbot/certbot:v5.0.0
+    networks:
+      - arch-network
+    volumes:
+      # Must be different from ./nginx/ssl:/etc/letsencrypt
+      - ./nginx/ssl-core:/etc/letsencrypt
+    env_file:
+      - .env
+    ports:
+      - "80:80"
+    command: [
+      "certonly",
+      "--standalone",
+      "--non-interactive",
+      "--agree-tos",
+      "-m", "${LETSENCRYPT_EMAIL}",
+      "-d", "${MAIN_DOMAIN_NAME}"
+    ]
 
 volumes:
   open-webui:
