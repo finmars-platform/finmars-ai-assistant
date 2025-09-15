@@ -1,0 +1,90 @@
+# /etc/nginx/templates/openwebui.conf.template
+
+map $http_upgrade $connection_upgrade {
+  default upgrade;
+  ''      close;
+}
+
+server {
+    listen 443 ssl;
+    http2 on;
+    server_name ${MAIN_DOMAIN_NAME};
+
+    # SSL Certificate paths from existing Let's Encrypt certificates
+    ssl_certificate /etc/letsencrypt/live/${MAIN_DOMAIN_NAME}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/${MAIN_DOMAIN_NAME}/privkey.pem;
+
+    # SSL Configuration
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+    ssl_prefer_server_ciphers on;
+    ssl_session_cache shared:SSL:10m;
+    ssl_session_timeout 10m;
+
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
+
+    # ПУБЛИЧНЫЙ bootstrap endpoint → agent-pipelines
+    location /bootstrap/finmars {
+        proxy_pass         http://agent-pipelines:9099/bootstrap/finmars;
+        proxy_http_version 1.1;
+        proxy_set_header   Host              $host;
+        proxy_set_header   X-Forwarded-For   $remote_addr;
+        proxy_set_header   X-Forwarded-Proto https;
+        proxy_set_header   Connection        "";
+    }
+
+    # Auth/API/WS — без кеша
+    location ~ ^/(oauth|auth|login|logout|api|ws|websocket) {
+        add_header Cache-Control "no-store" always;
+        proxy_no_cache     1;
+        proxy_cache_bypass 1;
+
+        proxy_pass http://open-webui-finmars:8080;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+
+        proxy_set_header Host              $http_host;   # содержит :8881
+        proxy_set_header X-Forwarded-Host  $http_host;
+        proxy_set_header X-Forwarded-Proto https;        # явно https
+        proxy_set_header X-Forwarded-Port  8881;         # критично!
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+
+        proxy_read_timeout 10m;
+        proxy_buffering off;
+
+        # iframe policy
+        proxy_hide_header X-Frame-Options;
+        add_header X-Frame-Options "" always;
+        proxy_hide_header Content-Security-Policy;
+        add_header Content-Security-Policy "frame-ancestors 'self' https://${MAIN_DOMAIN_NAME} https://*.${MAIN_DOMAIN_NAME};" always;
+    }
+
+    # Остальные запросы
+    location / {
+        proxy_pass http://open-webui-finmars:8080;
+
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+
+        proxy_set_header Host              $http_host;   # содержит :8881
+        proxy_set_header X-Forwarded-Host  $http_host;
+        proxy_set_header X-Forwarded-Proto https;        # явно https
+        proxy_set_header X-Forwarded-Port  8881;         # критично!
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+
+        proxy_buffering off;
+
+        # (Optional) Increase max request size for large attachments and long audio messages
+        client_max_body_size 20M;
+        proxy_read_timeout 10m;
+
+        proxy_hide_header X-Frame-Options;
+        add_header X-Frame-Options "" always;
+        proxy_hide_header Content-Security-Policy;
+        add_header Content-Security-Policy "frame-ancestors 'self' https://${MAIN_DOMAIN_NAME} https://*.${MAIN_DOMAIN_NAME};" always;
+    }
+}
