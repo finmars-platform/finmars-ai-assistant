@@ -20,24 +20,12 @@ from langchain_core.prompts import (
 from langchain_core.runnables import RunnableConfig
 from langchain_core.tools import BaseTool
 from langchain_openai import ChatOpenAI
-from langgraph.prebuilt import create_react_agent
+from deepagents import async_create_deep_agent
 from langgraph.prebuilt.chat_agent_executor import AgentState
 
 from libs.utils.key_manager import get_api_key
 from libs.utils.langfuse_manager import LangfusePromptName
 from tools import build_all_tools
-
-
-def create_agent_prompt(sys_msg) -> ChatPromptTemplate:
-
-    sys_msg = build_system_msg(sys_msg=sys_msg)
-
-    return ChatPromptTemplate.from_messages(
-        [
-            sys_msg,
-            MessagesPlaceholder("messages", optional=True),
-        ]
-    )
 
 
 class SolverState(AgentState):
@@ -47,7 +35,7 @@ class SolverState(AgentState):
     pass
 
 
-def create_finmars_agent_react(
+def create_finmars_deep_agent(
     config: Optional[RunnableConfig] = None,
 ):
     # Get configurable prompt configs
@@ -71,18 +59,18 @@ def create_finmars_agent_react(
     executor_llm = ChatOpenAI(**task_solver_llm_config)
 
     # Build the prompt template using ChatPromptTemplate.from_messages
-    prompt_template = create_agent_prompt(sys_msg=task_solver_sys_msg)
+    prompt_template: str = build_system_msg(
+        sys_msg=task_solver_sys_msg, get_string=True
+    )
 
     tools: list[BaseTool] = build_all_tools(
         finmars_token=finmars_token, space=space, realm=realm
     )
 
     # Create executor agent with state modifier
-    executor_agent = create_react_agent(
+    executor_agent = async_create_deep_agent(
         model=executor_llm,
         tools=tools,
-        prompt=prompt_template,
-        name="FinmarsReactAgent",
-        state_schema=SolverState,
+        instructions=prompt_template,
     )
     return executor_agent
