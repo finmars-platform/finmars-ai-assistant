@@ -618,6 +618,8 @@ class BackendBalanceReportItemsBase(BaseModel):
 
 
 class BackendBalanceReportItems(BackendBalanceReportItemsBase):
+    # Allow API to return count=0 without validation error
+    count: Optional[conint(ge=0)] = Field(None, title="Count")
     items: Optional[list[dict]] = Field(None, title="Items")
 
 
