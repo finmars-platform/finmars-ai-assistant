@@ -1,0 +1,147 @@
+import json
+from typing import Optional
+from langchain_core.messages import HumanMessage, BaseMessage
+from langchain_core.runnables import RunnableConfig
+
+from agents.react_agent import simple_react_tag
+from agents.deep_agent.agent_deep_builder import create_finmars_deep_agent
+from libs.utils.prompt_map_builder import build_map_prompts_cfg
+from libs.utils.langfuse_manager import PromptSource
+from libs.utils.langfuse_callback import get_langfuse_callbacks
+
+
+async def arun_agent_stream(
+    messages: list[BaseMessage],
+    chat_id: str,
+    user_key: str,
+    prompt_source: Optional[PromptSource] = None,
+    model_name: Optional[str] = None,
+    finmars_token: Optional[str] = None,
+    realm: Optional[str] = None,
+    space: Optional[str] = None,
+):
+    # Get Langfuse callbacks based on environment variables
+    callbacks = get_langfuse_callbacks()
+
+    map_prompts_cfg = await build_map_prompts_cfg(
+        tags=simple_react_tag,
+        prompt_source=prompt_source,
+        model_name=model_name,
+        finmars_token=finmars_token,
+        realm=realm,
+        space=space,
+    )
+
+    config = RunnableConfig(
+        **{
+            "callbacks": callbacks,
+            "metadata": {
+                "langfuse_user_id": user_key,
+                "langfuse_session_id": chat_id,
+                "langfuse_tags": [
+                    f"model_name::{model_name}",
+                    f"prompt_source::{prompt_source}",
+                ],
+            },
+            "configurable": map_prompts_cfg,
+        }
+    )
+
+    agent = create_finmars_deep_agent(config)
+
+    # Stream events compatibly with Open WebUI pipeline expectations
+    answer = ""
+    prev_event_is_agent_thinking = True
+    async for event_graph in agent.astream_events(
+        {
+            "messages": messages,
+        },
+        version="v2",
+        config=config,
+    ):
+        if "skip" in event_graph.get("tags", []):
+            continue
+
+        if event_graph.get("event") == "on_tool_end":
+            tool_output = event_graph.get("data", {}).get("output")
+            tool_output_status = ""
+            tool_output_name = ""
+
+            if hasattr(tool_output, "status"):
+                tool_output_status = tool_output.status
+
+            if hasattr(tool_output, "name"):
+                tool_output_name = tool_output.name
+
+            yield {
+                "event": {
+                    "type": "status",
+                    "data": {
+                        "description": f"Agent got response from {tool_output_name} tool with status: {tool_output_status}...",
+                        "done": False,
+                    },
+                }
+            }
+            prev_event_is_agent_thinking = False
+
+        elif event_graph.get("event") == "on_tool_start":
+            tool_name: str = event_graph.get("name")
+            tool_input_data: dict = event_graph.get("data", {}).get("input", {})
+            yield {
+                "event": {
+                    "type": "status",
+                    "data": {
+                        "description": f"Agent call {tool_name} tool with input: {json.dumps(tool_input_data)}...",
+                        "done": False,
+                    },
+                }
+            }
+            prev_event_is_agent_thinking = False
+
+        elif event_graph.get("event") == "on_chat_model_stream":
+            msg_chunk = event_graph.get("data", {}).get("chunk")
+            if getattr(msg_chunk, "type", None) != "AIMessageChunk":
+                continue
+
+            if msg_chunk.content:
+                if not prev_event_is_agent_thinking:
+                    yield {
+                        "event": {
+                            "type": "status",
+                            "data": {
+                                "description": "Agent is analysing tool responses...",
+                                "done": False,
+                            },
+                        }
+                    }
+                    prev_event_is_agent_thinking = True
+
+                answer += msg_chunk.content
+                yield msg_chunk.content
+
+
+async def run_agent(
+    messages: list[BaseMessage], prompt_source: Optional[PromptSource] = None
+) -> str:
+    answer = ""
+    async for chunk in arun_agent_stream(
+        messages=messages, prompt_source=prompt_source
+    ):
+        answer += chunk
+    return answer
+
+
+if __name__ == "__main__":
+    import asyncio
+
+    # Example usage with Langfuse-managed prompts
+    response = asyncio.run(
+        run_agent(
+            messages=[
+                HumanMessage(content="Show for me portfolio list top 5 on 1 page")
+            ],
+            prompt_source=PromptSource.LANGFUSE,
+        )
+    )
+    print(f"ANSWER: {response}")
+
