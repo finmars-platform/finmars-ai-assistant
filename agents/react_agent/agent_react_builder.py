@@ -95,19 +95,24 @@ async def pre_hook_agent_processor(state, config):
     # Insert reminder messages before the last human message
     rem = [HumanMessage(content=hm_content), AIMessage(content=ai_content)]
 
-    # Find the index of the last human message
-    last_human_index = -1
-    for i in range(len(state["messages"]) - 1, -1, -1):
-        if state["messages"][i].type == "human":
-            last_human_index = i
-            break
-
-    if last_human_index != -1:
-        # Insert before the last human message
-        state["messages"][last_human_index:last_human_index] = rem
-    else:
-        # If no human messages exist, just add the reminders at the end
+    # Check if the last message is a tool message
+    if len(state["messages"]) > 0 and state["messages"][-1].type == "tool":
+        # If last message is a tool message, just extend the reminders at the end
         state["messages"].extend(rem)
+    else:
+        # Find the index of the last human message
+        last_human_index = -1
+        for i in range(len(state["messages"]) - 1, -1, -1):
+            if state["messages"][i].type == "human":
+                last_human_index = i
+                break
+
+        if last_human_index != -1:
+            # Insert before the last human message
+            state["messages"][last_human_index:last_human_index] = rem
+        else:
+            # If no human messages exist, just add the reminders at the end
+            state["messages"].extend(rem)
 
     return {"messages": [RemoveMessage(id=REMOVE_ALL_MESSAGES), *state["messages"]]}
 
