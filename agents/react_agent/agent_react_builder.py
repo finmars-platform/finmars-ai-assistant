@@ -97,6 +97,7 @@ def create_finmars_agent_react(
         "model_name": task_solver_config.get("model_name"),
         "temperature": task_solver_config.get("temperature"),
         "base_url": task_solver_config.get("base_url"),
+        "is_google_provider": task_solver_config.get("is_google_provider"),
     }
     executor_llm = ChatOpenAI(**task_solver_llm_config)
 
