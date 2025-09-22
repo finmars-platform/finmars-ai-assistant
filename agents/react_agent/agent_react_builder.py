@@ -39,7 +39,7 @@ from libs.utils.langfuse_manager import LangfusePromptName
 from tools import build_all_tools
 
 msg_type = {
-    "ai": "AI Finance Agent",
+    "ai": "FinmarsReactAgent",
 }
 
 
@@ -96,7 +96,7 @@ def format_msg_content(m: AnyMessage):
             content_out += str(m.content)
 
         if m.tool_calls:
-            content_out += f"\nTOOL CALLS BY `AI Finance Agent`: {json.dumps(m.tool_calls, indent=2, ensure_ascii=False)}\n"
+            content_out += f"\nTOOL CALLS BY `FinmarsReactAgent`: {json.dumps(m.tool_calls, indent=2, ensure_ascii=False)}\n"
     else:
         if m.type == "tool":
             content_out += f"\n TOOL RESPONSE OF TOOL CALL WITH ID: {m.id}\n"
@@ -113,11 +113,11 @@ async def post_hook_agent_processor(state, config):
         [
             SystemMessage(content=SIMPLE_LLM_TOOL_USAGE_DETECTOR_SYSTEM_PROMPT),
             HumanMessagePromptTemplate.from_template(
-                "Here is the dialog between `AI Finance Agent` and Human:\n\n\n{dialog}"
+                "Here is the dialog between `FinmarsReactAgent` and Human:\n\n\n{dialog}"
             ),
             HumanMessagePromptTemplate.from_template(
-                "Here is the thinking AND list of current tool calling of `AI Finance Agent` that "
-                "was created by `AI Finance Agent` based on dialog between `AI Finance Agent` and Human:\n\n\n{agent_tool_calls}"
+                "Here is the thinking AND list of current tool calling of `FinmarsReactAgent` that "
+                "was created by `FinmarsReactAgent` based on dialog between `FinmarsReactAgent` and Human:\n\n\n{agent_tool_calls}"
             ),
         ]
     )
