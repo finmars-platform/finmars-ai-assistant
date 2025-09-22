@@ -212,9 +212,10 @@ async def arun_agent_stream_thinking(
                 }
             }
 
-            # If thinking is active, also yield tool response notification in thinking block
+            # Tool responses should always be in thinking blocks
+            # If thinking is not active, something went wrong, but let's handle it gracefully
             if is_thinking_active:
-                yield f"\n🔧 Tool call completed: {tool_output_name} (status: {tool_output_status})\n"
+                yield f"🔧 Tool call completed: {tool_output_name} (status: {tool_output_status})\n"
             prev_event_is_agent_thinking = False
 
         elif event_graph.get("event") == "on_tool_start":
@@ -232,9 +233,13 @@ async def arun_agent_stream_thinking(
                 }
             }
 
-            # If thinking is active, also yield tool call notification in thinking block
-            if is_thinking_active:
-                yield f"\n🔧 Tool call: {tool_name} with input: {json.dumps(tool_input_data)}\n"
+            # Always start thinking block for tool calls if not active
+            if not is_thinking_active:
+                yield "<think>"
+                is_thinking_active = True
+
+            # Always yield tool call notification in thinking block
+            yield f"🔧 Tool call: {tool_name} with input: {json.dumps(tool_input_data)}\n"
             prev_event_is_agent_thinking = False
 
         elif event_graph.get("event") == "on_chat_model_stream":
