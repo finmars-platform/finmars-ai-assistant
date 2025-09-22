@@ -233,3 +233,7 @@ Ask clarifying questions only when essential information is missing and cannot b
 ## 9. OTHER KEY SPECIFIC NOTE POINTS
 1. User sometimes means `asset type` is the same as `the type of assets` regarding the meaning. Please take it into your account!
 """
+
+
+SIMPLE_LLM_TOOL_USAGE_DETECTOR_SYSTEM_PROMPT = """
+"""
