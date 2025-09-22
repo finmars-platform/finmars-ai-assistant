@@ -2,6 +2,9 @@ from typing import Optional
 from datetime import datetime
 import os
 
+from langchain_core.messages import HumanMessage, AIMessage, RemoveMessage
+from langgraph.graph.message import REMOVE_ALL_MESSAGES
+
 try:
     from zoneinfo import ZoneInfo
 except ImportError:
@@ -71,6 +74,44 @@ def create_agent_prompt(sys_msg) -> ChatPromptTemplate:
     )
 
 
+async def pre_hook_agent_processor(state, config):
+    hm_content = (
+        "Here is my KINDLY REMINDER about `calculator_python_numexpr` tool usage. "
+        "Again, PLEASE, IN CASE OF ANY MATH OPERATIONS, CALCULATIONS USE `calculator_python_numexpr` tool. "
+        "THIS IS MANDATORY FOR ALL CALCULATIONS THAT WAS PRODUCED FROM YOU!!!"
+    )
+    ai_content = "YES!!! Of course, I will use the `calculator_python_numexpr` tool for any mathematical calculations. Thank you for the reminder."
+
+    # Remove any existing messages that contain the reminder content
+    state["messages"] = [
+        msg
+        for msg in state["messages"]
+        if not (
+            hasattr(msg, "content")
+            and ((hm_content == msg.content) or (ai_content == msg.content))
+        )
+    ]
+
+    # Insert reminder messages before the last human message
+    rem = [HumanMessage(content=hm_content), AIMessage(content=ai_content)]
+
+    # Find the index of the last human message
+    last_human_index = -1
+    for i in range(len(state["messages"]) - 1, -1, -1):
+        if state["messages"][i].type == "human":
+            last_human_index = i
+            break
+
+    if last_human_index != -1:
+        # Insert before the last human message
+        state["messages"][last_human_index:last_human_index] = rem
+    else:
+        # If no human messages exist, just add the reminders at the end
+        state["messages"].extend(rem)
+
+    return {"messages": [RemoveMessage(id=REMOVE_ALL_MESSAGES), *state["messages"]]}
+
+
 class SolverState(AgentState):
     """State for Solver agent"""
 
@@ -128,5 +169,6 @@ def create_finmars_agent_react(
         prompt=prompt_template,
         name="FinmarsReactAgent",
         state_schema=SolverState,
+        pre_model_hook=pre_hook_agent_processor,
     )
     return executor_agent
