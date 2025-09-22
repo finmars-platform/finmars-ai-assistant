@@ -18,6 +18,7 @@ from langchain_core.prompts import (
 from langchain_core.runnables import RunnableConfig
 from langchain_core.tools import BaseTool
 from langchain_openai import ChatOpenAI
+from langchain_google_genai import ChatGoogleGenerativeAI
 from langgraph.prebuilt import create_react_agent
 from langgraph.prebuilt.chat_agent_executor import AgentState
 
@@ -92,18 +93,26 @@ def create_finmars_agent_react(
     space = task_solver_config.get("space")
     realm = task_solver_config.get("realm")
 
-    task_solver_llm_config = {
-        "api_key": get_api_key(base_url=task_solver_config.get("base_url")),
-        "model_name": task_solver_config.get("model_name"),
-        "temperature": task_solver_config.get("temperature"),
-        "base_url": task_solver_config.get("base_url"),
-        "is_google_provider": task_solver_config.get("is_google_provider"),
-    }
-    if task_solver_llm_config.get("is_google_provider"):
-        task_solver_llm_config["thinking_budget"] = task_solver_config.get("thinking_budget", -1)
-        task_solver_llm_config["include_thoughts"] = task_solver_config.get("include_thoughts", True)
+    is_google_provider = task_solver_config.get("is_google_provider", False)
 
-    executor_llm = ChatOpenAI(**task_solver_llm_config)
+    if is_google_provider:
+        # Use ChatGoogleGenerativeAI for Google models
+        task_solver_llm_config = {
+            "model": task_solver_config.get("model_name"),
+            "temperature": task_solver_config.get("temperature"),
+            "thinking_budget": task_solver_config.get("thinking_budget", -1),
+            "include_thoughts": task_solver_config.get("include_thoughts", True),
+        }
+        executor_llm = ChatGoogleGenerativeAI(**task_solver_llm_config)
+    else:
+        # Use ChatOpenAI for OpenAI models
+        task_solver_llm_config = {
+            "api_key": get_api_key(base_url=task_solver_config.get("base_url")),
+            "model_name": task_solver_config.get("model_name"),
+            "temperature": task_solver_config.get("temperature"),
+            "base_url": task_solver_config.get("base_url"),
+        }
+        executor_llm = ChatOpenAI(**task_solver_llm_config)
 
     # Build the prompt template using ChatPromptTemplate.from_messages
     prompt_template = create_agent_prompt(sys_msg=task_solver_sys_msg)

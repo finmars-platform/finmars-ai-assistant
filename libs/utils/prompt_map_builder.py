@@ -1,5 +1,5 @@
 import os
-from typing import Optional
+from typing import Optional, Any
 from libs.utils.langfuse_manager import (
     LangfusePromptName,
     LangFusePromptManager,
@@ -9,6 +9,7 @@ from libs.utils.langfuse_manager import (
 
 async def build_map_prompts_cfg(
     tags: list[str],
+    config_default: dict[str, Any],
     prompt_source: Optional[PromptSource] = None,
     model_name: Optional[str] = None,
     finmars_token: Optional[str] = None,
@@ -21,15 +22,7 @@ async def build_map_prompts_cfg(
         await LangFusePromptManager.build_msg(
             name=LangfusePromptName.SIMPLE_REACT_SYSTEM_PROMPT,
             tags=tags,
-            config={
-                # "model_name": "gpt-4.1-2025-04-14",
-                "model_name": "gemini-2.5-flash",
-                "temperature": 0.0,
-                "base_url": None,
-                "is_google_provider": True,
-                "thinking_budget": -1,
-                "include_thoughts": True,
-            },
+            config=config_default,
             return_config=True,
             prompt_source=prompt_source,
         )
