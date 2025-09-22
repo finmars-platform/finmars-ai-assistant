@@ -2,8 +2,18 @@ from typing import Optional
 from datetime import datetime
 import os
 
-from langchain_core.messages import HumanMessage, AIMessage, RemoveMessage
+from langchain_core.messages import (
+    HumanMessage,
+    AIMessage,
+    RemoveMessage,
+    SystemMessage,
+)
 from langgraph.graph.message import REMOVE_ALL_MESSAGES
+
+from agents.react_agent.system_prompt import (
+    SIMPLE_LLM_TOOL_USAGE_DETECTOR_SYSTEM_PROMPT,
+)
+from agents.react_agent.utils import init_llm
 
 try:
     from zoneinfo import ZoneInfo
