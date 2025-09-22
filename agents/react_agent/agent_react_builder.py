@@ -1,12 +1,14 @@
-from typing import Optional
-from datetime import datetime
+import json
 import os
+from datetime import datetime
+from typing import Optional
 
 from langchain_core.messages import (
     HumanMessage,
     AIMessage,
     RemoveMessage,
     SystemMessage,
+    AnyMessage,
 )
 from langgraph.graph.message import REMOVE_ALL_MESSAGES
 
@@ -30,14 +32,15 @@ from langchain_core.prompts import (
 )
 from langchain_core.runnables import RunnableConfig
 from langchain_core.tools import BaseTool
-from langchain_openai import ChatOpenAI
-from langchain_google_genai import ChatGoogleGenerativeAI
 from langgraph.prebuilt import create_react_agent
 from langgraph.prebuilt.chat_agent_executor import AgentState
 
-from libs.utils.key_manager import get_api_key
 from libs.utils.langfuse_manager import LangfusePromptName
 from tools import build_all_tools
+
+msg_type = {
+    "ai": "AI Finance Agent",
+}
 
 
 def create_agent_prompt(sys_msg) -> ChatPromptTemplate:
@@ -82,6 +85,75 @@ def create_agent_prompt(sys_msg) -> ChatPromptTemplate:
             MessagesPlaceholder("messages", optional=True),
         ]
     )
+
+
+def format_msg_content(m: AnyMessage):
+    content_out = ""
+    if m.type == "ai":
+        if isinstance(m.content, list):
+            content_out += json.dumps(m.content, indent=2, ensure_ascii=False)
+        else:
+            content_out += str(m.content)
+
+        if m.tool_calls:
+            content_out += f"\nTOOL CALLS BY `AI Finance Agent`: {json.dumps(m.tool_calls, indent=2, ensure_ascii=False)}\n"
+    else:
+        if m.type == "tool":
+            content_out += f"\n TOOL RESPONSE ID: {m.id}\n"
+        content_out += str(m.content)
+    content_out += "\n"
+    content_out += "=" * 150
+    content_out += "\n"
+    return content_out
+
+
+async def post_hook_agent_processor(state, config):
+
+    prompt = ChatPromptTemplate.from_messages(
+        [
+            SystemMessage(content=SIMPLE_LLM_TOOL_USAGE_DETECTOR_SYSTEM_PROMPT),
+            HumanMessagePromptTemplate.from_template(
+                "Here is the dialog between `AI Finance Agent` and Human:\n\n\n{dialog}"
+            ),
+            HumanMessagePromptTemplate.from_template(
+                "Here is the thinking AND list of current tool calling of `AI Finance Agent` that "
+                "was created by `AI Finance Agent` based on dialog between `AI Finance Agent` and Human:\n\n\n{agent_tool_calls}"
+            ),
+        ]
+    )
+    configurable = config.get("configurable", {}) if config else {}
+    task_solver_sys_msg, task_solver_config = configurable.get(
+        LangfusePromptName.SIMPLE_REACT_SYSTEM_PROMPT,
+    )
+
+    task_solver_config["is_google_provider"] = False
+    task_solver_config["model_name"] = "gpt-4.1-2025-04-14"  # could be lower model
+    task_solver_config["temperature"] = 0.0
+
+    llm = init_llm(task_solver_config, kwargs={"tags": ["additional_thinking"]})
+    chain_calculator_usage_detector = prompt | llm
+
+    dialog = "\n".join(
+        (
+            f"<{msg_type.get(m.type, m.type.capitalize())}>\n{format_msg_content(m)}"
+            for m in state["messages"][:-1]
+        )
+    )
+
+    agent_tool_calls = (
+        f"<{msg_type.get(state['messages'].type, state['messages'].type.capitalize())}>\n"
+        f"{format_msg_content(state['messages'][-1])}"
+    )
+
+    result: AIMessage = await chain_calculator_usage_detector.ainvoke(
+        {"dialog": dialog, "agent_tool_calls": agent_tool_calls}
+    )
+
+    return {
+        "messages": HumanMessage(
+            content=result.content, name="StrictSupervisorAuditorCalculatorUsage"
+        )
+    }
 
 
 async def pre_hook_agent_processor(state, config):
@@ -199,5 +271,6 @@ def create_finmars_agent_react(
         name="FinmarsReactAgent",
         state_schema=SolverState,
         pre_model_hook=pre_hook_agent_processor,
+        post_model_hook=post_hook_agent_processor,
     )
     return executor_agent
