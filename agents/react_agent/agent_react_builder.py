@@ -100,7 +100,7 @@ async def pre_hook_agent_processor(state, config):
         # If last message is a tool message, just extend the reminders at the end
         state["messages"].extend(rem)
     else:
-        # Find the index of the last human message
+        # Find the last human message
         last_human_index = -1
         for i in range(len(state["messages"]) - 1, -1, -1):
             if state["messages"][i].type == "human":
@@ -108,8 +108,16 @@ async def pre_hook_agent_processor(state, config):
                 break
 
         if last_human_index != -1:
-            # Insert before the last human message
-            state["messages"][last_human_index:last_human_index] = rem
+            # Check if there's an AI message right before the human message
+            if (last_human_index > 0 and
+                state["messages"][last_human_index - 1].type == "ai"):
+                # Insert before the AI+human pair
+                insert_index = last_human_index - 1
+            else:
+                # Insert before just the human message
+                insert_index = last_human_index
+
+            state["messages"][insert_index:insert_index] = rem
         else:
             # If no human messages exist, just add the reminders at the end
             state["messages"].extend(rem)
