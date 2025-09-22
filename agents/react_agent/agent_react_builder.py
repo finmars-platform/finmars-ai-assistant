@@ -99,6 +99,10 @@ def create_finmars_agent_react(
         "base_url": task_solver_config.get("base_url"),
         "is_google_provider": task_solver_config.get("is_google_provider"),
     }
+    if task_solver_llm_config.get("is_google_provider"):
+        task_solver_llm_config["thinking_budget"] = task_solver_config.get("thinking_budget", -1)
+        task_solver_llm_config["include_thoughts"] = task_solver_config.get("include_thoughts", True)
+
     executor_llm = ChatOpenAI(**task_solver_llm_config)
 
     # Build the prompt template using ChatPromptTemplate.from_messages
