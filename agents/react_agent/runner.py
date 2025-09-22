@@ -257,12 +257,15 @@ async def arun_agent_stream_thinking(
 
             # Handle regular content
             if msg_chunk.content and isinstance(msg_chunk.content, str):
-                # If we were in thinking mode and now get regular content, close thinking
-                if is_thinking_active:
+                # Check if this chunk has tool calls
+                has_tool_calls = hasattr(msg_chunk, 'tool_calls') and msg_chunk.tool_calls
+
+                # If we were in thinking mode and get regular content without tool calls, close thinking
+                if is_thinking_active and not has_tool_calls:
                     yield "\n </think> \n\n"
                     is_thinking_active = False
 
-                if not prev_event_is_agent_thinking:
+                if not prev_event_is_agent_thinking and not is_thinking_active:
                     yield {
                         "event": {
                             "type": "status",
