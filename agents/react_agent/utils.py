@@ -4,7 +4,9 @@ from langchain_openai import ChatOpenAI
 from libs.utils.key_manager import get_api_key
 
 
-def init_llm(task_solver_config: dict, **kwargs):
+def init_llm(task_solver_config: dict, kwargs: dict = dict()):
+    # WARNING: Keep `kwargs` as it is, overwise you will get an errpr
+    # NameError: Fields must not use names with leading underscores; e.g., use 'pydantic_extra__' instead of '__pydantic_extra__'.
     clean_kwargs = {k: v for k, v in kwargs.items() if not k.startswith("_")}
     task_solver_config = {k: v for k, v in task_solver_config.items() if not k.startswith("_")}
     is_google_provider = task_solver_config.get("is_google_provider", False)
