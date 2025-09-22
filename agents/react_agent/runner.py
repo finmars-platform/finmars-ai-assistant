@@ -19,6 +19,7 @@ async def arun_agent_stream(
     finmars_token: Optional[str] = None,
     realm: Optional[str] = None,
     space: Optional[str] = None,
+    thinking_mode: Optional[bool] = None,
 ):
     # Get Langfuse callbacks based on environment variables
     callbacks = get_langfuse_callbacks()
