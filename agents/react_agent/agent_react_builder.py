@@ -99,7 +99,7 @@ def format_msg_content(m: AnyMessage):
             content_out += f"\nTOOL CALLS BY `AI Finance Agent`: {json.dumps(m.tool_calls, indent=2, ensure_ascii=False)}\n"
     else:
         if m.type == "tool":
-            content_out += f"\n TOOL RESPONSE ID: {m.id}\n"
+            content_out += f"\n TOOL RESPONSE OF TOOL CALL WITH ID: {m.id}\n"
         content_out += str(m.content)
     content_out += "\n"
     content_out += "=" * 150
