@@ -14,7 +14,7 @@ def init_llm(task_solver_config: dict, **kwargs):
             "thinking_budget": task_solver_config.get("thinking_budget", -1),
             "include_thoughts": task_solver_config.get("include_thoughts", True),
         }
-        executor_llm = ChatGoogleGenerativeAI(**task_solver_llm_config, **kwargs)
+        executor_llm = ChatGoogleGenerativeAI(**{**task_solver_llm_config, **kwargs})
     else:
         # Use ChatOpenAI for OpenAI models
         task_solver_llm_config = {
@@ -23,5 +23,5 @@ def init_llm(task_solver_config: dict, **kwargs):
             "temperature": task_solver_config.get("temperature"),
             "base_url": task_solver_config.get("base_url"),
         }
-        executor_llm = ChatOpenAI(**task_solver_llm_config, **kwargs)
+        executor_llm = ChatOpenAI(**{**task_solver_llm_config, **kwargs})
     return executor_llm
