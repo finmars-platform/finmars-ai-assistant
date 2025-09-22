@@ -132,8 +132,10 @@ async def pre_hook_agent_processor(state, config):
 
         if last_human_index != -1:
             # Check if there's an AI message right before the human message
-            if (last_human_index > 0 and
-                state["messages"][last_human_index - 1].type == "ai"):
+            if (
+                last_human_index > 0
+                and state["messages"][last_human_index - 1].type == "ai"
+            ):
                 # Insert before the AI+human pair
                 insert_index = last_human_index - 1
             else:
