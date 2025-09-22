@@ -201,38 +201,40 @@ async def arun_agent_stream_thinking(
             if hasattr(tool_output, "name"):
                 tool_output_name = tool_output.name
 
-            # If thinking is active, yield tool response notification without content
+            # Always yield status event for UI
+            yield {
+                "event": {
+                    "type": "status",
+                    "data": {
+                        "description": f"Agent got response from {tool_output_name} tool with status: {tool_output_status}...",
+                        "done": False,
+                    },
+                }
+            }
+
+            # If thinking is active, also yield tool response notification in thinking block
             if is_thinking_active:
                 yield f"\n🔧 Tool call completed: {tool_output_name} (status: {tool_output_status})\n"
-            else:
-                yield {
-                    "event": {
-                        "type": "status",
-                        "data": {
-                            "description": f"Agent got response from {tool_output_name} tool with status: {tool_output_status}...",
-                            "done": False,
-                        },
-                    }
-                }
             prev_event_is_agent_thinking = False
 
         elif event_graph.get("event") == "on_tool_start":
             tool_name: str = event_graph.get("name")
             tool_input_data: dict = event_graph.get("data", {}).get("input", {})
 
-            # If thinking is active, yield tool call notification without content
+            # Always yield status event for UI
+            yield {
+                "event": {
+                    "type": "status",
+                    "data": {
+                        "description": f"Agent call {tool_name} tool with input: {json.dumps(tool_input_data)}...",
+                        "done": False,
+                    },
+                }
+            }
+
+            # If thinking is active, also yield tool call notification in thinking block
             if is_thinking_active:
                 yield f"\n🔧 Tool call: {tool_name} with input: {json.dumps(tool_input_data)}\n"
-            else:
-                yield {
-                    "event": {
-                        "type": "status",
-                        "data": {
-                            "description": f"Agent call {tool_name} tool with input: {json.dumps(tool_input_data)}...",
-                            "done": False,
-                        },
-                    }
-                }
             prev_event_is_agent_thinking = False
 
         elif event_graph.get("event") == "on_chat_model_stream":
