@@ -100,9 +100,11 @@ async def pre_hook_agent_processor(state, config):
         # Find the last AI message with tool_calls that corresponds to the tool message
         ai_with_tool_calls_index = -1
         for i in range(len(state["messages"]) - 1, -1, -1):
-            if (state["messages"][i].type == "ai" and
-                hasattr(state["messages"][i], 'tool_calls') and
-                state["messages"][i].tool_calls):
+            if (
+                state["messages"][i].type == "ai"
+                and hasattr(state["messages"][i], "tool_calls")
+                and state["messages"][i].tool_calls
+            ):
                 ai_with_tool_calls_index = i
                 break
 
