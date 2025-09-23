@@ -29,8 +29,8 @@ async def create_prompt(
 async def financial_mathematician(state: AgentState, config: RunnableConfig):
     messages = state.get("messages", [])
     config_default = {
-        # "model_name": "gemini-2.5-flash",
-        "model": "gemini-2.5-pro",
+        "model_name": "gemini-2.5-flash",
+        # "model": "gemini-2.5-pro",
         "temperature": 0.0,
         "thinking_budget": -1,
         "include_thoughts": True,
