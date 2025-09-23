@@ -109,49 +109,58 @@ def format_msg_content(m: AnyMessage):
 
 async def post_hook_agent_processor(state, config):
 
-    prompt = ChatPromptTemplate.from_messages(
-        [
-            SystemMessage(content=SIMPLE_LLM_TOOL_USAGE_DETECTOR_SYSTEM_PROMPT),
-            HumanMessagePromptTemplate.from_template(
-                "Here is the dialog between `AI Finance Agent` and Human:\n\n\n{dialog}"
-            ),
-            HumanMessagePromptTemplate.from_template(
-                "Here is the thinking AND list of current tool calling of `AI Finance Agent` that "
-                "was created by `AI Finance Agent` based on dialog between `AI Finance Agent` and Human:\n\n\n{agent_tool_calls}"
-            ),
-        ]
-    )
-    configurable = config.get("configurable", {}) if config else {}
-    task_solver_sys_msg, task_solver_config = configurable.get(
-        LangfusePromptName.SIMPLE_REACT_SYSTEM_PROMPT,
-    )
+    # prompt = ChatPromptTemplate.from_messages(
+    #     [
+    #         SystemMessage(content=SIMPLE_LLM_TOOL_USAGE_DETECTOR_SYSTEM_PROMPT),
+    #         HumanMessagePromptTemplate.from_template(
+    #             "Here is the dialog between `AI Finance Agent` and Human:\n\n\n{dialog}"
+    #         ),
+    #         HumanMessagePromptTemplate.from_template(
+    #             "Here is the thinking AND list of current tool calling of `AI Finance Agent` that "
+    #             "was created by `AI Finance Agent` based on dialog between `AI Finance Agent` and Human:\n\n\n{agent_tool_calls}"
+    #         ),
+    #     ]
+    # )
+    # configurable = config.get("configurable", {}) if config else {}
+    # task_solver_sys_msg, task_solver_config = configurable.get(
+    #     LangfusePromptName.SIMPLE_REACT_SYSTEM_PROMPT,
+    # )
+    #
+    # task_solver_config["is_google_provider"] = False
+    # task_solver_config["model_name"] = "gpt-4.1-2025-04-14"  # could be lower model
+    # task_solver_config["temperature"] = 0.0
+    #
+    # llm = init_llm(task_solver_config, kwargs={"tags": ["additional_thinking"]})
+    # chain_calculator_usage_detector = prompt | llm
+    #
+    # dialog = "\n".join(
+    #     (
+    #         f"<{msg_type.get(m.type, m.type.capitalize())}>\n{format_msg_content(m)}"
+    #         for m in state["messages"][:-1]
+    #     )
+    # )
+    #
+    # agent_tool_calls = (
+    #     f"<{msg_type.get(state['messages'][-1].type, state['messages'][-1].type.capitalize())}>\n"
+    #     f"{format_msg_content(state['messages'][-1])}"
+    # )
+    #
+    # result: AIMessage = await chain_calculator_usage_detector.ainvoke(
+    #     {"dialog": dialog, "agent_tool_calls": agent_tool_calls}
+    # )
+    # result_content = result.content
 
-    task_solver_config["is_google_provider"] = False
-    task_solver_config["model_name"] = "gpt-4.1-2025-04-14"  # could be lower model
-    task_solver_config["temperature"] = 0.0
-
-    llm = init_llm(task_solver_config, kwargs={"tags": ["additional_thinking"]})
-    chain_calculator_usage_detector = prompt | llm
-
-    dialog = "\n".join(
-        (
-            f"<{msg_type.get(m.type, m.type.capitalize())}>\n{format_msg_content(m)}"
-            for m in state["messages"][:-1]
-        )
-    )
-
-    agent_tool_calls = (
-        f"<{msg_type.get(state['messages'][-1].type, state['messages'][-1].type.capitalize())}>\n"
-        f"{format_msg_content(state['messages'][-1])}"
-    )
-
-    result: AIMessage = await chain_calculator_usage_detector.ainvoke(
-        {"dialog": dialog, "agent_tool_calls": agent_tool_calls}
-    )
-
+    result_content = """
+YOU FORGOT TO USE `calculator_python_numexpr`! USE IT RIGHT NOW FOR YOUR MATH CALCULATIONS!! 
+ALL mathematical operations that MUST be performed using the calculator_python_numexpr tool. 
+No calculator tool calls have been made yet for these calculations. 
+For financial accuracy and auditability, every step involving arithmetic (summing, aggregating, percentage calculation end etc) must use the calculator tool `calculator_python_numexpr`. 
+Execute these calculations with `calculator_python_numexpr` immediately!
+"""
     return {
         "messages": HumanMessage(
-            content=result.content, name="StrictSupervisorAuditorCalculatorUsage"
+            # content=result.content, name="StrictSupervisorAuditorCalculatorUsage"
+            content=result_content, name="StrictSupervisorAuditorCalculatorUsage"
         )
     }
 
