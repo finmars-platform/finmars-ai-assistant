@@ -177,8 +177,9 @@ async def post_hook_agent_processor(state, config):
     result_content = """
 I skipped, failed to ask the `financial_mathematician` subagent, and on the next step I am obliged to ask the `financial_mathematician` subagent for my math work.
 Every arithmetic operation: sums, aggregates, percentages, and more -- must be done by asking the `financial_mathematician` subagent.
+The `financial_mathematician` subagent MUST use the `code_execution` tool for ALL mathematical calculations, including simple arithmetic operations.
 I have not asked the financial_mathematician for these computations yet.
-To maintain financial precision and auditability, each arithmetic step must go through the `financial_mathematician` subagent.
+To maintain financial precision and auditability, each arithmetic step must go through the `financial_mathematician` subagent with code_execution tool usage.
 I will ask the `financial_mathematician` subagent for these calculations right away.
 No apologies -- just doing the task without commentary.
 I MUST PROVIDE DETAILED CALCULATIONS by asking the `financial_mathematician` subagent!
@@ -186,6 +187,7 @@ I MUST PROVIDE DETAILED CALCULATIONS by asking the `financial_mathematician` sub
     continue_result_content = """
 I have already asked the `financial_mathematician` subagent right now, and I will continue relying on it for all future mathematical operations -- or correct my current usage where needed.
 Every arithmetic task: sums, aggregates, percentages, and more - must be executed by asking the `financial_mathematician` subagent.
+The `financial_mathematician` subagent MUST use the `code_execution` tool for ALL calculations to ensure computational accuracy and audit trail.
 If any computations were performed outside it, I will ask the `financial_mathematician` subagent to maintain financial precision and auditability.
 """
 
@@ -204,12 +206,12 @@ If any computations were performed outside it, I will ask the `financial_mathema
                 elif m.content[-1].endswith(continue_result_content):
                     m.content[-1] = m.content[-1][: -len(continue_result_content)]
             elif m.content and isinstance(m.content[-1], dict):
-                if m.content[-1]["thinking"].endswith(result_content):
-                    m.content[-1]["thinking"] = m.content[-1]["thinking"][
-                        : -len(result_content)
-                    ]
-                elif m.content[-1]["thinking"].endswith(continue_result_content):
-                    m.content[-1]["thinking"] = m.content[-1]["thinking"][
+                # Handle both old format {"thinking": "..."} and new format {"type": "thinking", "thinking": "..."}
+                thinking_content = m.content[-1].get("thinking", "")
+                if thinking_content.endswith(result_content):
+                    m.content[-1]["thinking"] = thinking_content[: -len(result_content)]
+                elif thinking_content.endswith(continue_result_content):
+                    m.content[-1]["thinking"] = thinking_content[
                         : -len(continue_result_content)
                     ]
         return m
@@ -223,7 +225,8 @@ If any computations were performed outside it, I will ask the `financial_mathema
             if m.content and isinstance(m.content[-1], str):
                 m.content[-1] = m.content[-1] + extra
             elif m.content and isinstance(m.content[-1], dict):
-                m.content[-1]["thinking"] = m.content[-1]["thinking"] + extra
+                if "thinking" in m.content[-1]:
+                    m.content[-1]["thinking"] = m.content[-1]["thinking"] + extra
         return m
 
     state["messages"] = [remove_extra(m) for m in state["messages"]]
@@ -247,9 +250,10 @@ async def pre_hook_agent_processor(state, config):
     hm_content = (
         "Here is my KINDLY REMINDER about `financial_mathematician` subagent usage. "
         "Again, PLEASE, IN CASE OF ANY MATH OPERATIONS, CALCULATIONS ASK THE `financial_mathematician` SUBAGENT. "
+        "The `financial_mathematician` subagent MUST use the `code_execution` tool for ALL mathematical calculations, including simple arithmetic operations. "
         "THIS IS MANDATORY FOR ALL CALCULATIONS THAT WAS PRODUCED FROM YOU!!!"
     )
-    ai_content = "YES!!! Of course, I will ask the `financial_mathematician` subagent for any mathematical calculations. Thank you for the reminder."
+    ai_content = "YES!!! Of course, I will ask the `financial_mathematician` subagent for any mathematical calculations, and it will use the `code_execution` tool for all computations. Thank you for the reminder."
 
     # Remove any existing messages that contain the reminder content
     state["messages"] = [

@@ -320,20 +320,40 @@ async def arun_agent_stream_thinking(
                 "tags", []
             )
 
-            # Handle thinking content
+            # Handle thinking content and code execution content
             if hasattr(msg_chunk, "content") and isinstance(msg_chunk.content, list):
                 for content_item in msg_chunk.content:
-                    if (
-                        isinstance(content_item, dict)
-                        and content_item.get("type") == "thinking"
-                    ):
-                        thinking_content = content_item.get("thinking", "")
-                        if thinking_content:
+                    if isinstance(content_item, dict):
+                        content_type = content_item.get("type")
+
+                        # Handle thinking content
+                        if content_type == "thinking":
+                            thinking_content = content_item.get("thinking", "")
+                            if thinking_content:
+                                if not is_thinking_active:
+                                    yield "<think>"
+                                    is_thinking_active = True
+                                yield thinking_content
+                            continue
+
+                        # Handle code execution content (executable_code and code_execution_result)
+                        elif content_type in [
+                            "executable_code",
+                            "code_execution_result",
+                        ]:
                             if not is_thinking_active:
                                 yield "<think>"
                                 is_thinking_active = True
-                            yield thinking_content
-                        continue
+
+                            if content_type == "executable_code":
+                                code = content_item.get("executable_code", "")
+                                if code:
+                                    yield f"\n**Prepared code to execute:**\n```python\n{code}\n```\n"
+                            elif content_type == "code_execution_result":
+                                result = content_item.get("code_execution_result", "")
+                                if result:
+                                    yield f"\n**Code execution Output:**\n```\n{result}\n```\n"
+                            continue
 
             # Handle regular content
             if msg_chunk.content and isinstance(msg_chunk.content, str):
