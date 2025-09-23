@@ -171,13 +171,18 @@ async def post_hook_agent_processor(state, config):
     #         ]
     #     }
     result_content = """
-    I forgot to use `calculator_python_numexpr` and must use it right now for my math calculations. 
-    All mathematical operations I perform must use the `calculator_python_numexpr` tool. 
-    I haven’t made any calculator tool calls for these calculations yet. 
-    To ensure financial accuracy and auditability, every step involving arithmetic -- summing, aggregating, percentage calculations, etc. -- must use the `calculator_python_numexpr` tool. 
-    I will execute these calculations with `calculator_python_numexpr` immediately. 
-    I won’t apologize; I’ll just do my task without any comments.
-    """
+I skipped, failed to use `calculator_python_numexpr`, and on the next step I am obliged to use `calculator_python_numexpr` for my math work. 
+Every arithmetic operation: sums, aggregates, percentages, and more -- must be done with the `calculator_python_numexpr` tool. 
+I have not made any calculator calls for these computations yet. 
+To maintain financial precision and auditability, each arithmetic step must go through `calculator_python_numexpr`. 
+I will run these calculations with `calculator_python_numexpr` right away. 
+No apologies -- just doing the task without commentary.
+"""
+    continue_result_content = """
+I have already used `calculator_python_numexpr` right now, and I will continue relying on it for all future mathematical operations -- or correct my current usage where needed.
+Every arithmetic task: sums, aggregates, percentages, and more - must be executed with `calculator_python_numexpr` by myself.
+If any computations were performed outside it, I will re-run them through `calculator_python_numexpr` to maintain financial precision and auditability.
+"""
 
     def remove_extra(m: AnyMessage):
         if m.type != "ai":
@@ -185,37 +190,50 @@ async def post_hook_agent_processor(state, config):
         if isinstance(m.content, str):
             if m.content.endswith(result_content):
                 m.content = m.content[: -len(result_content)]
+            elif m.content.endswith(continue_result_content):
+                m.content = m.content[: -len(continue_result_content)]
         elif isinstance(m.content, list):
-            if (
-                m.content
-                and isinstance(m.content[-1], str)
-                and m.content[-1].endswith(result_content)
-            ):
-                m.content[-1] = m.content[-1][: -len(result_content)]
-            elif (
-                m.content
-                and isinstance(m.content[-1], dict)
-                and m.content[-1]["thinking"].endswith(result_content)
-            ):
-                m.content[-1]["thinking"] = m.content[-1]["thinking"][
-                    : -len(result_content)
-                ]
+            if m.content and isinstance(m.content[-1], str):
+                if m.content[-1].endswith(result_content):
+                    m.content[-1] = m.content[-1][: -len(result_content)]
+                elif m.content[-1].endswith(continue_result_content):
+                    m.content[-1] = m.content[-1][: -len(continue_result_content)]
+            elif m.content and isinstance(m.content[-1], dict):
+                if m.content[-1]["thinking"].endswith(result_content):
+                    m.content[-1]["thinking"] = m.content[-1]["thinking"][
+                        : -len(result_content)
+                    ]
+                elif m.content[-1]["thinking"].endswith(continue_result_content):
+                    m.content[-1]["thinking"] = m.content[-1]["thinking"][
+                        : -len(continue_result_content)
+                    ]
         return m
 
-    def add_extra(m: AnyMessage):
+    def add_extra(m: AnyMessage, extra: str):
         if m.type != "ai":
             return m
         if isinstance(m.content, str) and m.content:
-            m.content = m.content + result_content
+            m.content = m.content + extra
         elif isinstance(m.content, list):
             if m.content and isinstance(m.content[-1], str):
-                m.content[-1] = m.content[-1] + result_content
+                m.content[-1] = m.content[-1] + extra
             elif m.content and isinstance(m.content[-1], dict):
-                m.content[-1]["thinking"] = m.content[-1]["thinking"] + result_content
+                m.content[-1]["thinking"] = m.content[-1]["thinking"] + extra
         return m
 
     state["messages"] = [remove_extra(m) for m in state["messages"]]
-    state["messages"][-1] = add_extra(state["messages"][-1])
+
+    if not any(
+        (
+            bool(tc.get("name") == "calculator_python_numexpr")
+            for tc in state["messages"][-1].tool_calls
+        )
+    ):
+        state["messages"][-1] = add_extra(state["messages"][-1], extra=result_content)
+    else:
+        state["messages"][-1] = add_extra(
+            state["messages"][-1], extra=continue_result_content
+        )
 
     return {"messages": [RemoveMessage(id=REMOVE_ALL_MESSAGES), *state["messages"]]}
 
