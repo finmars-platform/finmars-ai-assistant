@@ -11,6 +11,31 @@ from libs.utils.langfuse_manager import PromptSource
 from libs.utils.langfuse_callback import get_langfuse_callbacks
 
 
+def should_close_thinking_for_supervisor(event_graph):
+    """Check if thinking should be closed based on supervisor final answer condition."""
+    is_supervisor = "finmars_supervisor_agent" in event_graph.get("tags", [])
+    if is_supervisor:
+        if (
+            isinstance(event_graph["data"]["chunk"].content, str)
+            and event_graph["data"]["chunk"].content
+            and not (
+                hasattr(event_graph["data"]["chunk"], "tool_calls")
+                and event_graph["data"]["chunk"].tool_calls
+            )
+        ):
+            return True
+        elif (
+            isinstance(event_graph["data"]["chunk"].content, list)
+            and isinstance(event_graph["data"]["chunk"].content[-1], str)
+            and not (
+                hasattr(event_graph["data"]["chunk"], "tool_calls")
+                and event_graph["data"]["chunk"].tool_calls
+            )
+        ):
+            return True
+    return False
+
+
 async def arun_agent_stream(
     messages: list[BaseMessage],
     chat_id: str,
@@ -208,6 +233,7 @@ async def arun_agent_stream_thinking(
     answer = ""
     prev_event_is_agent_thinking = True
     is_thinking_active = False
+    prev_answering_supervisor = ""
 
     async for event_graph in agent.astream_events(
         {
@@ -261,9 +287,9 @@ async def arun_agent_stream_thinking(
                 # Create appropriate thinking output for tool completion
                 if tool_output_name and tool_output_name.startswith("transfer_to_"):
                     agent_name = tool_output_name.replace("transfer_to_", "")
-                    yield f"✅ Delegation to {agent_name} completed (status: {tool_output_status})\n"
+                    yield f"\n✅ Delegation to {agent_name} completed (status: {tool_output_status})\n"
                 else:
-                    yield f"🔧 Tool call completed: {tool_output_name} (status: {tool_output_status})\n"
+                    yield f"\n🔧 Tool call completed: {tool_output_name} (status: {tool_output_status})\n"
             prev_event_is_agent_thinking = False
 
         elif event_graph.get("event") == "on_tool_start":
@@ -305,9 +331,9 @@ async def arun_agent_stream_thinking(
                 task_description = tool_input_data.get(
                     "description", "No task description provided"
                 )
-                yield f"🔄 Supervisor delegating to {agent_name}: {task_description}\n"
+                yield f"\n🔄 Supervisor delegating to {agent_name}: {task_description}\n"
             else:
-                yield f"🔧 Tool call: {tool_name} with input: {json.dumps(tool_input_data)}\n"
+                yield f"\n🔧 Tool call: {tool_name} with input: {json.dumps(tool_input_data)}\n"
 
             prev_event_is_agent_thinking = False
 
@@ -320,6 +346,11 @@ async def arun_agent_stream_thinking(
             is_additional_thinking = "additional_thinking" in event_graph.get(
                 "tags", []
             )
+            # Check if this chunk has tool calls
+            has_tool_calls = hasattr(msg_chunk, "tool_calls") and msg_chunk.tool_calls
+            if (not is_thinking_active) and has_tool_calls:
+                yield "<think>"
+                is_thinking_active = True
 
             # Handle thinking content and code execution content
             if hasattr(msg_chunk, "content") and isinstance(msg_chunk.content, list):
@@ -358,11 +389,6 @@ async def arun_agent_stream_thinking(
 
             # Handle regular content
             if msg_chunk.content and isinstance(msg_chunk.content, str):
-                # Check if this chunk has tool calls
-                has_tool_calls = (
-                    hasattr(msg_chunk, "tool_calls") and msg_chunk.tool_calls
-                )
-
                 # If this is additional_thinking content, stream it in thinking mode
                 if is_additional_thinking:
                     if not is_thinking_active:
@@ -371,9 +397,27 @@ async def arun_agent_stream_thinking(
                     yield msg_chunk.content
                     continue
 
-                # If we were in thinking mode and get regular content without tool calls, close thinking
-                if is_thinking_active and not has_tool_calls:
-                    yield "\n </think> \n\n"
+                # Check if we should close thinking for supervisor final answer
+                should_close_thinking = should_close_thinking_for_supervisor(
+                    event_graph
+                )
+
+                prev_answering_supervisor += msg_chunk.content
+
+                # Close thinking ONLY for supervisor final answer condition
+                if (
+                    is_thinking_active
+                    and should_close_thinking
+                    and not (
+                        prev_answering_supervisor.startswith(
+                            "delegating_to_financial_mathematician"
+                        )
+                        or prev_answering_supervisor.startswith(
+                            "delegating_to_finmars_api_finance_ai_agent"
+                        )
+                    )
+                ):
+                    yield "\n</think>\n\n"
                     is_thinking_active = False
 
                 if not prev_event_is_agent_thinking and not is_thinking_active:
@@ -390,6 +434,12 @@ async def arun_agent_stream_thinking(
 
                 answer += msg_chunk.content
                 yield msg_chunk.content
+
+            is_supervisor = bool(
+                "finmars_supervisor_agent" in event_graph.get("tags", [])
+            )
+            if not is_supervisor:
+                prev_answering_supervisor = ""
 
     # Close thinking if still active at the end
     if is_thinking_active:

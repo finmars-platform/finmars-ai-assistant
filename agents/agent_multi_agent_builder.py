@@ -7,7 +7,7 @@ from agents.multiagent_system_prompt import (
     SUPERVISOR_SYSTEM_PROMPT,
     FINMARS_API_SYSTEM_PROMPT,
 )
-from agents.utils.utils import prebuild_agent, post_hook_agent_processor
+from agents.utils.utils import prebuild_agent, post_hook_agent_processor, init_llm
 
 from langchain_core.runnables import RunnableConfig
 from langgraph.prebuilt.chat_agent_executor import AgentState, create_react_agent
@@ -24,15 +24,22 @@ def create_finmars_multi_agent(
     config: Optional[RunnableConfig] = None,
 ):
 
-    executor_llm, prompt_template, tools = prebuild_agent(
+    task_solver_config, prompt_template, tools = prebuild_agent(
         config=config,
         system_prompt=FINMARS_API_SYSTEM_PROMPT,
         skip_build_calculator_tools=True,
     )
+    finmars_api_finance_ai_agent_executor_llm = init_llm(
+        task_solver_config,
+        {"tags": ["finmars_api_finance_ai_agent", "additional_thinking"]},
+    )
+    finmars_supervisor_agent_executor_llm = init_llm(
+        task_solver_config, {"tags": ["finmars_supervisor_agent"]}
+    )
 
     # Create executor agent with state modifier
     finmars_api_agent = create_react_agent(
-        model=executor_llm,
+        model=finmars_api_finance_ai_agent_executor_llm,
         tools=tools,
         prompt=prompt_template,
         name="finmars_api_finance_ai_agent",
@@ -42,7 +49,7 @@ def create_finmars_multi_agent(
     )
 
     executor_agent = create_supervisor(
-        model=executor_llm,
+        model=finmars_supervisor_agent_executor_llm,
         agents=[finmars_api_agent, financial_mathematician_app],
         prompt=SUPERVISOR_SYSTEM_PROMPT,
         add_handoff_back_messages=True,

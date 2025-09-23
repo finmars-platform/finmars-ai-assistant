@@ -94,7 +94,6 @@ def prebuild_agent(
     config: Optional[RunnableConfig] = None,
     system_prompt: str = None,
     skip_build_calculator_tools: bool = True,
-    tags: list[str] = None,
 ):
     # Get configurable prompt configs
     configurable = config.get("configurable", {}) if config else {}
@@ -111,7 +110,6 @@ def prebuild_agent(
     space = task_solver_config.get("space")
     realm = task_solver_config.get("realm")
 
-    executor_llm = init_llm(task_solver_config, {"tags": tags})
     tools: list[BaseTool] = build_all_tools(
         finmars_token=finmars_token,
         space=space,
@@ -121,7 +119,7 @@ def prebuild_agent(
 
     # Build the prompt template using ChatPromptTemplate.from_messages
     prompt_template = create_agent_prompt(sys_msg=task_solver_sys_msg, tools=tools)
-    return executor_llm, prompt_template, tools
+    return task_solver_config, prompt_template, tools
 
 
 def create_agent_prompt(sys_msg, tools=None) -> ChatPromptTemplate:
