@@ -15,6 +15,7 @@ from langgraph.graph.message import REMOVE_ALL_MESSAGES
 from langgraph_supervisor import create_supervisor
 
 from agents.react_agent.financial_mathematician import financial_mathematician_app
+from agents.react_agent.system_prompt import SUPERVISOR_SYSTEM_PROMPT
 from agents.react_agent.utils import init_llm
 
 try:
@@ -171,18 +172,18 @@ async def post_hook_agent_processor(state, config):
     #         ]
     #     }
     result_content = """
-I skipped, failed to ask the `FinancialMathematician` subagent, and on the next step I am obliged to ask the `FinancialMathematician` subagent for my math work.
-Every arithmetic operation: sums, aggregates, percentages, and more -- must be done by asking the `FinancialMathematician` subagent.
-I have not asked the FinancialMathematician for these computations yet.
-To maintain financial precision and auditability, each arithmetic step must go through the `FinancialMathematician` subagent.
-I will ask the `FinancialMathematician` subagent for these calculations right away.
+I skipped, failed to ask the `financial_mathematician` subagent, and on the next step I am obliged to ask the `financial_mathematician` subagent for my math work.
+Every arithmetic operation: sums, aggregates, percentages, and more -- must be done by asking the `financial_mathematician` subagent.
+I have not asked the financial_mathematician for these computations yet.
+To maintain financial precision and auditability, each arithmetic step must go through the `financial_mathematician` subagent.
+I will ask the `financial_mathematician` subagent for these calculations right away.
 No apologies -- just doing the task without commentary.
-I MUST PROVIDE DETAILED CALCULATIONS by asking the `FinancialMathematician` subagent!
+I MUST PROVIDE DETAILED CALCULATIONS by asking the `financial_mathematician` subagent!
 """
     continue_result_content = """
-I have already asked the `FinancialMathematician` subagent right now, and I will continue relying on it for all future mathematical operations -- or correct my current usage where needed.
-Every arithmetic task: sums, aggregates, percentages, and more - must be executed by asking the `FinancialMathematician` subagent.
-If any computations were performed outside it, I will ask the `FinancialMathematician` subagent to maintain financial precision and auditability.
+I have already asked the `financial_mathematician` subagent right now, and I will continue relying on it for all future mathematical operations -- or correct my current usage where needed.
+Every arithmetic task: sums, aggregates, percentages, and more - must be executed by asking the `financial_mathematician` subagent.
+If any computations were performed outside it, I will ask the `financial_mathematician` subagent to maintain financial precision and auditability.
 """
 
     def remove_extra(m: AnyMessage):
@@ -227,7 +228,7 @@ If any computations were performed outside it, I will ask the `FinancialMathemat
     if not any(
         (
             # bool(tc.get("name") == "calculator_python_numexpr")
-            bool("FinancialMathematician" in tc.get("name"))
+            bool("financial_mathematician" in tc.get("name"))
             for tc in state["messages"][-1].tool_calls
         )
     ):
@@ -242,11 +243,11 @@ If any computations were performed outside it, I will ask the `FinancialMathemat
 
 async def pre_hook_agent_processor(state, config):
     hm_content = (
-        "Here is my KINDLY REMINDER about `FinancialMathematician` subagent usage. "
-        "Again, PLEASE, IN CASE OF ANY MATH OPERATIONS, CALCULATIONS ASK THE `FinancialMathematician` SUBAGENT. "
+        "Here is my KINDLY REMINDER about `financial_mathematician` subagent usage. "
+        "Again, PLEASE, IN CASE OF ANY MATH OPERATIONS, CALCULATIONS ASK THE `financial_mathematician` SUBAGENT. "
         "THIS IS MANDATORY FOR ALL CALCULATIONS THAT WAS PRODUCED FROM YOU!!!"
     )
-    ai_content = "YES!!! Of course, I will ask the `FinancialMathematician` subagent for any mathematical calculations. Thank you for the reminder."
+    ai_content = "YES!!! Of course, I will ask the `financial_mathematician` subagent for any mathematical calculations. Thank you for the reminder."
 
     # Remove any existing messages that contain the reminder content
     state["messages"] = [
@@ -347,25 +348,24 @@ def create_finmars_agent_react(
         finmars_token=finmars_token, space=space, realm=realm
     )
 
-    # # Create executor agent with state modifier
-    # executor_agent = create_react_agent(
-    #     model=executor_llm,
-    #     tools=tools,
-    #     prompt=prompt_template,
-    #     name="FinmarsReactAgent",
-    #     state_schema=SolverState,
-    #     pre_model_hook=pre_hook_agent_processor,
-    #     post_model_hook=post_hook_agent_processor,
-    # )
+    # Create executor agent with state modifier
+    finmars_api_agent = create_react_agent(
+        model=executor_llm,
+        tools=tools,
+        prompt=prompt_template,
+        name="finmars_api_finance_ai_agent",
+        state_schema=SolverState,
+        # pre_model_hook=pre_hook_agent_processor,
+        # post_model_hook=post_hook_agent_processor,
+    )
 
     executor_agent = create_supervisor(
         model=executor_llm,
-        tools=tools,
-        agents=[financial_mathematician_app],
-        prompt=prompt_template,
+        agents=[finmars_api_agent, financial_mathematician_app],
+        prompt=SUPERVISOR_SYSTEM_PROMPT,
         add_handoff_back_messages=True,
         output_mode="full_history",
-        supervisor_name="FinmarsSuperVisorAgent",
+        supervisor_name="finmars_supervisor_agent",
         state_schema=SolverState,
         pre_model_hook=pre_hook_agent_processor,
         post_model_hook=post_hook_agent_processor,
@@ -376,8 +376,8 @@ def create_finmars_agent_react(
     #     tools=tools,
     #     subagents=[
     #         CustomSubAgent(
-    #             name="FinancialMathematician",
-    #             description="FinancialMathematician - a specialized mathematical computation subagent responsible for performing ALL arithmetic operations and mathematical calculations in the financial domain",
+    #             name="financial_mathematician",
+    #             description="financial_mathematician - a specialized mathematical computation subagent responsible for performing ALL arithmetic operations and mathematical calculations in the financial domain",
     #             graph=financial_mathematician_app,
     #         )
     #     ],

@@ -57,7 +57,7 @@ async def financial_mathematician(state: AgentState, config: RunnableConfig):
         msgs,
         tools=[GenAITool(code_execution={})],
     )
-    response.name = "FinancialMathematician"
+    response.name = "financial_mathematician"
 
     return {
         "messages": [response],
@@ -73,7 +73,7 @@ def build_graph_financial_mathematician():
     workflow.add_edge("financial_mathematician", END)
 
     # Compile the graph
-    app = workflow.compile(name="FinancialMathematician")
+    app = workflow.compile(name="financial_mathematician")
 
     return app
 
