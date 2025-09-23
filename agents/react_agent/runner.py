@@ -75,12 +75,17 @@ async def arun_agent_stream(
             tool_output_name = ""
 
             if (
-                isinstance(tool_output.update["messages"], list)
+                hasattr(tool_output, "update")
+                and isinstance(tool_output.update["messages"], list)
                 and hasattr(tool_output.update["messages"][-1], "type")
                 and tool_output.update["messages"][-1].type == "tool"
             ):
                 tool_output_name = tool_output.update["messages"][-1].name
                 tool_output_status = tool_output.update["messages"][-1].status
+
+            elif hasattr(tool_output, "type") and tool_output.type == "tool":
+                tool_output_name = tool_output.name
+                tool_output_status = tool_output.status
 
             # Create appropriate status description for tool completion
             if tool_output_name and tool_output_name.startswith("transfer_to_"):
@@ -219,12 +224,17 @@ async def arun_agent_stream_thinking(
             tool_output_name = ""
 
             if (
-                isinstance(tool_output.update["messages"], list)
+                hasattr(tool_output, "update")
+                and isinstance(tool_output.update["messages"], list)
                 and hasattr(tool_output.update["messages"][-1], "type")
                 and tool_output.update["messages"][-1].type == "tool"
             ):
                 tool_output_name = tool_output.update["messages"][-1].name
                 tool_output_status = tool_output.update["messages"][-1].status
+
+            elif hasattr(tool_output, "type") and tool_output.type == "tool":
+                tool_output_name = tool_output.name
+                tool_output_status = tool_output.status
 
             # Always yield status event for UI
             # Create appropriate status description for tool completion
