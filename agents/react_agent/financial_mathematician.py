@@ -38,7 +38,7 @@ async def financial_mathematician(state: AgentState, config: RunnableConfig):
 
     llm = ChatGoogleGenerativeAI(
         **config_default,
-        tags=["additional_thinking"]
+        tags=["additional_thinking"],
         timeout=20.0,
     ).with_retry(
         retry_if_exception_type=(
