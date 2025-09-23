@@ -151,17 +151,27 @@ async def post_hook_agent_processor(state, config):
     # result_content = result.content
 
     result_content = """
-YOU FORGOT TO USE `calculator_python_numexpr`! USE IT RIGHT NOW FOR YOUR MATH CALCULATIONS!! 
-ALL mathematical operations that MUST be performed using the calculator_python_numexpr tool. 
-No calculator tool calls have been made yet for these calculations. 
-For financial accuracy and auditability, every step involving arithmetic (summing, aggregating, percentage calculation end etc) must use the calculator tool `calculator_python_numexpr`. 
-Execute these calculations with `calculator_python_numexpr` immediately!
+I forgot to use `calculator_python_numexpr` and must use it right now for my math calculations. 
+All mathematical operations I perform must use the `calculator_python_numexpr` tool. 
+I haven’t made any calculator tool calls for these calculations yet. 
+To ensure financial accuracy and auditability, every step involving arithmetic -- summing, aggregating, percentage calculations, etc. -- must use the `calculator_python_numexpr` tool. 
+I will execute these calculations with `calculator_python_numexpr` immediately. 
+I won’t apologize; I’ll just do my task without any comments.
 """
+    msgs2rm = [
+        RemoveMessage(id=m.id) for m in state["messages"] if m.content == result_content
+    ]
     return {
-        "messages": HumanMessage(
-            # content=result.content, name="StrictSupervisorAuditorCalculatorUsage"
-            content=result_content, name="StrictSupervisorAuditorCalculatorUsage"
-        )
+        "messages": [
+            *msgs2rm,
+            *state["messages"],
+            # AIMessage(
+            AIMessage(
+                # content=result.content, name="StrictSupervisorAuditorCalculatorUsage"
+                content=result_content,
+                name="StrictSupervisorAuditorCalculatorUsage",
+            ),
+        ]
     }
 
 
