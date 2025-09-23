@@ -39,17 +39,18 @@ async def financial_mathematician(state: AgentState, config: RunnableConfig):
     llm = ChatGoogleGenerativeAI(
         **config_default,
         tags=["additional_thinking"],
-        timeout=20.0,
-    ).with_retry(
-        retry_if_exception_type=(
-            httpx.ReadTimeout,
-            httpx.RemoteProtocolError,
-            ServiceUnavailable,
-            InternalServerError,
-        ),  # Retry only on ValueError
-        wait_exponential_jitter=True,  # Add jitter to the exponential backoff
-        stop_after_attempt=6,
+        # timeout=200.0,
     )
+    # ).with_retry(
+    #     retry_if_exception_type=(
+    #         httpx.ReadTimeout,
+    #         httpx.RemoteProtocolError,
+    #         ServiceUnavailable,
+    #         InternalServerError,
+    #     ),  # Retry only on ValueError
+    #     wait_exponential_jitter=True,  # Add jitter to the exponential backoff
+    #     stop_after_attempt=6,
+    # )
     msgs = await create_prompt(
         messages=messages,
     )
