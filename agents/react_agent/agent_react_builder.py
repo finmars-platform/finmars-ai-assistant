@@ -227,8 +227,7 @@ If any computations were performed outside it, I will ask the `financial_mathema
 
     if not any(
         (
-            # bool(tc.get("name") == "calculator_python_numexpr")
-            bool("financial_mathematician" in tc.get("name"))
+            bool(tc.get("name") == "transfer_to_financial_mathematician")
             for tc in state["messages"][-1].tool_calls
         )
     ):
