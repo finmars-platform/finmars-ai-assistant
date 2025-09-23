@@ -141,7 +141,7 @@ async def post_hook_agent_processor(state, config):
     )
 
     agent_tool_calls = (
-        f"<{msg_type.get(state['messages'][-1].type, state['messages'].type.capitalize())}>\n"
+        f"<{msg_type.get(state['messages'][-1].type, state['messages'][-1].type.capitalize())}>\n"
         f"{format_msg_content(state['messages'][-1])}"
     )
 
