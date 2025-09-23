@@ -3,6 +3,9 @@ import os
 from datetime import datetime
 from typing import Optional
 
+import httpx
+from google.api_core.exceptions import ServiceUnavailable, InternalServerError
+
 # from deepagents import async_create_deep_agent, SubAgent
 # from deepagents.sub_agent import CustomSubAgent
 from langchain_core.messages import (
@@ -369,6 +372,16 @@ def create_finmars_agent_react(
         pre_model_hook=pre_hook_agent_processor,
         post_model_hook=post_hook_agent_processor,
     ).compile()
+    # executor_agent = executor_agent.with_retry(
+    #     retry_if_exception_type=(
+    #         httpx.ReadTimeout,
+    #         httpx.RemoteProtocolError,
+    #         ServiceUnavailable,
+    #         InternalServerError,
+    #     ),  # Retry only on ValueError
+    #     wait_exponential_jitter=True,  # Add jitter to the exponential backoff
+    #     stop_after_attempt=6,
+    # )
 
     # executor_agent = async_create_deep_agent(
     #     model=executor_llm,

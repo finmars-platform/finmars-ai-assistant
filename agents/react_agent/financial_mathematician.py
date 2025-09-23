@@ -2,7 +2,7 @@ from typing import Sequence
 
 import httpx
 from google.ai.generativelanguage_v1beta.types import Tool as GenAITool
-from google.api_core.exceptions import ServiceUnavailable
+from google.api_core.exceptions import ServiceUnavailable, InternalServerError
 from langchain_core.messages import (
     SystemMessage,
     BaseMessage,
@@ -45,6 +45,7 @@ async def financial_mathematician(state: AgentState, config: RunnableConfig):
             httpx.ReadTimeout,
             httpx.RemoteProtocolError,
             ServiceUnavailable,
+            InternalServerError,
         ),  # Retry only on ValueError
         wait_exponential_jitter=True,  # Add jitter to the exponential backoff
         stop_after_attempt=6,
