@@ -108,7 +108,9 @@ async def arun_agent_stream(
                 task_description = tool_input_data.get(
                     "description", "No task description provided"
                 )
-                status_description = f"🔄 Supervisor delegating to {agent_name}: {task_description}..."
+                status_description = (
+                    f"🔄 Supervisor delegating to {agent_name}: {task_description}..."
+                )
             else:
                 status_description = f"🔧 Agent call {tool_name} tool with input: {json.dumps(tool_input_data)}..."
 
