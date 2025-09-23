@@ -276,3 +276,6 @@ Analyze the dialog and agent's current tool calls, then respond with EXACTLY ONE
 - Even simple arithmetic MUST use the calculator tool
 - Your response should be direct and actionable
 """
+
+FINANCIAL_MATHEMATICIAN_SYSTEM_PROMPT = """
+"""

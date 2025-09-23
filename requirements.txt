@@ -31,3 +31,4 @@ langchain==0.3.25
 numexpr==2.11.0
 
 langchain-google-genai==2.1.12
+langgraph-supervisor==0.0.29

@@ -7,14 +7,11 @@ from langchain_core.messages import (
     HumanMessage,
     AIMessage,
     RemoveMessage,
-    SystemMessage,
     AnyMessage,
 )
 from langgraph.graph.message import REMOVE_ALL_MESSAGES
 
-from agents.react_agent.system_prompt import (
-    SIMPLE_LLM_TOOL_USAGE_DETECTOR_SYSTEM_PROMPT,
-)
+from agents.react_agent.financial_mathematician import financial_mathematician_app
 from agents.react_agent.utils import init_llm
 
 try:
@@ -27,16 +24,15 @@ except ImportError:
 
 from langchain_core.prompts import (
     ChatPromptTemplate,
-    HumanMessagePromptTemplate,
     MessagesPlaceholder,
 )
 from langchain_core.runnables import RunnableConfig
 from langchain_core.tools import BaseTool
-from langgraph.prebuilt import create_react_agent
 from langgraph.prebuilt.chat_agent_executor import AgentState
 
 from libs.utils.langfuse_manager import LangfusePromptName
 from tools import build_all_tools
+from langgraph_supervisor import create_supervisor
 
 msg_type = {
     "ai": "AI Finance Agent",
@@ -346,14 +342,26 @@ def create_finmars_agent_react(
         finmars_token=finmars_token, space=space, realm=realm
     )
 
-    # Create executor agent with state modifier
-    executor_agent = create_react_agent(
+    # # Create executor agent with state modifier
+    # executor_agent = create_react_agent(
+    #     model=executor_llm,
+    #     tools=tools,
+    #     prompt=prompt_template,
+    #     name="FinmarsReactAgent",
+    #     state_schema=SolverState,
+    #     pre_model_hook=pre_hook_agent_processor,
+    #     post_model_hook=post_hook_agent_processor,
+    # )
+    executor_agent = create_supervisor(
         model=executor_llm,
         tools=tools,
+        agents=[financial_mathematician_app],
         prompt=prompt_template,
-        name="FinmarsReactAgent",
+        add_handoff_back_messages=True,
+        output_mode="full_history",
+        supervisor_name="FinmarsSuperVisorAgent",
         state_schema=SolverState,
         pre_model_hook=pre_hook_agent_processor,
         post_model_hook=post_hook_agent_processor,
-    )
+    ).compile()
     return executor_agent
