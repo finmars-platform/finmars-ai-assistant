@@ -3,6 +3,8 @@ import os
 from datetime import datetime
 from typing import Optional
 
+# from deepagents import async_create_deep_agent, SubAgent
+# from deepagents.sub_agent import CustomSubAgent
 from langchain_core.messages import (
     HumanMessage,
     AIMessage,
@@ -10,6 +12,7 @@ from langchain_core.messages import (
     AnyMessage,
 )
 from langgraph.graph.message import REMOVE_ALL_MESSAGES
+from langgraph_supervisor import create_supervisor
 
 from agents.react_agent.financial_mathematician import financial_mathematician_app
 from agents.react_agent.utils import init_llm
@@ -28,11 +31,12 @@ from langchain_core.prompts import (
 )
 from langchain_core.runnables import RunnableConfig
 from langchain_core.tools import BaseTool
-from langgraph.prebuilt.chat_agent_executor import AgentState
+from langgraph.prebuilt.chat_agent_executor import AgentState, create_react_agent
 
 from libs.utils.langfuse_manager import LangfusePromptName
 from tools import build_all_tools
-from langgraph_supervisor import create_supervisor
+
+# from langgraph_supervisor import create_supervisor
 
 msg_type = {
     "ai": "AI Finance Agent",
@@ -353,6 +357,7 @@ def create_finmars_agent_react(
     #     pre_model_hook=pre_hook_agent_processor,
     #     post_model_hook=post_hook_agent_processor,
     # )
+
     executor_agent = create_supervisor(
         model=executor_llm,
         tools=tools,
@@ -365,4 +370,17 @@ def create_finmars_agent_react(
         pre_model_hook=pre_hook_agent_processor,
         post_model_hook=post_hook_agent_processor,
     ).compile()
+
+    # executor_agent = async_create_deep_agent(
+    #     model=executor_llm,
+    #     tools=tools,
+    #     subagents=[
+    #         CustomSubAgent(
+    #             name="FinancialMathematician",
+    #             description="FinancialMathematician - a specialized mathematical computation subagent responsible for performing ALL arithmetic operations and mathematical calculations in the financial domain",
+    #             graph=financial_mathematician_app,
+    #         )
+    #     ],
+    #     instructions=prompt_template.messages[0].prompt.template,
+    # )
     return executor_agent

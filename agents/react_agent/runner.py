@@ -228,7 +228,7 @@ async def arun_agent_stream_thinking(
                 "event": {
                     "type": "status",
                     "data": {
-                        "description": f"Agent call {tool_name} tool with input: {json.dumps(tool_input_data)}...",
+                        "description": f"Agent call {tool_name} tool with input: {str(tool_input_data)}...",
                         "done": False,
                     },
                 }
@@ -240,7 +240,7 @@ async def arun_agent_stream_thinking(
                 is_thinking_active = True
 
             # Always yield tool call notification in thinking block
-            yield f"🔧 Tool call: {tool_name} with input: {json.dumps(tool_input_data)}\n"
+            yield f"🔧 Tool call: {tool_name} with input: {str(tool_input_data)}\n"
             prev_event_is_agent_thinking = False
 
         elif event_graph.get("event") == "on_chat_model_stream":
