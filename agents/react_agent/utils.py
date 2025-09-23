@@ -37,9 +37,7 @@ def init_llm(task_solver_config: dict, kwargs: dict = dict()):
         try:
             executor_llm = ChatOpenAI(**{**task_solver_llm_config, **clean_kwargs})
         except NameError as e:
-            exc = traceback.format_exc()
-            logger.error(exc)
-            logger.warning("TRY AGAIN")
+            logger.warning(f"TRY AGAIN: {repr(e)}")
             executor_llm = ChatOpenAI(**{**task_solver_llm_config, **clean_kwargs})
 
     return executor_llm
