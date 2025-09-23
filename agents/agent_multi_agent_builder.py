@@ -7,7 +7,7 @@ from agents.multiagent_system_prompt import (
     SUPERVISOR_SYSTEM_PROMPT,
     FINMARS_API_SYSTEM_PROMPT,
 )
-from agents.utils import prebuild_agent, post_hook_agent_processor
+from agents.utils.utils import prebuild_agent, post_hook_agent_processor
 
 from langchain_core.runnables import RunnableConfig
 from langgraph.prebuilt.chat_agent_executor import AgentState, create_react_agent

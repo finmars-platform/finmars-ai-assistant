@@ -3,7 +3,7 @@ from typing import Optional
 from langchain_core.runnables import RunnableConfig
 from langgraph.prebuilt.chat_agent_executor import AgentState, create_react_agent
 
-from agents.utils import prebuild_agent
+from agents.utils.utils import prebuild_agent
 
 
 class SolverState(AgentState):

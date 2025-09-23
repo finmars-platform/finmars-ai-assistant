@@ -7,8 +7,10 @@ from langchain_core.messages import (
     AIMessage,
     RemoveMessage,
     AnyMessage,
+    SystemMessage,
 )
 from langgraph.graph.message import REMOVE_ALL_MESSAGES
+from agents.utils.tool_scratchpad_builder import create_tool_scratchpad
 
 try:
     from zoneinfo import ZoneInfo
@@ -109,20 +111,19 @@ def prebuild_agent(
     realm = task_solver_config.get("realm")
 
     executor_llm = init_llm(task_solver_config)
-
-    # Build the prompt template using ChatPromptTemplate.from_messages
-    prompt_template = create_agent_prompt(sys_msg=task_solver_sys_msg)
-
     tools: list[BaseTool] = build_all_tools(
         finmars_token=finmars_token,
         space=space,
         realm=realm,
         skip_build_calculator_tools=skip_build_calculator_tools,
     )
+
+    # Build the prompt template using ChatPromptTemplate.from_messages
+    prompt_template = create_agent_prompt(sys_msg=task_solver_sys_msg, tools=tools)
     return executor_llm, prompt_template, tools
 
 
-def create_agent_prompt(sys_msg) -> ChatPromptTemplate:
+def create_agent_prompt(sys_msg, tools=None) -> ChatPromptTemplate:
     # Get timezone from environment variable, default to UTC
     tz_name = os.getenv("TZ", "UTC")
 
@@ -158,9 +159,20 @@ def create_agent_prompt(sys_msg) -> ChatPromptTemplate:
     elif hasattr(sys_msg, "prompt") and hasattr(sys_msg.prompt, "template"):
         sys_msg.prompt.template = sys_msg.prompt.template + datetime_info
 
+    tool_scratchpad = ""
+    if tools:
+        tool_scratchpad = create_tool_scratchpad(tools=tools)
+
     return ChatPromptTemplate.from_messages(
         [
             sys_msg,
+            *(
+                [
+                    SystemMessage(content=tool_scratchpad),
+                ]
+                if tool_scratchpad
+                else []
+            ),
             MessagesPlaceholder("messages", optional=True),
         ]
     )

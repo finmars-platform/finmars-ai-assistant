@@ -169,8 +169,8 @@ async def arun_agent_stream_thinking(
     # Get Langfuse callbacks based on environment variables
     callbacks = get_langfuse_callbacks()
     config_default = {
-        "model_name": "gemini-2.5-flash",
-        # "model_name": "gemini-2.5-pro",
+        # "model_name": "gemini-2.5-flash",
+        "model_name": "gemini-2.5-pro",
         "temperature": 0.0,
         "base_url": None,
         "is_google_provider": True,
