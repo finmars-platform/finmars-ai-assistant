@@ -150,26 +150,74 @@ async def post_hook_agent_processor(state, config):
     # )
     # result_content = result.content
 
+    #     result_content = """
+    # YOU FORGOT TO USE `calculator_python_numexpr`! USE IT RIGHT NOW FOR YOUR MATH CALCULATIONS!!
+    # ALL mathematical operations that MUST be performed using the calculator_python_numexpr tool.
+    # No calculator tool calls have been made yet for these calculations.
+    # For financial accuracy and auditability, every step involving arithmetic (summing, aggregating, percentage calculation end etc) must use the calculator tool `calculator_python_numexpr`.
+    # Execute these calculations with `calculator_python_numexpr` immediately!
+    # """
+    #     msgs2rm = [
+    #         RemoveMessage(id=m.id) for m in state["messages"] if m.content == result_content
+    #     ]
+    #     return {
+    #         "messages": [
+    #             *msgs2rm,
+    #             *state["messages"],
+    #             HumanMessage(
+    #                 content=result_content,
+    #                 name="StrictSupervisorAuditorCalculatorUsage",
+    #             ),
+    #         ]
+    #     }
     result_content = """
-YOU FORGOT TO USE `calculator_python_numexpr`! USE IT RIGHT NOW FOR YOUR MATH CALCULATIONS!! 
-ALL mathematical operations that MUST be performed using the calculator_python_numexpr tool. 
-No calculator tool calls have been made yet for these calculations. 
-For financial accuracy and auditability, every step involving arithmetic (summing, aggregating, percentage calculation end etc) must use the calculator tool `calculator_python_numexpr`. 
-Execute these calculations with `calculator_python_numexpr` immediately!
-"""
-    msgs2rm = [
-        RemoveMessage(id=m.id) for m in state["messages"] if m.content == result_content
-    ]
-    return {
-        "messages": [
-            *msgs2rm,
-            *state["messages"],
-            HumanMessage(
-                content=result_content,
-                name="StrictSupervisorAuditorCalculatorUsage",
-            ),
-        ]
-    }
+    I forgot to use `calculator_python_numexpr` and must use it right now for my math calculations. 
+    All mathematical operations I perform must use the `calculator_python_numexpr` tool. 
+    I haven’t made any calculator tool calls for these calculations yet. 
+    To ensure financial accuracy and auditability, every step involving arithmetic -- summing, aggregating, percentage calculations, etc. -- must use the `calculator_python_numexpr` tool. 
+    I will execute these calculations with `calculator_python_numexpr` immediately. 
+    I won’t apologize; I’ll just do my task without any comments.
+    """
+
+    def remove_extra(m: AnyMessage):
+        if m.type != "ai":
+            return m
+        if isinstance(m.content, str):
+            if m.content.endswith(result_content):
+                m.content = m.content[: -len(result_content)]
+        elif isinstance(m.content, list):
+            if (
+                m.content
+                and isinstance(m.content[-1], str)
+                and m.content[-1].endswith(result_content)
+            ):
+                m.content[-1] = m.content[-1][: -len(result_content)]
+            elif (
+                m.content
+                and isinstance(m.content[-1], dict)
+                and m.content[-1]["thinking"].endswith(result_content)
+            ):
+                m.content[-1]["thinking"] = m.content[-1]["thinking"][
+                    : -len(result_content)
+                ]
+        return m
+
+    def add_extra(m: AnyMessage):
+        if m.type != "ai":
+            return m
+        if isinstance(m.content, str) and m.content:
+            m.content = m.content + result_content
+        elif isinstance(m.content, list):
+            if m.content and isinstance(m.content[-1], str):
+                m.content[-1] = m.content[-1] + result_content
+            elif m.content and isinstance(m.content[-1], dict):
+                m.content[-1]["thinking"] = m.content[-1]["thinking"] + result_content
+        return m
+
+    state["messages"] = [remove_extra(m) for m in state["messages"]]
+    state["messages"][-1] = add_extra(state["messages"][-1])
+
+    return {"messages": [RemoveMessage(id=REMOVE_ALL_MESSAGES), *state["messages"]]}
 
 
 async def pre_hook_agent_processor(state, config):
