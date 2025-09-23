@@ -248,6 +248,9 @@ async def arun_agent_stream_thinking(
             if msg_chunk.type != "AIMessageChunk":
                 continue
 
+            # Check if this is from chain_calculator_usage_detector with additional_thinking tag
+            is_additional_thinking = "additional_thinking" in event_graph.get("tags", [])
+
             # Handle thinking content
             if hasattr(msg_chunk, "content") and isinstance(msg_chunk.content, list):
                 for content_item in msg_chunk.content:
@@ -267,6 +270,14 @@ async def arun_agent_stream_thinking(
             if msg_chunk.content and isinstance(msg_chunk.content, str):
                 # Check if this chunk has tool calls
                 has_tool_calls = hasattr(msg_chunk, 'tool_calls') and msg_chunk.tool_calls
+
+                # If this is additional_thinking content, stream it in thinking mode
+                if is_additional_thinking:
+                    if not is_thinking_active:
+                        yield "<think>"
+                        is_thinking_active = True
+                    yield msg_chunk.content
+                    continue
 
                 # If we were in thinking mode and get regular content without tool calls, close thinking
                 if is_thinking_active and not has_tool_calls:
