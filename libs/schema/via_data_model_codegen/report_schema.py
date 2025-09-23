@@ -618,6 +618,7 @@ class BackendBalanceReportItemsBase(BaseModel):
 
 
 class BackendBalanceReportItems(BackendBalanceReportItemsBase):
+    count: Optional[conint(ge=0)] = Field(None, title="Count")
     items: Optional[list[dict]] = Field(None, title="Items")
 
 
