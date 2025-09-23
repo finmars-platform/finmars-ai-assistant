@@ -369,7 +369,7 @@ def create_finmars_agent_react(
         output_mode="full_history",
         supervisor_name="finmars_supervisor_agent",
         state_schema=SolverState,
-        pre_model_hook=pre_hook_agent_processor,
+        # pre_model_hook=pre_hook_agent_processor,
         post_model_hook=post_hook_agent_processor,
     ).compile()
     # executor_agent = executor_agent.with_retry(
