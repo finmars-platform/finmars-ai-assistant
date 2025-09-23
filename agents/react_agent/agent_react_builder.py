@@ -177,6 +177,7 @@ I have not made any calculator calls for these computations yet.
 To maintain financial precision and auditability, each arithmetic step must go through `calculator_python_numexpr`. 
 I will run these calculations with `calculator_python_numexpr` right away. 
 No apologies -- just doing the task without commentary.
+I MUST PROVIDE DETAILED CALCULATIONS using exact tool which is called `calculator_python_numexpr`!
 """
     continue_result_content = """
 I have already used `calculator_python_numexpr` right now, and I will continue relying on it for all future mathematical operations -- or correct my current usage where needed.
