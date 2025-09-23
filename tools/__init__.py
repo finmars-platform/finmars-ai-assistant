@@ -79,7 +79,7 @@ __all__ = [
     "build_pl_report_tools",
     "build_performance_report_tools",
     "build_transaction_report_tools",
-    "build_calculator_tools",
+    # "build_calculator_tools",
 ]
 
 
@@ -100,5 +100,5 @@ def build_all_tools(finmars_token: str = None, space: str = None, realm: str = N
     tools.extend(build_pl_report_tools(finmars_token=finmars_token, space=space, realm=realm))
     tools.extend(build_performance_report_tools(finmars_token=finmars_token, space=space, realm=realm))
     tools.extend(build_transaction_report_tools(finmars_token=finmars_token, space=space, realm=realm))
-    tools.extend(build_calculator_tools())
+    # tools.extend(build_calculator_tools())
     return tools

@@ -167,18 +167,18 @@ async def post_hook_agent_processor(state, config):
     #         ]
     #     }
     result_content = """
-I skipped, failed to use `calculator_python_numexpr`, and on the next step I am obliged to use `calculator_python_numexpr` for my math work. 
-Every arithmetic operation: sums, aggregates, percentages, and more -- must be done with the `calculator_python_numexpr` tool. 
-I have not made any calculator calls for these computations yet. 
-To maintain financial precision and auditability, each arithmetic step must go through `calculator_python_numexpr`. 
-I will run these calculations with `calculator_python_numexpr` right away. 
+I skipped, failed to ask the `FinancialMathematician` subagent, and on the next step I am obliged to ask the `FinancialMathematician` subagent for my math work.
+Every arithmetic operation: sums, aggregates, percentages, and more -- must be done by asking the `FinancialMathematician` subagent.
+I have not asked the FinancialMathematician for these computations yet.
+To maintain financial precision and auditability, each arithmetic step must go through the `FinancialMathematician` subagent.
+I will ask the `FinancialMathematician` subagent for these calculations right away.
 No apologies -- just doing the task without commentary.
-I MUST PROVIDE DETAILED CALCULATIONS using exact tool which is called `calculator_python_numexpr`!
+I MUST PROVIDE DETAILED CALCULATIONS by asking the `FinancialMathematician` subagent!
 """
     continue_result_content = """
-I have already used `calculator_python_numexpr` right now, and I will continue relying on it for all future mathematical operations -- or correct my current usage where needed.
-Every arithmetic task: sums, aggregates, percentages, and more - must be executed with `calculator_python_numexpr` by myself.
-If any computations were performed outside it, I will re-run them through `calculator_python_numexpr` to maintain financial precision and auditability.
+I have already asked the `FinancialMathematician` subagent right now, and I will continue relying on it for all future mathematical operations -- or correct my current usage where needed.
+Every arithmetic task: sums, aggregates, percentages, and more - must be executed by asking the `FinancialMathematician` subagent.
+If any computations were performed outside it, I will ask the `FinancialMathematician` subagent to maintain financial precision and auditability.
 """
 
     def remove_extra(m: AnyMessage):
@@ -222,7 +222,8 @@ If any computations were performed outside it, I will re-run them through `calcu
 
     if not any(
         (
-            bool(tc.get("name") == "calculator_python_numexpr")
+            # bool(tc.get("name") == "calculator_python_numexpr")
+            bool("FinancialMathematician" in tc.get("name"))
             for tc in state["messages"][-1].tool_calls
         )
     ):
@@ -237,11 +238,11 @@ If any computations were performed outside it, I will re-run them through `calcu
 
 async def pre_hook_agent_processor(state, config):
     hm_content = (
-        "Here is my KINDLY REMINDER about `calculator_python_numexpr` tool usage. "
-        "Again, PLEASE, IN CASE OF ANY MATH OPERATIONS, CALCULATIONS USE `calculator_python_numexpr` tool. "
+        "Here is my KINDLY REMINDER about `FinancialMathematician` subagent usage. "
+        "Again, PLEASE, IN CASE OF ANY MATH OPERATIONS, CALCULATIONS ASK THE `FinancialMathematician` SUBAGENT. "
         "THIS IS MANDATORY FOR ALL CALCULATIONS THAT WAS PRODUCED FROM YOU!!!"
     )
-    ai_content = "YES!!! Of course, I will use the `calculator_python_numexpr` tool for any mathematical calculations. Thank you for the reminder."
+    ai_content = "YES!!! Of course, I will ask the `FinancialMathematician` subagent for any mathematical calculations. Thank you for the reminder."
 
     # Remove any existing messages that contain the reminder content
     state["messages"] = [
