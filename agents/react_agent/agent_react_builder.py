@@ -165,9 +165,7 @@ I won’t apologize; I’ll just do my task without any comments.
         "messages": [
             *msgs2rm,
             *state["messages"],
-            # AIMessage(
-            AIMessage(
-                # content=result.content, name="StrictSupervisorAuditorCalculatorUsage"
+            HumanMessage(
                 content=result_content,
                 name="StrictSupervisorAuditorCalculatorUsage",
             ),
