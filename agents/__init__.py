@@ -1,0 +1,1 @@
+simple_react_tag = ["simple_react_tag"]

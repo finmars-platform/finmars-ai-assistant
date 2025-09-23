@@ -214,7 +214,7 @@ These prompts are automatically suggested to users in the Open WebUI interface, 
 2. **Programmatic Usage**:
    ```python
    from libs.utils.langfuse_manager import PromptSource
-   from agents.react_agent.runner import run_agent
+   from agents.runner import run_agent
    
    # Use local prompts
    response = await run_agent(messages, prompt_source=PromptSource.CODE)
@@ -727,20 +727,22 @@ python agents/react_agent/runner.py
 
 ```python
 import asyncio
-from agents.react_agent import create_finmars_agent_react
+from agents import create_finmars_agent_react
 from langchain_core.messages import HumanMessage
+
 
 async def query_agent():
     # Create the agent
     agent = await create_finmars_agent_react()
-    
+
     # Ask a question
     response = await agent.ainvoke({
         "messages": [HumanMessage(content="List all portfolios with their types")]
     })
-    
+
     # Print the response
     print(response["messages"][-1].content)
+
 
 if __name__ == "__main__":
     asyncio.run(query_agent())

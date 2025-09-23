@@ -14,7 +14,7 @@ from langfuse.model import (
     ChatPromptClient,
 )
 
-from agents.react_agent.system_prompt import SIMPLE_REACT_SYSTEM_PROMPT
+from agents.simple_react_system_prompt import SIMPLE_REACT_SYSTEM_PROMPT
 from libs.basic.base_enum import BaseEnum
 from libs.logger.logger import logger
 

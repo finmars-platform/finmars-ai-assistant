@@ -2,12 +2,6 @@ import json
 import os
 from datetime import datetime
 from typing import Optional
-
-import httpx
-from google.api_core.exceptions import ServiceUnavailable, InternalServerError
-
-# from deepagents import async_create_deep_agent, SubAgent
-# from deepagents.sub_agent import CustomSubAgent
 from langchain_core.messages import (
     HumanMessage,
     AIMessage,
@@ -15,11 +9,6 @@ from langchain_core.messages import (
     AnyMessage,
 )
 from langgraph.graph.message import REMOVE_ALL_MESSAGES
-from langgraph_supervisor import create_supervisor
-
-from agents.react_agent.financial_mathematician import financial_mathematician_app
-from agents.react_agent.system_prompt import SUPERVISOR_SYSTEM_PROMPT
-from agents.react_agent.utils import init_llm
 
 try:
     from zoneinfo import ZoneInfo
@@ -32,19 +21,105 @@ except ImportError:
 from langchain_core.prompts import (
     ChatPromptTemplate,
     MessagesPlaceholder,
+    SystemMessagePromptTemplate,
 )
+
+# from langgraph_supervisor import create_supervisor
+# from deepagents import async_create_deep_agent, SubAgent
+# from deepagents.sub_agent import CustomSubAgent
+
+try:
+    from zoneinfo import ZoneInfo
+except ImportError:
+    # Fallback for Python < 3.9
+    from datetime import timezone
+
+    ZoneInfo = None
+
 from langchain_core.runnables import RunnableConfig
 from langchain_core.tools import BaseTool
-from langgraph.prebuilt.chat_agent_executor import AgentState, create_react_agent
 
 from libs.utils.langfuse_manager import LangfusePromptName
 from tools import build_all_tools
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_openai import ChatOpenAI
 
-# from langgraph_supervisor import create_supervisor
+from libs.logger.logger import logger
+from libs.utils.key_manager import get_api_key
 
 msg_type = {
     "ai": "AI Finance Agent",
 }
+
+
+def init_llm(task_solver_config: dict, kwargs: dict = dict()):
+    # WARNING: Keep `kwargs` as it is, overwise you will get an errpr
+    # NameError: Fields must not use names with leading underscores; e.g., use 'pydantic_extra__' instead of '__pydantic_extra__'.
+    clean_kwargs = {k: v for k, v in kwargs.items() if not k.startswith("_")}
+    task_solver_config = {
+        k: v for k, v in task_solver_config.items() if not k.startswith("_")
+    }
+    is_google_provider = task_solver_config.get("is_google_provider", False)
+    if is_google_provider:
+        # Use ChatGoogleGenerativeAI for Google models
+        task_solver_llm_config = {
+            "model": task_solver_config.get("model_name"),
+            "temperature": task_solver_config.get("temperature"),
+            "thinking_budget": task_solver_config.get("thinking_budget", -1),
+            "include_thoughts": task_solver_config.get("include_thoughts", True),
+        }
+        executor_llm = ChatGoogleGenerativeAI(
+            **{**task_solver_llm_config, **clean_kwargs}
+        )
+    else:
+        # Use ChatOpenAI for OpenAI models
+        task_solver_llm_config = {
+            "api_key": get_api_key(base_url=task_solver_config.get("base_url")),
+            "model_name": task_solver_config.get("model_name"),
+            "temperature": task_solver_config.get("temperature"),
+            "base_url": task_solver_config.get("base_url"),
+        }
+        try:
+            executor_llm = ChatOpenAI(**{**task_solver_llm_config, **clean_kwargs})
+        except NameError as e:
+            logger.warning(f"TRY AGAIN: {repr(e)}")
+            executor_llm = ChatOpenAI(**{**task_solver_llm_config, **clean_kwargs})
+
+    return executor_llm
+
+
+def prebuild_agent(
+    config: Optional[RunnableConfig] = None,
+    system_prompt: str = None,
+    skip_build_calculator_tools: bool = True,
+):
+    # Get configurable prompt configs
+    configurable = config.get("configurable", {}) if config else {}
+
+    # Get task solver prompt and config
+    task_solver_sys_msg, task_solver_config = configurable.get(
+        LangfusePromptName.SIMPLE_REACT_SYSTEM_PROMPT,
+    )
+
+    if system_prompt:
+        task_solver_sys_msg = SystemMessagePromptTemplate.from_template(system_prompt)
+
+    finmars_token = task_solver_config.get("finmars_token")
+    space = task_solver_config.get("space")
+    realm = task_solver_config.get("realm")
+
+    executor_llm = init_llm(task_solver_config)
+
+    # Build the prompt template using ChatPromptTemplate.from_messages
+    prompt_template = create_agent_prompt(sys_msg=task_solver_sys_msg)
+
+    tools: list[BaseTool] = build_all_tools(
+        finmars_token=finmars_token,
+        space=space,
+        realm=realm,
+        skip_build_calculator_tools=skip_build_calculator_tools,
+    )
+    return executor_llm, prompt_template, tools
 
 
 def create_agent_prompt(sys_msg) -> ChatPromptTemplate:
@@ -321,82 +396,3 @@ async def pre_hook_agent_processor(state, config):
             state["messages"].extend(rem)
 
     return {"messages": [RemoveMessage(id=REMOVE_ALL_MESSAGES), *state["messages"]]}
-
-
-class SolverState(AgentState):
-    """State for Solver agent"""
-
-    # New Context ...
-    pass
-
-
-def create_finmars_agent_react(
-    config: Optional[RunnableConfig] = None,
-):
-    # Get configurable prompt configs
-    configurable = config.get("configurable", {}) if config else {}
-
-    # Get task solver prompt and config
-    task_solver_sys_msg, task_solver_config = configurable.get(
-        LangfusePromptName.SIMPLE_REACT_SYSTEM_PROMPT,
-    )
-
-    finmars_token = task_solver_config.get("finmars_token")
-    space = task_solver_config.get("space")
-    realm = task_solver_config.get("realm")
-
-    executor_llm = init_llm(task_solver_config)
-
-    # Build the prompt template using ChatPromptTemplate.from_messages
-    prompt_template = create_agent_prompt(sys_msg=task_solver_sys_msg)
-
-    tools: list[BaseTool] = build_all_tools(
-        finmars_token=finmars_token, space=space, realm=realm
-    )
-
-    # Create executor agent with state modifier
-    finmars_api_agent = create_react_agent(
-        model=executor_llm,
-        tools=tools,
-        prompt=prompt_template,
-        name="finmars_api_finance_ai_agent",
-        state_schema=SolverState,
-        # pre_model_hook=pre_hook_agent_processor,
-        # post_model_hook=post_hook_agent_processor,
-    )
-
-    executor_agent = create_supervisor(
-        model=executor_llm,
-        agents=[finmars_api_agent, financial_mathematician_app],
-        prompt=SUPERVISOR_SYSTEM_PROMPT,
-        add_handoff_back_messages=True,
-        output_mode="full_history",
-        supervisor_name="finmars_supervisor_agent",
-        state_schema=SolverState,
-        # pre_model_hook=pre_hook_agent_processor,
-        post_model_hook=post_hook_agent_processor,
-    ).compile()
-    # executor_agent = executor_agent.with_retry(
-    #     retry_if_exception_type=(
-    #         httpx.ReadTimeout,
-    #         httpx.RemoteProtocolError,
-    #         ServiceUnavailable,
-    #         InternalServerError,
-    #     ),  # Retry only on ValueError
-    #     wait_exponential_jitter=True,  # Add jitter to the exponential backoff
-    #     stop_after_attempt=6,
-    # )
-
-    # executor_agent = async_create_deep_agent(
-    #     model=executor_llm,
-    #     tools=tools,
-    #     subagents=[
-    #         CustomSubAgent(
-    #             name="financial_mathematician",
-    #             description="financial_mathematician - a specialized mathematical computation subagent responsible for performing ALL arithmetic operations and mathematical calculations in the financial domain",
-    #             graph=financial_mathematician_app,
-    #         )
-    #     ],
-    #     instructions=prompt_template.messages[0].prompt.template,
-    # )
-    return executor_agent

@@ -4,7 +4,7 @@ from pprint import pprint
 
 from langchain_core.messages import BaseMessage
 
-from agents.react_agent.runner import arun_agent_stream
+from agents.runner import arun_agent_stream
 from utils.agent_utils.async_loop_to_sync import sync_generator_from_async
 from utils.agent_utils.lc_converter import convert_to_lc_messages
 from libs.utils.langfuse_manager import PromptSource
