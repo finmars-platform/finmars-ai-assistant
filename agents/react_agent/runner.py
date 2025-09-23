@@ -80,11 +80,18 @@ async def arun_agent_stream(
             if hasattr(tool_output, "name"):
                 tool_output_name = tool_output.name
 
+            # Create appropriate status description for tool completion
+            if tool_output_name and tool_output_name.startswith("transfer_to_"):
+                agent_name = tool_output_name.replace("transfer_to_", "")
+                status_description = f"✅ Delegation to {agent_name} completed with status: {tool_output_status}..."
+            else:
+                status_description = f"🔧 Agent got response from {tool_output_name} tool with status: {tool_output_status}..."
+
             yield {
                 "event": {
                     "type": "status",
                     "data": {
-                        "description": f"Agent got response from {tool_output_name} tool with status: {tool_output_status}...",
+                        "description": status_description,
                         "done": False,
                     },
                 }
@@ -94,11 +101,22 @@ async def arun_agent_stream(
         elif event_graph.get("event") == "on_tool_start":
             tool_name: str = event_graph.get("name")
             tool_input_data: dict = event_graph.get("data", {}).get("input", {})
+
+            # Create appropriate status description for supervisor transfers
+            if tool_name.startswith("transfer_to_"):
+                agent_name = tool_name.replace("transfer_to_", "")
+                task_description = tool_input_data.get(
+                    "description", "No task description provided"
+                )
+                status_description = f"🔄 Supervisor delegating to {agent_name}: {task_description}..."
+            else:
+                status_description = f"🔧 Agent call {tool_name} tool with input: {json.dumps(tool_input_data)}..."
+
             yield {
                 "event": {
                     "type": "status",
                     "data": {
-                        "description": f"Agent call {tool_name} tool with input: {json.dumps(tool_input_data)}...",
+                        "description": status_description,
                         "done": False,
                     },
                 }
@@ -203,11 +221,18 @@ async def arun_agent_stream_thinking(
                 tool_output_name = tool_output.name
 
             # Always yield status event for UI
+            # Create appropriate status description for tool completion
+            if tool_output_name and tool_output_name.startswith("transfer_to_"):
+                agent_name = tool_output_name.replace("transfer_to_", "")
+                status_description = f"✅ Delegation to {agent_name} completed with status: {tool_output_status}..."
+            else:
+                status_description = f"🔧 Agent got response from {tool_output_name} tool with status: {tool_output_status}..."
+
             yield {
                 "event": {
                     "type": "status",
                     "data": {
-                        "description": f"Agent got response from {tool_output_name} tool with status: {tool_output_status}...",
+                        "description": status_description,
                         "done": False,
                     },
                 }
@@ -216,7 +241,12 @@ async def arun_agent_stream_thinking(
             # Tool responses should always be in thinking blocks
             # If thinking is not active, something went wrong, but let's handle it gracefully
             if is_thinking_active:
-                yield f"🔧 Tool call completed: {tool_output_name} (status: {tool_output_status})\n"
+                # Create appropriate thinking output for tool completion
+                if tool_output_name and tool_output_name.startswith("transfer_to_"):
+                    agent_name = tool_output_name.replace("transfer_to_", "")
+                    yield f"✅ Delegation to {agent_name} completed (status: {tool_output_status})\n"
+                else:
+                    yield f"🔧 Tool call completed: {tool_output_name} (status: {tool_output_status})\n"
             prev_event_is_agent_thinking = False
 
         elif event_graph.get("event") == "on_tool_start":
@@ -224,11 +254,23 @@ async def arun_agent_stream_thinking(
             tool_input_data: dict = event_graph.get("data", {}).get("input", {})
 
             # Always yield status event for UI
+            # Create appropriate status description for supervisor transfers
+            if tool_name.startswith("transfer_to_"):
+                agent_name = tool_name.replace("transfer_to_", "")
+                task_description = tool_input_data.get(
+                    "description", "No task description provided"
+                )
+                status_description = (
+                    f"🔄 Supervisor delegating to {agent_name}: {task_description}..."
+                )
+            else:
+                status_description = f"🔧 Agent call {tool_name} tool with input: {json.dumps(tool_input_data)}..."
+
             yield {
                 "event": {
                     "type": "status",
                     "data": {
-                        "description": f"Agent call {tool_name} tool with input: {str(tool_input_data)}...",
+                        "description": status_description,
                         "done": False,
                     },
                 }
@@ -240,7 +282,16 @@ async def arun_agent_stream_thinking(
                 is_thinking_active = True
 
             # Always yield tool call notification in thinking block
-            yield f"🔧 Tool call: {tool_name} with input: {str(tool_input_data)}\n"
+            if tool_name.startswith("transfer_to_"):
+                # Handle supervisor delegation transfers
+                agent_name = tool_name.replace("transfer_to_", "")
+                task_description = tool_input_data.get(
+                    "description", "No task description provided"
+                )
+                yield f"🔄 Supervisor delegating to {agent_name}: {task_description}\n"
+            else:
+                yield f"🔧 Tool call: {tool_name} with input: {json.dumps(tool_input_data)}\n"
+
             prev_event_is_agent_thinking = False
 
         elif event_graph.get("event") == "on_chat_model_stream":
@@ -249,7 +300,9 @@ async def arun_agent_stream_thinking(
                 continue
 
             # Check if this is from chain_calculator_usage_detector with additional_thinking tag
-            is_additional_thinking = "additional_thinking" in event_graph.get("tags", [])
+            is_additional_thinking = "additional_thinking" in event_graph.get(
+                "tags", []
+            )
 
             # Handle thinking content
             if hasattr(msg_chunk, "content") and isinstance(msg_chunk.content, list):
@@ -269,7 +322,9 @@ async def arun_agent_stream_thinking(
             # Handle regular content
             if msg_chunk.content and isinstance(msg_chunk.content, str):
                 # Check if this chunk has tool calls
-                has_tool_calls = hasattr(msg_chunk, 'tool_calls') and msg_chunk.tool_calls
+                has_tool_calls = (
+                    hasattr(msg_chunk, "tool_calls") and msg_chunk.tool_calls
+                )
 
                 # If this is additional_thinking content, stream it in thinking mode
                 if is_additional_thinking:
