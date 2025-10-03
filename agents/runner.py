@@ -6,6 +6,7 @@ from langchain_core.runnables import RunnableConfig
 from agents import simple_react_tag
 from agents.agent_multi_agent_builder import create_finmars_multi_agent
 from agents.agent_react_builder import create_finmars_agent_react
+from agents.env import LLM_MODEL
 from libs.utils.prompt_map_builder import build_map_prompts_cfg
 from libs.utils.langfuse_manager import PromptSource
 from libs.utils.langfuse_callback import get_langfuse_callbacks
@@ -194,14 +195,38 @@ async def arun_agent_stream_thinking(
     # Get Langfuse callbacks based on environment variables
     callbacks = get_langfuse_callbacks()
     config_default = {
-        "model_name": "gemini-2.5-flash",
-        # "model_name": "gemini-2.5-pro",
         "temperature": 0.0,
         "base_url": None,
-        "is_google_provider": True,
-        "thinking_budget": -1,
-        "include_thoughts": True,
     }
+
+    if LLM_MODEL.startswith("gemini"):
+        config_default.update(
+            {
+                "model": LLM_MODEL,
+                "is_google_provider": True,
+                "thinking_budget": -1,
+                "include_thoughts": True,
+            }
+        )
+    else:
+        config_default.update(
+            {
+                "model_name": LLM_MODEL,
+                "temperature": (
+                    1.0
+                    if config_default.get("temperature", 0.0) < 1.0
+                    else config_default.get("temperature", 0.0)
+                ),
+                "is_google_provider": False,
+                "use_responses_api": True,
+                "model_kwargs": {
+                    "reasoning": {
+                        "effort": "medium",  # 'low', 'medium', or 'high'
+                        "summary": "auto",  # 'detailed', 'auto', or None
+                    }
+                },
+            }
+        )
 
     map_prompts_cfg = await build_map_prompts_cfg(
         config_default=config_default,

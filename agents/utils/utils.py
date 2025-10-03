@@ -80,7 +80,10 @@ def init_llm(task_solver_config: dict, kwargs: dict = dict()):
             "model_name": task_solver_config.get("model_name"),
             "temperature": task_solver_config.get("temperature"),
             "base_url": task_solver_config.get("base_url"),
+            "use_responses_api": task_solver_config.get("use_responses_api"),
+            "model_kwargs": task_solver_config.get("model_kwargs"),
         }
+
         try:
             executor_llm = ChatOpenAI(**{**task_solver_llm_config, **clean_kwargs})
         except NameError as e:
