@@ -1,3 +1,3 @@
 import os
 
-LLM_MODEL = os.getenv("LLM_MODEL", "gpt-5").lower()
+LLM_MODEL = os.getenv("LLM_MODEL", "gemini-2.5-flash").lower()

@@ -1,4 +1,5 @@
 import json
+import time
 from typing import Optional
 from langchain_core.messages import HumanMessage, BaseMessage
 from langchain_core.runnables import RunnableConfig
@@ -10,6 +11,10 @@ from agents.env import LLM_MODEL
 from libs.utils.prompt_map_builder import build_map_prompts_cfg
 from libs.utils.langfuse_manager import PromptSource
 from libs.utils.langfuse_callback import get_langfuse_callbacks
+from openai import AsyncClient, OpenAI
+
+openai_client_async = AsyncClient()
+openai_client_sync = OpenAI()
 
 
 def should_close_thinking_for_supervisor(event_graph):
@@ -199,7 +204,9 @@ async def arun_agent_stream_thinking(
         "base_url": None,
     }
 
-    if LLM_MODEL.startswith("gemini"):
+    is_gemini = LLM_MODEL.startswith("gemini")
+
+    if is_gemini:
         config_default.update(
             {
                 "model": LLM_MODEL,
@@ -221,7 +228,7 @@ async def arun_agent_stream_thinking(
                 "use_responses_api": True,
                 "model_kwargs": {
                     "reasoning": {
-                        "effort": "medium",  # 'low', 'medium', or 'high'
+                        "effort": "low",  # 'low', 'medium', or 'high'
                         "summary": "auto",  # 'detailed', 'auto', or None
                     }
                 },
@@ -237,6 +244,7 @@ async def arun_agent_stream_thinking(
         realm=realm,
         space=space,
     )
+    map_prompts_cfg["is_gemini"] = is_gemini
     config = RunnableConfig(
         **{
             "callbacks": callbacks,
@@ -259,6 +267,8 @@ async def arun_agent_stream_thinking(
     prev_event_is_agent_thinking = True
     is_thinking_active = False
     prev_answering_supervisor = ""
+    prev_index = None  # Track index for GPT-5 format to detect paragraph breaks
+    start_run = time.time()
 
     async for event_graph in agent.astream_events(
         {
@@ -377,14 +387,88 @@ async def arun_agent_stream_thinking(
                 yield "<think>"
                 is_thinking_active = True
 
+            # Handle GPT-5 reasoning content from additional_kwargs
+            if hasattr(msg_chunk, "additional_kwargs") and msg_chunk.additional_kwargs:
+                reasoning_data = msg_chunk.additional_kwargs.get("reasoning", {})
+                if reasoning_data and "summary" in reasoning_data:
+                    if not is_thinking_active:
+                        yield "<think>"
+                        is_thinking_active = True
+
+                    for summary_item in reasoning_data["summary"]:
+                        if isinstance(summary_item, dict):
+                            summary_type = summary_item.get("type")
+                            current_index = summary_item.get("index", 0)
+
+                            # Yield \n\n when index changes (paragraph break)
+                            if prev_index is not None and current_index != prev_index:
+                                yield "\n\n"
+
+                            prev_index = current_index
+
+                            if summary_type == "summary_text":
+                                text = summary_item.get("text", "")
+                                if text:
+                                    yield text
+
+                # Handle GPT-5 code_interpreter tool outputs from additional_kwargs
+                tool_outputs = msg_chunk.additional_kwargs.get("tool_outputs", [])
+                if tool_outputs:
+                    if not is_thinking_active:
+                        yield "<think>"
+                        is_thinking_active = True
+
+                    for tool_output in tool_outputs:
+                        if isinstance(tool_output, dict):
+                            tool_type = tool_output.get("type")
+                            if tool_type == "code_interpreter_call":
+                                status = tool_output.get("status", "unknown")
+                                code = tool_output.get("code", "")
+
+                                if code:
+                                    yield f"\n**Code interpreter executing (status: {status}):**\n```python\n{code}\n```\n"
+
+                                container_id = tool_output.get("container_id", "")
+                                if container_id:
+                                    files = openai_client_sync.containers.files.list(
+                                        container_id=container_id,
+                                    )
+                                    is_files_showed = False
+                                    for file in files:
+                                        if file.created_at > start_run:
+                                            file_content = await openai_client_async.containers.files.content.retrieve(
+                                                container_id=container_id,
+                                                file_id=file.id,
+                                            )
+                                            yield f"\n**Code interpreter file ({file.id}) output:**\n{file_content}\n"
+                                            is_files_showed = True
+
+                                    if is_files_showed:
+                                        start_run = time.time()
+
             # Handle thinking content and code execution content
             if hasattr(msg_chunk, "content") and isinstance(msg_chunk.content, list):
                 for content_item in msg_chunk.content:
                     if isinstance(content_item, dict):
                         content_type = content_item.get("type")
 
-                        # Handle thinking content
-                        if content_type == "thinking":
+                        # Handle GPT-5 text content with index tracking
+                        if content_type == "text":
+                            text_content = content_item.get("text", "")
+                            current_index = content_item.get("index", 0)
+
+                            # Yield \n\n when index changes (paragraph break)
+                            if prev_index is not None and current_index != prev_index:
+                                yield "\n\n"
+
+                            prev_index = current_index
+
+                            if text_content:
+                                yield text_content
+                            continue
+
+                        # Handle Gemini thinking content (backward compatibility)
+                        elif content_type == "thinking":
                             thinking_content = content_item.get("thinking", "")
                             if thinking_content:
                                 if not is_thinking_active:
@@ -393,7 +477,7 @@ async def arun_agent_stream_thinking(
                                 yield thinking_content
                             continue
 
-                        # Handle code execution content (executable_code and code_execution_result)
+                        # Handle Gemini code execution content (backward compatibility)
                         elif content_type in [
                             "executable_code",
                             "code_execution_result",

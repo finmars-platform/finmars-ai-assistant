@@ -1,5 +1,6 @@
 import json
 import os
+import uuid
 from datetime import datetime
 from typing import Optional
 from langchain_core.messages import (
@@ -65,7 +66,7 @@ def init_llm(task_solver_config: dict, kwargs: dict = dict()):
     if is_google_provider:
         # Use ChatGoogleGenerativeAI for Google models
         task_solver_llm_config = {
-            "model": task_solver_config.get("model_name"),
+            "model": task_solver_config.get("model"),
             "temperature": task_solver_config.get("temperature"),
             "thinking_budget": task_solver_config.get("thinking_budget", -1),
             "include_thoughts": task_solver_config.get("include_thoughts", True),
@@ -202,6 +203,9 @@ def format_msg_content(m: AnyMessage):
 
 async def post_hook_agent_processor(state, config):
 
+    configurable = config.get("configurable", {}) if config else {}
+    is_gemini = configurable.get("is_gemini")
+
     # prompt = ChatPromptTemplate.from_messages(
     #     [
     #         SystemMessage(content=SIMPLE_LLM_TOOL_USAGE_DETECTOR_SYSTEM_PROMPT),
@@ -272,6 +276,9 @@ To maintain financial precision and auditability, each arithmetic step must go t
 I will ask the `financial_mathematician` subagent for these calculations right away.
 No apologies -- just doing the task without commentary.
 I MUST PROVIDE DETAILED CALCULATIONS by asking the `financial_mathematician` subagent!
+
+
+And I remember that IN CASE OF TO DELEGATE I ALSO MUST CALL TOOL `transfer_to_financial_mathematician` OR `transfer_to_finmars_api_finance_ai_agent`
 """
     continue_result_content = """
 I have already asked the `financial_mathematician` subagent right now, and I will continue relying on it for all future mathematical operations -- or correct my current usage where needed.
@@ -283,11 +290,28 @@ If any computations were performed outside it, I will ask the `financial_mathema
     def remove_extra(m: AnyMessage):
         if m.type != "ai":
             return m
+
+        # Handle GPT-5 reasoning in additional_kwargs
+        if hasattr(m, "additional_kwargs") and m.additional_kwargs:
+            reasoning_data = m.additional_kwargs.get("reasoning", {})
+            if reasoning_data and "summary" in reasoning_data:
+                summary = reasoning_data["summary"]
+                if summary and isinstance(summary[-1], dict):
+                    if summary[-1].get("type") == "summary_text":
+                        text = summary[-1].get("text", "")
+                        if text.endswith(result_content):
+                            summary[-1]["text"] = text[: -len(result_content)]
+                        elif text.endswith(continue_result_content):
+                            summary[-1]["text"] = text[: -len(continue_result_content)]
+
+        # Handle string content
         if isinstance(m.content, str):
             if m.content.endswith(result_content):
                 m.content = m.content[: -len(result_content)]
             elif m.content.endswith(continue_result_content):
                 m.content = m.content[: -len(continue_result_content)]
+
+        # Handle list content
         elif isinstance(m.content, list):
             if m.content and isinstance(m.content[-1], str):
                 if m.content[-1].endswith(result_content):
@@ -295,7 +319,7 @@ If any computations were performed outside it, I will ask the `financial_mathema
                 elif m.content[-1].endswith(continue_result_content):
                     m.content[-1] = m.content[-1][: -len(continue_result_content)]
             elif m.content and isinstance(m.content[-1], dict):
-                # Handle both old format {"thinking": "..."} and new format {"type": "thinking", "thinking": "..."}
+                # Handle Gemini thinking format
                 thinking_content = m.content[-1].get("thinking", "")
                 if thinking_content.endswith(result_content):
                     m.content[-1]["thinking"] = thinking_content[: -len(result_content)]
@@ -308,6 +332,37 @@ If any computations were performed outside it, I will ask the `financial_mathema
     def add_extra(m: AnyMessage, extra: str):
         if m.type != "ai":
             return m
+
+        # For GPT-5, add to reasoning in additional_kwargs
+        if not is_gemini and hasattr(m, "additional_kwargs"):
+            if not m.additional_kwargs:
+                m.additional_kwargs = {}
+
+            reasoning_data = m.additional_kwargs.get("reasoning", {})
+            if not reasoning_data:
+                reasoning_data = {"summary": []}
+                m.additional_kwargs["reasoning"] = reasoning_data
+
+            if "summary" not in reasoning_data:
+                reasoning_data["summary"] = []
+
+            summary = reasoning_data["summary"]
+
+            # Add or update the last summary item
+            if (
+                summary
+                and isinstance(summary[-1], dict)
+                and summary[-1].get("type") == "summary_text"
+            ):
+                summary[-1]["text"] = summary[-1].get("text", "") + extra
+            else:
+                # Create new summary item
+                new_index = summary[-1].get("index", 0) + 1 if summary else 0
+                summary.append(
+                    {"type": "summary_text", "text": extra, "index": new_index}
+                )
+
+        # For Gemini and string content
         if isinstance(m.content, str) and m.content:
             m.content = m.content + extra
         elif isinstance(m.content, list):
@@ -331,6 +386,43 @@ If any computations were performed outside it, I will ask the `financial_mathema
         state["messages"][-1] = add_extra(
             state["messages"][-1], extra=continue_result_content
         )
+
+    # if (
+    #     state["messages"]
+    #     and (state["messages"][-1].type == "ai")
+    #     and state["messages"][-1].content
+    #     and state["messages"][-1].content[-1]["text"].startswith("delegating_to_")
+    #     and (not state["messages"][-1].tool_calls)
+    # ):
+    #     if (
+    #         state["messages"][-1]
+    #         .content[-1]["text"]
+    #         .startswith("delegating_to_finmars_api_finance_ai_agent")
+    #     ):
+    #         tool_name_ = "transfer_to_finmars_api_finance_ai_agent"
+    #     elif (
+    #         state["messages"][-1]
+    #         .content[-1]["text"]
+    #         .startswith("delegating_to_financial_mathematician")
+    #     ):
+    #         tool_name_ = "transfer_to_financial_mathematician"
+    #     else:
+    #         tool_name_ = None
+    #
+    #     if tool_name_ is not None:
+    #         call_id_fake = str(uuid.uuid4())
+    #         call_id_fake_map = str(uuid.uuid4())
+    #         state["messages"][-1].additional_kwargs["__openai_function_call_ids__"] = {
+    #             call_id_fake: call_id_fake_map
+    #         }
+    #         state["messages"][-1].tool_calls = [
+    #             {
+    #                 "args": dict(),
+    #                 "id": call_id_fake,
+    #                 "name": tool_name_,
+    #                 "type": "tool_call",
+    #             }
+    #         ]
 
     return {"messages": [RemoveMessage(id=REMOVE_ALL_MESSAGES), *state["messages"]]}
 

@@ -13,15 +13,26 @@ from langgraph.graph import StateGraph
 from langgraph.prebuilt.chat_agent_executor import AgentState
 
 from agents.env import LLM_MODEL
-from agents.multiagent_system_prompt import FINANCIAL_MATHEMATICIAN_SYSTEM_PROMPT
+from agents.multiagent_system_prompt import (
+    FINANCIAL_MATHEMATICIAN_SYSTEM_PROMPT,
+    FINANCIAL_MATHEMATICIAN_LOG_FILE_SYSTEM_PROMPT,
+)
 
 
 async def create_prompt(
-    messages: Sequence[BaseMessage],
+    messages: Sequence[BaseMessage], is_gemini: bool
 ) -> list[BaseMessage]:
     """Create the prompt template"""
+    sys_msg = (
+        SystemMessage(FINANCIAL_MATHEMATICIAN_SYSTEM_PROMPT)
+        if is_gemini
+        else SystemMessage(
+            FINANCIAL_MATHEMATICIAN_SYSTEM_PROMPT
+            + FINANCIAL_MATHEMATICIAN_LOG_FILE_SYSTEM_PROMPT
+        )
+    )
     return [
-        SystemMessage(FINANCIAL_MATHEMATICIAN_SYSTEM_PROMPT),
+        sys_msg,
         *messages,
     ]
 
@@ -29,20 +40,19 @@ async def create_prompt(
 async def financial_mathematician(state: AgentState, config: RunnableConfig):
     messages = state.get("messages", [])
 
-    msgs = await create_prompt(
-        messages=messages,
-    )
-
     config_default = {
         "temperature": 0.0,
         "base_url": None,
     }
 
-    if LLM_MODEL.startswith("gemini"):
+    is_gemini = LLM_MODEL.startswith("gemini")
+
+    msgs = await create_prompt(messages=messages, is_gemini=is_gemini)
+
+    if is_gemini:
         config_default.update(
             {
                 "model": LLM_MODEL,
-                "is_google_provider": True,
                 "thinking_budget": -1,
                 "include_thoughts": True,
             }
@@ -75,11 +85,10 @@ async def financial_mathematician(state: AgentState, config: RunnableConfig):
                     if config_default.get("temperature", 0.0) < 1.0
                     else config_default.get("temperature", 0.0)
                 ),
-                "is_google_provider": False,
                 "use_responses_api": True,
                 "model_kwargs": {
                     "reasoning": {
-                        "effort": "medium",  # 'low', 'medium', or 'high'
+                        "effort": "low",  # 'low', 'medium', or 'high'
                         "summary": "auto",  # 'detailed', 'auto', or None
                     }
                 },
