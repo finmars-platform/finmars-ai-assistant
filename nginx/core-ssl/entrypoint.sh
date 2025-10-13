@@ -45,13 +45,15 @@ fi
 export DOMAIN_HOST
 
 CERTBOT_WEBROOT="/var/www/certbot"
-NGINX_CONF="/etc/nginx/conf.d/default.conf"
+NGINX_CONF_DIR="/etc/nginx/conf.d"
+HTTP_CONF="${NGINX_CONF_DIR}/http.conf"
+HTTPS_CONF="${NGINX_CONF_DIR}/https.conf"
 LE_DIR="/etc/letsencrypt"
 LIVE_DIR="${LE_DIR}/live/${DOMAIN_HOST}"
 
 mkdir -p "${CERTBOT_WEBROOT}"
 mkdir -p "${LE_DIR}"
-mkdir -p "$(dirname "${NGINX_CONF}")"
+mkdir -p "${NGINX_CONF_DIR}"
 
 ensure_timezone() {
   if [[ -f "/usr/share/zoneinfo/${TZ}" ]]; then
@@ -61,15 +63,15 @@ ensure_timezone() {
 }
 
 generate_http_config() {
-  envsubst '${DOMAIN_HOST}' < /templates/http.conf.template > "${NGINX_CONF}"
-  chown root:"${NGINX_USER}" "${NGINX_CONF}"
-  chmod 640 "${NGINX_CONF}"
+  envsubst '${DOMAIN_HOST}' < /templates/http.conf.template > "${HTTP_CONF}"
+  chown root:"${NGINX_USER}" "${HTTP_CONF}"
+  chmod 640 "${HTTP_CONF}"
 }
 
 generate_https_config() {
-  envsubst '${DOMAIN_HOST}' < /templates/https.conf.template > "${NGINX_CONF}"
-  chown root:"${NGINX_USER}" "${NGINX_CONF}"
-  chmod 640 "${NGINX_CONF}"
+  envsubst '${DOMAIN_HOST}' < /templates/https.conf.template > "${HTTPS_CONF}"
+  chown root:"${NGINX_USER}" "${HTTPS_CONF}"
+  chmod 640 "${HTTPS_CONF}"
 }
 
 ensure_tls_assets() {
@@ -88,8 +90,9 @@ obtain_initial_certificate_if_needed() {
     return
   fi
 
+  rm -f "${HTTPS_CONF}"
+
   echo "No existing certificate found. Starting Nginx with temporary HTTP configuration..."
-  generate_http_config
   nginx
 
   sleep 2
@@ -222,6 +225,7 @@ EOF
 }
 
 ensure_timezone
+generate_http_config
 ensure_tls_assets
 obtain_initial_certificate_if_needed
 ensure_permissions
