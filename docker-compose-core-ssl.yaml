@@ -1,10 +1,10 @@
 services:
-  # Nginx reverse proxy to terminate TLS and expose Open WebUI via HTTPS on :8881
+  # Nginx reverse proxy to terminate TLS and expose Open WebUI via HTTPS
   nginx:
     build:
       context: ./nginx/core-ssl
     ports:
-      - "443:443"  # Expose HTTPS on 8881
+      - "443:443"  # Expose HTTPS
       - "80:80"     # Required for Let's Encrypt HTTP-01 challenges
     networks:
       - arch-network
