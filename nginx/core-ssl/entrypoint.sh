@@ -9,6 +9,9 @@ NGINX_USER="${NGINX_USER:-nginx}"
 POST_RENEW_SCRIPT="/usr/local/bin/renewal-post-hook.sh"
 LOGROTATE_CONFIG="${LOGROTATE_CONFIG:-/etc/logrotate.d/nginx}"
 LOGROTATE_STATE="${LOGROTATE_STATE:-/var/lib/logrotate/nginx.status}"
+PID_FILE="${PID_FILE:-/var/run/nginx/nginx.pid}"
+PID_DIR="$(dirname "${PID_FILE}")"
+NGINX_CONF="/etc/nginx/nginx.conf"
 
 if [[ -z "${DOMAIN_RAW}" ]]; then
   echo "Error: DOMAIN environment variable is required (e.g. example.com)." >&2
@@ -132,11 +135,11 @@ ensure_permissions() {
     chown -R "${NGINX_USER}:${NGINX_USER}" /var/cache/nginx
   fi
 
-  mkdir -p /var/run/nginx
-  touch /var/run/nginx/nginx.pid
-  chown -R "${NGINX_USER}:${NGINX_USER}" /var/run/nginx
-  chmod 750 /var/run/nginx
-  chmod 640 /var/run/nginx/nginx.pid
+  mkdir -p "${PID_DIR}"
+  touch "${PID_FILE}"
+  chown -R "${NGINX_USER}:${NGINX_USER}" "${PID_DIR}"
+  chmod 750 "${PID_DIR}"
+  chmod 640 "${PID_FILE}"
 
   mkdir -p /var/log/nginx
   chown "${NGINX_USER}:${NGINX_USER}" /var/log/nginx
@@ -159,6 +162,8 @@ set -eu
 LE_DIR="${LE_DIR}"
 CERTBOT_WEBROOT="${CERTBOT_WEBROOT}"
 NGINX_USER="${NGINX_USER}"
+PID_FILE="${PID_FILE}"
+PID_DIR="${PID_DIR}"
 
 if [ -d "\${LE_DIR}" ]; then
   chown -R root:"\${NGINX_USER}" "\${LE_DIR}"
@@ -176,11 +181,11 @@ if [ -d "/var/cache/nginx" ]; then
   chown -R "\${NGINX_USER}:\${NGINX_USER}" /var/cache/nginx
 fi
 
-mkdir -p /var/run/nginx
-touch /var/run/nginx/nginx.pid
-chown -R "\${NGINX_USER}:\${NGINX_USER}" /var/run/nginx
-chmod 750 /var/run/nginx
-chmod 640 /var/run/nginx/nginx.pid
+mkdir -p "\${PID_DIR}"
+touch "\${PID_FILE}"
+chown -R "\${NGINX_USER}:\${NGINX_USER}" "\${PID_DIR}"
+chmod 750 "\${PID_DIR}"
+chmod 640 "\${PID_FILE}"
 
 mkdir -p /var/log/nginx
 chown "\${NGINX_USER}:\${NGINX_USER}" /var/log/nginx
@@ -225,11 +230,26 @@ PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 EOF
 }
 
+ensure_main_nginx_config() {
+  if [[ -f "${NGINX_CONF}" ]]; then
+    if grep -Eq '^[[:space:]]*pid[[:space:]]+' "${NGINX_CONF}"; then
+      sed -i "s/^[[:space:]]*pid[[:space:]]\+.*/pid ${PID_FILE};/" "${NGINX_CONF}"
+    else
+      sed -i "1i pid ${PID_FILE};" "${NGINX_CONF}"
+    fi
+
+    if grep -Eq '^[[:space:]]*user[[:space:]]+' "${NGINX_CONF}"; then
+      sed -i 's/^[[:space:]]*\(user[[:space:]]\+.*\)$/# \1/' "${NGINX_CONF}"
+    fi
+  fi
+}
+
 ensure_timezone
 generate_http_config
 ensure_tls_assets
 obtain_initial_certificate_if_needed
 ensure_permissions
+ensure_main_nginx_config
 write_post_renew_script
 configure_logrotate
 generate_https_config
