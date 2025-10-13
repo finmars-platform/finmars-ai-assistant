@@ -44,7 +44,7 @@ services:
       dockerfile: Dockerfile
     container_name: agent-pipelines
     ports:
-      - "9299:9099"
+      - "9099"
     networks:
       - arch-network
     depends_on:
