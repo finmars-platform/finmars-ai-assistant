@@ -1,20 +1,23 @@
 services:
   # Nginx reverse proxy to terminate TLS and expose Open WebUI via HTTPS on :8881
   nginx:
-    image: nginx:alpine
+    build:
+      context: ./nginx/core-ssl
     ports:
-      - "8881:443"  # Expose HTTPS on 8881
+      - "443:443"  # Expose HTTPS on 8881
+      - "80:80"     # Required for Let's Encrypt HTTP-01 challenges
     networks:
       - arch-network
     volumes:
-      # Use templated config for Open WebUI
-      - ./nginx/conf_core.d:/etc/nginx/templates
-      # Use a dedicated SSL directory for Core setup (must be different from ./nginx/ssl)
-      - ./nginx/ssl-core:/etc/letsencrypt:ro
+      # Persist Let's Encrypt assets for the Core setup (separate from ./nginx/ssl)
+      - ./nginx/ssl-core:/etc/letsencrypt
     depends_on:
       - open-webui
     environment:
-      - MAIN_DOMAIN_NAME=${MAIN_DOMAIN_NAME}
+      - DOMAIN=${MAIN_DOMAIN_NAME}
+      - EMAIL=${LETSENCRYPT_EMAIL}
+      - TZ=${TZ:-Europe/Luxembourg}
+    restart: always
 
   open-webui:
     image: backplane/open-webui:0.6.15
@@ -58,28 +61,6 @@ services:
       - FINMARS_SPACE=${FINMARS_SPACE}
       - ACTIVATE_PUBLIC_NAME=${ACTIVATE_PUBLIC_NAME:-false}
     restart: always
-
-  # One-off container to obtain/renew Let's Encrypt certificates for MAIN_DOMAIN_NAME
-  certbot:
-    image: certbot/certbot:v5.0.0
-    networks:
-      - arch-network
-    volumes:
-      # Must be different from ./nginx/ssl:/etc/letsencrypt
-      - ./nginx/ssl-core:/etc/letsencrypt
-    environment:
-      - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL}
-      - MAIN_DOMAIN_NAME=${MAIN_DOMAIN_NAME}
-    ports:
-      - "80:80"
-    command: [
-      "certonly",
-      "--standalone",
-      "--non-interactive",
-      "--agree-tos",
-      "-m", "${LETSENCRYPT_EMAIL}",
-      "-d", "${MAIN_DOMAIN_NAME}"
-    ]
 
 volumes:
   open-webui:
