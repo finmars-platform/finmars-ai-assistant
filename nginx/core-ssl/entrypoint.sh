@@ -232,14 +232,14 @@ EOF
 
 ensure_main_nginx_config() {
   if [[ -f "${NGINX_CONF}" ]]; then
-    if grep -Eq '^[[:space:]]*pid[[:space:]]+' "${NGINX_CONF}"; then
-      sed -i "s/^[[:space:]]*pid[[:space:]]\+.*/pid ${PID_FILE};/" "${NGINX_CONF}"
+    if grep -Eq '^[[:space:]]*pid[[:space:]]' "${NGINX_CONF}"; then
+      sed -i "s#^[[:space:]]*pid[[:space:]][^;]*;#pid ${PID_FILE};#" "${NGINX_CONF}"
     else
       sed -i "1i pid ${PID_FILE};" "${NGINX_CONF}"
     fi
 
-    if grep -Eq '^[[:space:]]*user[[:space:]]+' "${NGINX_CONF}"; then
-      sed -i 's/^[[:space:]]*\(user[[:space:]]\+.*\)$/# \1/' "${NGINX_CONF}"
+    if grep -Eq '^[[:space:]]*user[[:space:]]' "${NGINX_CONF}"; then
+      sed -i 's/^[[:space:]]*user[[:space:]].*/# &/' "${NGINX_CONF}"
     fi
   fi
 }
