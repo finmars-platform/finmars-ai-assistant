@@ -14,7 +14,7 @@ services:
     depends_on:
       - open-webui
     environment:
-      - DOMAIN=${MAIN_DOMAIN_NAME}
+      - DOMAIN=${AI_ASSISTANT_DOMAIN_NAME}
       - EMAIL=${LETSENCRYPT_EMAIL}
       - TZ=${TZ:-Europe/Luxembourg}
     restart: always
