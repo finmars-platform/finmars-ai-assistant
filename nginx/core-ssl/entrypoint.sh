@@ -72,6 +72,7 @@ generate_https_config() {
   envsubst '${DOMAIN_HOST}' < /templates/https.conf.template > "${HTTPS_CONF}"
   chown root:"${NGINX_USER}" "${HTTPS_CONF}"
   chmod 640 "${HTTPS_CONF}"
+  rm -f "${HTTP_CONF}"
 }
 
 ensure_tls_assets() {
