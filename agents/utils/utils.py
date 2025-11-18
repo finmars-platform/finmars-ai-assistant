@@ -12,6 +12,7 @@ from langchain_core.messages import (
 )
 from langgraph.graph.message import REMOVE_ALL_MESSAGES
 from agents.utils.tool_scratchpad_builder import create_tool_scratchpad
+from openai import OpenAIError
 
 try:
     from zoneinfo import ZoneInfo
@@ -96,7 +97,10 @@ def init_llm(task_solver_config: dict, kwargs: dict = dict()):
 
         try:
             executor_llm = ChatOpenAI(**{**task_solver_llm_config, **clean_kwargs})
-        except NameError as e:
+        except (TypeError, ValueError) as e:
+            logger.error(f"Config error: {e}")
+            raise
+        except (NameError, OpenAIError) as e:  # NameError triggers very seldom
             logger.warning(f"TRY AGAIN: {repr(e)}")
             executor_llm = ChatOpenAI(**{**task_solver_llm_config, **clean_kwargs})
 
