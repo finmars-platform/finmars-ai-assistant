@@ -75,7 +75,7 @@ def init_llm(task_solver_config: dict, kwargs: dict = dict()):
             **{**task_solver_llm_config, **clean_kwargs}
         )
     else:
-        # Use ChatOpenAI for OpenAI models
+        # Use ChatOpenAI for OpenAI-compatible models (OpenAI, DeepSeek, Ollama via OpenAI shim, etc.)
         task_solver_llm_config = {
             "api_key": get_api_key(base_url=task_solver_config.get("base_url")),
             "model_name": task_solver_config.get("model_name"),
@@ -83,6 +83,15 @@ def init_llm(task_solver_config: dict, kwargs: dict = dict()):
             "base_url": task_solver_config.get("base_url"),
             "use_responses_api": task_solver_config.get("use_responses_api"),
             "model_kwargs": task_solver_config.get("model_kwargs"),
+        }
+
+        # langchain-openai's ChatOpenAI is sensitive to some fields being explicitly
+        # set to None (notably model_kwargs). Filter out any None-valued entries so
+        # they fall back to library defaults instead of causing
+        # `TypeError: argument of type 'NoneType' is not iterable` inside
+        # langchain_core.utils._build_model_kwargs.
+        task_solver_llm_config = {
+            k: v for k, v in task_solver_llm_config.items() if v is not None
         }
 
         try:
