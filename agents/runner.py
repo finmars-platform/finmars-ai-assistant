@@ -56,7 +56,8 @@ async def arun_agent_stream(
     callbacks = get_langfuse_callbacks()
 
     config_default = {
-        "model_name": "gpt-4.1-2025-04-14",
+        #"model_name": "gpt-4.1-2025-04-14",
+        "model_name": "gpt-4.1",
         "temperature": 0.0,
         "base_url": None,
         "is_google_provider": False,

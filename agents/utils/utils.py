@@ -12,6 +12,7 @@ from langchain_core.messages import (
 )
 from langgraph.graph.message import REMOVE_ALL_MESSAGES
 from agents.utils.tool_scratchpad_builder import create_tool_scratchpad
+from openai import OpenAIError
 
 try:
     from zoneinfo import ZoneInfo
@@ -75,7 +76,7 @@ def init_llm(task_solver_config: dict, kwargs: dict = dict()):
             **{**task_solver_llm_config, **clean_kwargs}
         )
     else:
-        # Use ChatOpenAI for OpenAI models
+        # Use ChatOpenAI for OpenAI-compatible models (OpenAI, DeepSeek, Ollama via OpenAI shim, etc.)
         task_solver_llm_config = {
             "api_key": get_api_key(base_url=task_solver_config.get("base_url")),
             "model_name": task_solver_config.get("model_name"),
@@ -85,9 +86,21 @@ def init_llm(task_solver_config: dict, kwargs: dict = dict()):
             "model_kwargs": task_solver_config.get("model_kwargs"),
         }
 
+        # langchain-openai's ChatOpenAI is sensitive to some fields being explicitly
+        # set to None (notably model_kwargs). Filter out any None-valued entries so
+        # they fall back to library defaults instead of causing
+        # `TypeError: argument of type 'NoneType' is not iterable` inside
+        # langchain_core.utils._build_model_kwargs.
+        task_solver_llm_config = {
+            k: v for k, v in task_solver_llm_config.items() if v is not None
+        }
+
         try:
             executor_llm = ChatOpenAI(**{**task_solver_llm_config, **clean_kwargs})
-        except NameError as e:
+        except (TypeError, ValueError) as e:
+            logger.error(f"Config error: {e}")
+            raise
+        except (NameError, OpenAIError) as e:  # NameError triggers very seldom
             logger.warning(f"TRY AGAIN: {repr(e)}")
             executor_llm = ChatOpenAI(**{**task_solver_llm_config, **clean_kwargs})
 
