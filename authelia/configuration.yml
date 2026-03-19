@@ -1,0 +1,51 @@
+# Authelia configuration for Finmars AI Assistant (v4.38+)
+#
+# Environment variable substitution uses Go template syntax.
+# Enable it by setting  X_AUTHELIA_CONFIG_FILTERS=template  on the container.
+#
+# Secrets (jwt_secret, session.secret, storage.encryption_key) are injected
+# via AUTHELIA_* environment variables in docker-compose — they do NOT appear
+# in this file.
+
+server:
+  address: 'tcp://:9091/authelia'
+
+log:
+  level: info
+
+totp:
+  issuer: 'Finmars'
+  period: 30
+  skew: 1
+
+authentication_backend:
+  file:
+    path: /config/users_database.yml
+    password:
+      algorithm: argon2id
+      iterations: 3
+      memory: 65536
+      parallelism: 4
+      salt_length: 16
+
+access_control:
+  default_policy: deny
+  rules:
+    - domain: '{{ env "AI_ASSISTANT_DOMAIN_NAME" }}'
+      policy: two_factor
+
+session:
+  name: authelia_session
+  expiration: 12h
+  inactivity: 2h
+  cookies:
+    - domain: '{{ env "AI_ASSISTANT_DOMAIN_NAME" }}'
+      authelia_url: 'https://{{ env "AI_ASSISTANT_DOMAIN_NAME" }}/authelia'
+
+storage:
+  local:
+    path: /config/db.sqlite3
+
+notifier:
+  filesystem:
+    filename: /config/notification.txt
