@@ -1,0 +1,105 @@
+# Core SSL stack with Keycloak OIDC SSO for Open WebUI.
+#
+# Combines the Let's Encrypt nginx reverse proxy from core-ssl
+# with Keycloak-based authentication (OIDC).
+#
+# 2FA is configured in Keycloak itself (Realm → Authentication → Browser flow → OTP Required).
+#
+# Required .env variables (in addition to core-ssl ones):
+#   AUTH_DOMAIN_NAME          – Keycloak hostname (e.g. auth.finmars.com)
+#   OPENWEBUI_CLIENT_SECRET   – OIDC client secret for the "open-webui" client in Keycloak
+
+services:
+  # Nginx reverse proxy to terminate TLS and expose Open WebUI via HTTPS
+  nginx:
+    build:
+      context: ./nginx/core-ssl
+    ports:
+      - "443:443"  # Expose HTTPS
+      - "80:80"     # Required for Let's Encrypt HTTP-01 challenges
+    networks:
+      - arch-network
+    volumes:
+      # Persist Let's Encrypt assets for the Core setup (separate from ./nginx/ssl)
+      - ./nginx/ssl-core:/etc/letsencrypt
+    depends_on:
+      - open-webui
+    environment:
+      - DOMAIN=${AI_ASSISTANT_DOMAIN_NAME}
+      - EMAIL=${LETSENCRYPT_EMAIL}
+      - TZ=${TZ:-Europe/Luxembourg}
+    restart: always
+
+  open-webui:
+    image: backplane/open-webui:0.6.15
+    container_name: open-webui-finmars
+    expose:
+      - "8080"
+    networks:
+      - arch-network
+    environment:
+      - TZ=${TZ:-Europe/Luxembourg}
+      - PIPELINES_API_KEY=${PIPELINES_API_KEY}
+      - ENABLE_FOLLOW_UP_GENERATION=true
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - WEBUI_NAME=Finmars AI Assistant
+
+      # External URL (must match the nginx endpoint)
+      - WEBUI_URL=https://${AI_ASSISTANT_DOMAIN_NAME}
+
+      # OIDC SSO via Keycloak
+      - ENABLE_OAUTH_SIGNUP=true
+      - ENABLE_LOGIN_FORM=true
+      # Default Client_ID is assistant-ui
+      - OAUTH_CLIENT_ID=${OPENWEBUI_CLIENT_ID}
+      - OAUTH_CLIENT_SECRET=${OPENWEBUI_CLIENT_SECRET}
+      - OPENID_PROVIDER_URL=https://${AUTH_DOMAIN_NAME}/realms/finmars/.well-known/openid-configuration
+      - OPENID_REDIRECT_URI=https://${AI_ASSISTANT_DOMAIN_NAME}/oauth/oidc/callback
+      - OAUTH_PROVIDER_NAME=Finmars SSO
+      - OAUTH_SCOPES=openid email profile
+
+      # Role and group management from Keycloak tokens
+      - ENABLE_OAUTH_ROLE_MANAGEMENT=true
+      - OAUTH_ROLES_CLAIM=realm_access.roles
+      - OAUTH_ALLOWED_ROLES=user,admin
+      - OAUTH_ADMIN_ROLES=admin
+      - ENABLE_OAUTH_GROUP_MANAGEMENT=true
+      - ENABLE_OAUTH_GROUP_CREATION=true
+      - OAUTH_GROUP_CLAIM=groups
+
+    volumes:
+      - open-webui:/app/backend/data
+    restart: always
+
+  agent-pipelines:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: agent-pipelines
+    ports:
+      - "9099"
+    networks:
+      - arch-network
+    depends_on:
+      - open-webui
+    environment:
+      - TZ=${TZ:-Europe/Luxembourg}
+      - AUTH_DOMAIN_NAME=${AUTH_DOMAIN_NAME}
+      - PIPELINES_API_KEY=${PIPELINES_API_KEY:-test}
+      - PIPELINE_NAME=${PIPELINE_NAME:-Finmars AI Assistant}
+      - PROMPT_SOURCE=${PROMPT_SOURCE:-code}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - FINMARS_BASE_URL=${FINMARS_BASE_URL}
+      - ACTIVATE_PUBLIC_NAME=${ACTIVATE_PUBLIC_NAME:-false}
+      - ACTIVATE_DYNAMIC_FINMARS_EXPERT_TOKEN_HANDLING=true
+      - ENABLE_FORWARD_USER_INFO_HEADERS=true
+    restart: always
+
+volumes:
+  open-webui:
+    driver: local
+
+networks:
+  arch-network:
+    driver: bridge
