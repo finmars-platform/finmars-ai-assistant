@@ -43,10 +43,8 @@ services:
       - ENABLE_FOLLOW_UP_GENERATION=true
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - WEBUI_NAME=Finmars AI Assistant
-
       # External URL (must match the nginx endpoint)
       - WEBUI_URL=https://${AI_ASSISTANT_DOMAIN_NAME}
-
       # OIDC SSO via Keycloak
       - ENABLE_OAUTH_SIGNUP=true
       - ENABLE_LOGIN_FORM=true
@@ -55,17 +53,27 @@ services:
       - OAUTH_CLIENT_SECRET=${OPENWEBUI_CLIENT_SECRET}
       - OPENID_PROVIDER_URL=https://${AUTH_DOMAIN_NAME}/realms/finmars/.well-known/openid-configuration
       - OPENID_REDIRECT_URI=https://${AI_ASSISTANT_DOMAIN_NAME}/oauth/oidc/callback
-      - OAUTH_PROVIDER_NAME=Finmars SSO
       - OAUTH_SCOPES=openid email profile
-
+      # login of predefined users with Finmars Keycloak
+      # Web OpenUI's pre-created users the only ones who can log in.
+      - DEFAULT_USER_ROLE=pending
+      - OAUTH_MERGE_ACCOUNTS_BY_EMAIL=true
+      # prevents self-registration of unknown users
+      # - ENABLE_OAUTH_SIGNUP=false
+      # removal of cookies
+      ##- JWT_EXPIRES_IN=1h
+      ##- WEBUI_SESSION_COOKIE_SECURE=true
+      ##- WEBUI_SESSION_COOKIE_SAME_SITE=lax
+      ###- WEBUI_SESSION_COOKIE_SAME_SITE=strict
       # Role and group management from Keycloak tokens
       - ENABLE_OAUTH_ROLE_MANAGEMENT=true
-      - OAUTH_ROLES_CLAIM=realm_access.roles
-      - OAUTH_ALLOWED_ROLES=user,admin
-      - OAUTH_ADMIN_ROLES=admin
-      - ENABLE_OAUTH_GROUP_MANAGEMENT=true
-      - ENABLE_OAUTH_GROUP_CREATION=true
+      #- OAUTH_ROLES_CLAIM=realm_access.roles
+      - OAUTH_ROLES_CLAIM=groups
       - OAUTH_GROUP_CLAIM=groups
+      - ENABLE_OAUTH_GROUP_MANAGEMENT=true
+      - OAUTH_ALLOWED_ROLES=openwebui-users
+      - OAUTH_ADMIN_ROLES=admin
+      - OAUTH_PROVIDER_NAME=Finmars Auth1
 
     volumes:
       - open-webui:/app/backend/data
@@ -90,9 +98,12 @@ services:
       - PROMPT_SOURCE=${PROMPT_SOURCE:-code}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - FINMARS_EXPERT_TOKEN=${FINMARS_EXPERT_TOKEN}
       - FINMARS_BASE_URL=${FINMARS_BASE_URL}
+      - FINMARS_REALM=${FINMARS_REALM}
+      - FINMARS_SPACE=${FINMARS_SPACE}
       - ACTIVATE_PUBLIC_NAME=${ACTIVATE_PUBLIC_NAME:-false}
-      - ACTIVATE_DYNAMIC_FINMARS_EXPERT_TOKEN_HANDLING=true
+      - ACTIVATE_DYNAMIC_FINMARS_EXPERT_TOKEN_HANDLING=false
       - ENABLE_FORWARD_USER_INFO_HEADERS=true
     restart: always
 
